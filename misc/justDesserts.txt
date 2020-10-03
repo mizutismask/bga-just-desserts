@@ -1,0 +1,1 @@
+ magick montage  `ls -v D:/Users/skamycki/Downloads/looneylabs-9c47b8/JustDessertsAssets_BGA/Cards/*.png` -tile 10 -geometry 180x280+0+0 tiles180.jpg
