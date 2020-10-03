@@ -25,6 +25,25 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
+<div id="playertables">
+
+    <!-- BEGIN player -->
+    <div class="playertable whiteblock">
+        <div class="playertablename" style="color:#{PLAYER_COLOR}">
+            {PLAYER_NAME}
+        </div>
+        <div class="playertablecard" id="playertablecard_{PLAYER_ID}">
+        </div>
+    </div>
+    <!-- END player -->
+
+</div>
+
+<div id="myhand_wrap" class="whiteblock">
+    <h3>{MY_HAND}</h3>
+    <div id="myhand">
+    </div>
+</div>
 
 This is your game interface. You can edit this HTML in your ".tpl" file.
 
@@ -33,12 +52,12 @@ This is your game interface. You can edit this HTML in your ".tpl" file.
 
 // Javascript HTML templates
 
-/*
-// Example:
-var jstpl_some_game_item='<div class="my_game_item" id="my_game_item_${MY_ITEM_ID}"></div>';
+    /*
+    // Example:
+    var jstpl_some_game_item='<div class="my_game_item" id="my_game_item_${MY_ITEM_ID}"></div>';
+    
+    */
 
-*/
-
-</script>  
+</script>
 
 {OVERALL_GAME_FOOTER}

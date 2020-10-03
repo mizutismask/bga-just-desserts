@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -23,24 +24,25 @@
  * Note: if the HTML of your game interface is always the same, you don't have to place anything here.
  *
  */
-  
-  require_once( APP_BASE_PATH."view/common/game.view.php" );
-  
-  class view_justdesserts_justdesserts extends game_view
+
+require_once(APP_BASE_PATH . "view/common/game.view.php");
+
+class view_justdesserts_justdesserts extends game_view
+{
+  function getGameName()
   {
-    function getGameName() {
-        return "justdesserts";
-    }    
-  	function build_page( $viewArgs )
-  	{		
-  	    // Get players & players number
-        $players = $this->game->loadPlayersBasicInfos();
-        $players_nbr = count( $players );
+    return "justdesserts";
+  }
+  function build_page($viewArgs)
+  {
+    // Get players & players number
+    $players = $this->game->loadPlayersBasicInfos();
+    $players_nbr = count($players);
 
-        /*********** Place your code below:  ************/
+    /*********** Place your code below:  ************/
 
 
-        /*
+    /*
         
         // Examples: set the value of some element defined in your tpl file like this: {MY_VARIABLE_ELEMENT}
 
@@ -54,8 +56,8 @@
         $this->tpl['MY_VARIABLE_ELEMENT'] = self::raw( $some_html_code );
         
         */
-        
-        /*
+
+    /*
         
         // Example: display a specific HTML block for each player in this game.
         // (note: the block is defined in your .tpl file like this:
@@ -76,10 +78,19 @@
         
         */
 
+    // this will inflate our player block with actual players data
+    $template = self::getGameName() . "_" . self::getGameName();
+    $this->page->begin_block($template, "player");
+    foreach ($players as $player_id => $info) {
+      $this->page->insert_block("player", array(
+        "PLAYER_ID" => $player_id,
+        "PLAYER_NAME" => $players[$player_id]['player_name'],
+        "PLAYER_COLOR" => $players[$player_id]['player_color']
+      ));
+    }
+    // this will make our My Hand text translatable
+    $this->tpl['MY_HAND'] = self::_("My hand");
 
-
-        /*********** Do not change anything below this line  ************/
-  	}
+    /*********** Do not change anything below this line  ************/
   }
-  
-
+}
