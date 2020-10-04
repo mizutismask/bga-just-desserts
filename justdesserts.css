@@ -66,16 +66,27 @@
         background-repeat: none;
     }
 */
+#container {
+    display: inline-block;
+    position: relative;
+}
+
 #decks {
-    
-    display: grid;
-    grid-template-columns: 3;
-    grid-gap: 5px
+    display: inline-grid;
+    grid-template-columns: 2;
+    grid-gap: 5px;
+    width: 360px;
+}
+
+
+#board {
+    display: inline-grid;
 }
 
 .pile {
     width: 180 px;
     height: 280px;
+    /*display: inline-block;*/
 }
 
 .discard {
@@ -94,25 +105,13 @@
     grid-row: 2;
 }
 
-#right_part{
-    grid-column: 3;
-    grid-row: 1 / span 3;
-    
-}
-
-#guests_wrapper {
-    float: left;
-}
-
 .guestsname {
     font-weight: bold;
 }
 
 .guests {
-    position: relative;
-    width: 50%;
     height: 280px;
-    float: left;
+    display: inline-block;
 }
 
 .guests_on_table {
