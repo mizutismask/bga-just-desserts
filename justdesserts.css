@@ -66,6 +66,68 @@
         background-repeat: none;
     }
 */
+#decks {
+    
+    display: grid;
+    grid-template-columns: 3;
+    grid-gap: 5px
+}
+
+.pile {
+    width: 180 px;
+    height: 280px;
+}
+
+.discard {
+    grid-column: 2;
+}
+
+.draw {
+    grid-column: 1;
+}
+
+.guest_pile {
+    grid-row: 1;
+}
+
+.dessert_pile {
+    grid-row: 2;
+}
+
+#right_part{
+    grid-column: 3;
+    grid-row: 1 / span 3;
+    
+}
+
+#guests_wrapper {
+    float: left;
+}
+
+.guestsname {
+    font-weight: bold;
+}
+
+.guests {
+    position: relative;
+    width: 50%;
+    height: 280px;
+    float: left;
+}
+
+.guests_on_table {
+    position: relative;
+    text-align: center;
+    width: 180px;
+    height: 280px;
+}
+
+#guests_wrapper:after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
 
 
 

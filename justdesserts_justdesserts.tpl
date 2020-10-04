@@ -24,28 +24,53 @@
     
     Please REMOVE this comment before publishing your game on BGA
 -->
+<div id="decks">
+    <div id="dessert_draw" class="pile draw dessert_pile"> dd</div>
+    <div id="dessert_discard" class="pile discard dessert_pile">dp</div>
+    <div id="guest_draw" class="pile draw guest_pile">gd</div>
+    <div id="guest_discard" class="pile discard guest_pile">gp</div>
+    <div id="right_part">
 
-<div id="playertables">
+        <div id="my_guests">
 
-    <!-- BEGIN player -->
-    <div class="playertable whiteblock">
-        <div class="playertablename" style="color:#{PLAYER_COLOR}">
-            {PLAYER_NAME}
+            <!-- BEGIN player_me -->
+            <div class="guests whiteblock">
+                <div class="guestsname" style="color:#{PLAYER_COLOR}">
+                    {PLAYER_NAME}
+                </div>
+                <div class="guestscard" id="guestscard_{PLAYER_ID}">
+                </div>
+            </div>
+            <!-- END player_me -->
+        
         </div>
-        <div class="playertablecard" id="playertablecard_{PLAYER_ID}">
+        
+        <div id=guests_on_table class="whiteblock">
+            rivière
         </div>
+        
+        <div id="myhand_wrap" class="whiteblock">
+            <h3>{MY_HAND}</h3>
+            <div id="myhand">
+            </div>
+        </div>
+        
+        <div id="guests_wrapper">
+        
+            <!-- BEGIN player -->
+            <div id="guest_{PLAYER_ID}" class="guests">
+                <div class="guestsname" style="color:#{PLAYER_COLOR}">
+                    {PLAYER_NAME}
+                </div>
+                <div class="guestscard" id="guestscard_{PLAYER_ID}">
+                </div>
+            </div>
+            <!-- END player -->
+        
+        </div>
+
     </div>
-    <!-- END player -->
-
 </div>
-
-<div id="myhand_wrap" class="whiteblock">
-    <h3>{MY_HAND}</h3>
-    <div id="myhand">
-    </div>
-</div>
-
-This is your game interface. You can edit this HTML in your ".tpl" file.
 
 
 <script type="text/javascript">
