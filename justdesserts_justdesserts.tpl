@@ -26,10 +26,10 @@
 -->
 <div id="container">
     <div id="decks">
-        <div id="dessert_draw" class="pile draw dessert_pile"> dd</div>
-        <div id="dessert_discard" class="pile discard dessert_pile">dp</div>
-        <div id="guest_draw" class="pile draw guest_pile">gd</div>
-        <div id="guest_discard" class="pile discard guest_pile">gp</div>
+        <div id="dessert_draw" class="pile draw dessert_pile"></div>
+        <div id="dessert_discard" class="pile discard dessert_pile"></div>
+        <div id="guest_draw" class="pile draw guest_pile"></div>
+        <div id="guest_discard" class="pile discard guest_pile"></div>
     </div>
 
     <div id="board">
@@ -44,22 +44,22 @@
                 </div>
             </div>
             <!-- END player_me -->
-        
+
         </div>
-        
+
         <div id=guests_on_table class="whiteblock">
             rivière
         </div>
-        
+
         <div id="myhand_wrap" class="whiteblock">
             <h3>{MY_HAND}</h3>
             <div id="myhand">
             </div>
         </div>
     </div>
-    
+
     <div id="guests_wrapper">
-    
+
         <!-- BEGIN player -->
         <div id="guest_{PLAYER_ID}" class="guests whiteblock">
             <div class="guestsname" style="color:#{PLAYER_COLOR}">
@@ -69,19 +69,20 @@
             </div>
         </div>
         <!-- END player -->
-    
+
     </div>
 </div>
 
 <script type="text/javascript">
 
-// Javascript HTML templates
+    // Javascript HTML templates
 
     /*
     // Example:
     var jstpl_some_game_item='<div class="my_game_item" id="my_game_item_${MY_ITEM_ID}"></div>';
     
     */
+    var jstpl_cardontable = '<div class="cardontable"">\</div>';
 
 </script>
 

@@ -60,9 +60,41 @@ define([
                 // TODO: Set up your game interface here, according to "gamedatas"
                 // Player hand
                 this.playerHand = new ebg.stock(); // new stock object for hand
-                this.playerHand.create(this, $('myhand'), this.cardwidth, this.cardheight);
+                this.playerHand.create(this, $('myhand'), this.cardwidth, this.cardheight);//myhand is the div where the card is going
                 this.playerHand.image_items_per_row = 10; // 10 images per row
 
+                // Create cards types:
+                for (var card_id = 1; card_id <= 6; card_id++) {
+                    // Build card type id
+                    //var card_type_id = this.getCardUniqueId(color, value);
+                    this.playerHand.addItemType(card_id, card_id, g_gamethemeurl + 'img/desserts180.jpg', card_id);
+                }
+                console.log(gamedatas);
+                for (var card_id in gamedatas.hand) {
+                    var card = gamedatas.hand[card_id];
+                    console.log("ajout de la carte :" + card.type);
+                    this.playerHand.addToStockWithId(card.type, card.type);
+                    // TODO: Setting up players boards if needed
+                }
+                //this.playerHand.addToStockWithId(6);
+                //guest on table setup
+                this.guestsOnTable = new ebg.stock(); // new stock object for hand
+                this.guestsOnTable.create(this, $('guests_on_table'), this.cardwidth, this.cardheight);
+                this.guestsOnTable.image_items_per_row = 10; // 10 images per row
+
+                // Create cards types:
+                for (var card_id = 1; card_id <= 3; card_id++) {
+                    // Build card type id
+                    //var card_type_id = this.getCardUniqueId(color, value);
+                    this.guestsOnTable.addItemType(card_id, card_id, g_gamethemeurl + 'img/guests180.jpg', card_id);
+                }
+                console.log(gamedatas);
+                for (var card_id in gamedatas.guestsOnTable) {
+                    var card = gamedatas.guestsOnTable[card_id];
+                    console.log("ajout de la carte :" + card.type);
+                    this.guestsOnTable.addToStockWithId(card.type, card.type);
+                    // TODO: Setting up players boards if needed
+                }
 
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
@@ -155,7 +187,10 @@ define([
                 script.
             
             */
-
+            playCardOnTable: function (player_id, color, value, card_id) {
+                // player_id => direction
+                dojo.place(this.format_block('jstpl_cardontable', null), $('guests_on_table'));
+            },
 
             ///////////////////////////////////////////////////
             //// Player's action
@@ -232,6 +267,9 @@ define([
                 // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
                 // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
                 // 
+                dojo.subscribe('newHand', this, "notif_newHand");
+                dojo.subscribe('newRiver', this, "notif_newRiver");
+
             },
 
             // TODO: from this point and below, you can write your game notifications handling methods
@@ -250,5 +288,30 @@ define([
             },    
             
             */
+            notif_newHand: function (notif) {
+                console.log("notif_newHand");
+                // We received a new full hand of 13 cards.
+                this.playerHand.removeAll();
+
+                for (var i in notif.args.cards) {
+                    console.log(notif.args.cards);
+                    var card = notif.args.cards[i];
+                    console.log("card.id1", card.id);
+                    this.playerHand.addToStockWithId(card.id);
+                }
+            },
+
+            notif_newRiver: function (notif) {
+                console.log("notif_newRiver");
+                this.guestsOnTable.removeAll();
+
+                for (var i in notif.args.cards) {
+                    console.log(notif.args.cards);
+                    var card = notif.args.cards[i];
+                    console.log("card.id1", card.id);
+                    this.guestsOnTable.addToStockWithId(card.id);
+                }
+            },
+
         });
     });

@@ -129,12 +129,10 @@
     height: 280px;
 }
 
-#guests_wrapper:after {
-    content: "";
-    clear: both;
-    display: table;
-}
 
+#myhand div {
+    display: inline-grid;
+}
 
 
 
