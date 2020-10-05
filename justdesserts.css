@@ -67,27 +67,26 @@
     }
 */
 #container {
-    display: inline-block;
-    position: relative;
+    /*display: inline-block;
+    position: relative;*/
 }
 
 #decks {
     display: inline-grid;
-    grid-template-columns: 2;
     grid-gap: 5px;
     width: 360px;
 }
 
-
 #board {
-    display: inline-grid;
+   display: inline-block;
+   width: 100%;
 }
 
-.pile {
-    width: 180 px;
+.pile, .stockitem  {
+    width: 180px;
     height: 280px;
     /*display: inline-block;*/
-    border-radius: 15px;
+    border-radius: 20px;
 }
 
 .discard {
@@ -125,7 +124,7 @@
 .guests_on_table {
     position: relative;
     text-align: center;
-    width: 180px;
+    width: 100%;
     height: 280px;
 }
 

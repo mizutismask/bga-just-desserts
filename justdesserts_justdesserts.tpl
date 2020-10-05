@@ -33,22 +33,8 @@
     </div>
 
     <div id="board">
-        <div id="my_guests">
-
-            <!-- BEGIN player_me -->
-            <div class="guests whiteblock">
-                <div class="guestsname" style="color:#{PLAYER_COLOR}">
-                    {PLAYER_NAME}
-                </div>
-                <div class="guestscard" id="guestscard_{PLAYER_ID}">
-                </div>
-            </div>
-            <!-- END player_me -->
-
-        </div>
-
         <div id=guests_on_table class="whiteblock">
-            rivière
+
         </div>
 
         <div id="myhand_wrap" class="whiteblock">

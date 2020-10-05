@@ -79,7 +79,7 @@ class view_justdesserts_justdesserts extends game_view
         */
 
     $template = self::getGameName() . "_" . self::getGameName();
-    $this->page->begin_block($template, "player_me");
+    // $this->page->begin_block($template, "player_me");
     /*$my_id = self::getActivePlayerId();
     $this->page->insert_block("player_me", array(
       "PLAYER_ID" => $my_id,
