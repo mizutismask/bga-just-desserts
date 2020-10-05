@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -49,7 +50,7 @@
 
 //    !! It is not a good idea to modify this file when a game is running !!
 
- 
+
 $machinestates = array(
 
     // The initial state. Please do not modify.
@@ -58,21 +59,39 @@ $machinestates = array(
         "description" => "",
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => 2 )
+        "transitions" => array("" => 2)
     ),
-    
+
     // Note: ID=2 => your first state
 
     2 => array(
-    		"name" => "playerTurn",
-    		"description" => clienttranslate('${actplayer} must play a card or pass'),
-    		"descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-    		"type" => "activeplayer",
-    		"possibleactions" => array( "playCard", "pass" ),
-    		"transitions" => array( "playCard" => 2, "pass" => 2 )
+        "name" => "playerTurn",
+        "description" => clienttranslate('${actplayer} must draw a dessert, serve guests or swap ingredients'),
+        "descriptionmyturn" => clienttranslate('${you} must draw a dessert, serve guests or swap ingredients'),
+        "type" => "activeplayer",
+        "possibleactions" => array("draw", "serve", "swap"),
+        "transitions" => array("playCard" => 3, "serve" => 3, "swap" => 3, "discardGuest" => 4)
     ),
-    
-/*
+
+    3 => array(
+        "name" => "nextPlayer",
+        "description" => '',
+        "type" => "game",
+        "action" => "stNextPlayer",
+        "updateGameProgression" => true,
+        "transitions" => array("endGame" => 99, "playerTurn" => 2)
+    ),
+
+    4 => array(
+        "name" => "playerDiscardGuest",
+        "description" => clienttranslate('${actplayer} must draw discard guests to keep only one of each suit'),
+        "descriptionmyturn" => clienttranslate('${you} must draw discard guests to keep only one of each suit'),
+        "type" => "activeplayer",
+        "action" => "stDiscardGuests",
+        "transitions" => array("discard" => 3)
+    ),
+
+    /*
     Examples:
     
     2 => array(
@@ -93,8 +112,8 @@ $machinestates = array(
         "transitions" => array( "playCard" => 2, "pass" => 2 )
     ), 
 
-*/    
-   
+*/
+
     // Final state.
     // Please do not modify (and do not overload action/args methods).
     99 => array(
@@ -106,6 +125,3 @@ $machinestates = array(
     )
 
 );
-
-
-

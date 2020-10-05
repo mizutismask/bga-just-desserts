@@ -168,12 +168,7 @@ class JustDesserts extends Table
         }
         $this->guestcards->createCards($cards, 'guestDeck');
         $this->guestcards->shuffle('guestDeck');
-        $this->guestcards->pickCardsForLocation(3, 'guestDeck', 'river');
-
-        foreach ($players as $player_id => $player) {
-            // Notify player about cards on table
-            self::notifyPlayer($player_id, 'newRiver', '', array('cards' => $this->guestcards->getCardsInLocation('river')));
-        }
+        $this->pickGuestCardsAndNotifyPlayers(3, $players);
     }
 
     function setupDessertsDeck($players)
@@ -189,11 +184,27 @@ class JustDesserts extends Table
         $this->dessertcards->shuffle('dessertDeck');
 
         foreach ($players as $player_id => $player) {
-            $cards = $this->dessertcards->pickCards(2, 'dessertDeck', $player_id);
-            // Notify player about his cards
-            self::notifyPlayer($player_id, 'newHand', '', array('cards' => $cards));
+            $this->pickDessertCardsAndNotifyPlayer(3, $player_id);
         }
     }
+
+    function pickGuestCardsAndNotifyPlayers($nb, $players)
+    {
+        $this->guestcards->pickCardsForLocation($nb, 'guestDeck', 'river');
+
+        foreach ($players as $player_id => $player) {
+            // Notify player about cards on table
+            self::notifyPlayer($player_id, 'newRiver', '', array('cards' => $this->guestcards->getCardsInLocation('river')));
+        }
+    }
+
+    function pickDessertCardsAndNotifyPlayer($nb, $player_id)
+    {
+        $cards = $this->dessertcards->pickCards($nb, 'dessertDeck', $player_id);
+        // Notify player about his cards
+        self::notifyPlayer($player_id, 'newHand', '', array('cards' => $cards));
+    }
+
 
 
     //////////////////////////////////////////////////////////////////////////////
@@ -280,7 +291,13 @@ class JustDesserts extends Table
         $this->gamestate->nextState( 'some_gamestate_transition' );
     }    
     */
-
+    function stNextPlayer()
+    {
+        $player_id = self::activeNextPlayer();
+        $this->pickGuestCardsAndNotifyPlayers(1);
+        self::giveExtraTime($player_id);
+        $this->gamestate->nextState('playerTurn');
+    }
     //////////////////////////////////////////////////////////////////////////////
     //////////// Zombie
     ////////////

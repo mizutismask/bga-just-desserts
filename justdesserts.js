@@ -64,7 +64,7 @@ define([
                 this.playerHand.image_items_per_row = 10; // 10 images per row
 
                 // Create cards types:
-                for (var card_id = 1; card_id <= 6; card_id++) {
+                for (var card_id = 1; card_id <= 35; card_id++) {
                     // Build card type id
                     //var card_type_id = this.getCardUniqueId(color, value);
                     this.playerHand.addItemType(card_id, card_id, g_gamethemeurl + 'img/desserts180.jpg', card_id);
@@ -83,7 +83,7 @@ define([
                 this.guestsOnTable.image_items_per_row = 10; // 10 images per row
 
                 // Create cards types:
-                for (var card_id = 1; card_id <= 3; card_id++) {
+                for (var card_id = 1; card_id <= 24; card_id++) {
                     // Build card type id
                     //var card_type_id = this.getCardUniqueId(color, value);
                     this.guestsOnTable.addItemType(card_id, card_id, g_gamethemeurl + 'img/guests180.jpg', card_id);
