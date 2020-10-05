@@ -241,7 +241,19 @@ class JustDesserts extends Table
     }
     
     */
+    function draw()
+    {
+        $player_id = self::getActivePlayerId();
 
+        // Make sure this is an accepted action
+        if (self::checkAction('draw')) {
+            $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
+        }
+
+        self::notifyAllPlayers('draw', clienttranslate('${player_name} draws a dessert'), array('player_name' => self::getActivePlayerName()));
+
+        $this->gamestate->nextState('draw'); //computes the next state when draw is given to the current state.
+    }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments
@@ -297,6 +309,9 @@ class JustDesserts extends Table
         $player_id = self::activeNextPlayer();
         $this->pickGuestCardsAndNotifyPlayers(1, $players);
         $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
+
+        self::notifyAllPlayers('playerTurn', clienttranslate('New turn : ${player_name} draws a dessert and a guest'), array('player_name' => self::getActivePlayerName()));
+
         self::giveExtraTime($player_id);
         $this->gamestate->nextState('playerTurn');
     }

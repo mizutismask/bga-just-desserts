@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
@@ -20,29 +21,26 @@
  * this.ajaxcall( "/justdesserts/justdesserts/myAction.html", ...)
  *
  */
-  
-  
-  class action_justdesserts extends APP_GameAction
-  { 
-    // Constructor: please do not modify
-   	public function __default()
-  	{
-  	    if( self::isArg( 'notifwindow') )
-  	    {
-            $this->view = "common_notifwindow";
-  	        $this->viewArgs['table'] = self::getArg( "table", AT_posint, true );
-  	    }
-  	    else
-  	    {
-            $this->view = "justdesserts_justdesserts";
-            self::trace( "Complete reinitialization of board game" );
-      }
-  	} 
-  	
-  	// TODO: defines your action entry points there
 
 
-    /*
+class action_justdesserts extends APP_GameAction
+{
+  // Constructor: please do not modify
+  public function __default()
+  {
+    if (self::isArg('notifwindow')) {
+      $this->view = "common_notifwindow";
+      $this->viewArgs['table'] = self::getArg("table", AT_posint, true);
+    } else {
+      $this->view = "justdesserts_justdesserts";
+      self::trace("Complete reinitialization of board game");
+    }
+  }
+
+  // TODO: defines your action entry points there
+
+
+  /*
     
     Example:
   	
@@ -62,7 +60,12 @@
     }
     
     */
+  public function drawAction()
+  {
+    self::setAjaxMode();
 
+    $this->game->draw();
+
+    self::ajaxResponse();
   }
-  
-
+}

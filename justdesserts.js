@@ -174,6 +174,9 @@ define([
                                             this.addActionButton( 'button_3_id', _('Button 3 label'), 'onMyMethodToCall3' ); 
                                             break;
                         */
+                        case "playerTurn":
+                            this.addActionButton('button_draw', _('Draw a dessert'), 'onDraw');
+                            break;
                     }
                 }
             },
@@ -205,6 +208,22 @@ define([
                 _ make a call to the game server
             
             */
+
+            onDraw: function (evt) {
+                console.log('onDraw');
+
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+
+                if (this.checkAction('draw')) {
+                    this.ajaxcall('/justdesserts/justdesserts/drawAction.html',
+                        { lock: true },
+                        this,
+                        function (result) {
+                            // animate
+                        });
+                }
+            },
 
             /* Example:
             
@@ -290,8 +309,6 @@ define([
             */
             notif_newHand: function (notif) {
                 console.log("notif_newHand");
-                // We received a new full hand of 13 cards.
-                this.playerHand.removeAll();
 
                 for (var i in notif.args.cards) {
                     console.log(notif.args.cards);
@@ -303,7 +320,6 @@ define([
 
             notif_newRiver: function (notif) {
                 console.log("notif_newRiver");
-                this.guestsOnTable.removeAll();
 
                 for (var i in notif.args.cards) {
                     console.log(notif.args.cards);
