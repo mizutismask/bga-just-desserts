@@ -100,15 +100,11 @@
 
 .guest_pile {
     grid-row: 1;
-    width: 180 px;
-    height: 280 px;
     background-image: url('img/guests180.jpg');
 }
 
 .dessert_pile {
     grid-row: 2;
-    width: 180 px;
-    height: 280 px;
     background-image: url('img/desserts180.jpg');
 }
 

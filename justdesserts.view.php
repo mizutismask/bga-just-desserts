@@ -79,21 +79,13 @@ class view_justdesserts_justdesserts extends game_view
         */
 
     $template = self::getGameName() . "_" . self::getGameName();
-    // $this->page->begin_block($template, "player_me");
-    /*$my_id = self::getActivePlayerId();
-    $this->page->insert_block("player_me", array(
-      "PLAYER_ID" => $my_id,
-      "PLAYER_NAME" => $players[$my_id]['player_name'],
-      "PLAYER_COLOR" => $players[$my_id]['player_color']
-    ));
-*/
+
     // this will make our My Hand text translatable
     $this->tpl['MY_HAND'] = self::_("My hand");
 
     // this will inflate our player block with actual players data
     $this->page->begin_block($template, "player");
     foreach ($players as $player_id => $info) {
-      //if ($player_id != $my_id) {
       $this->page->insert_block("player", array(
         "PLAYER_ID" => $player_id,
         "PLAYER_NAME" => $players[$player_id]['player_name'],

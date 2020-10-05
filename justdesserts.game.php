@@ -96,37 +96,8 @@ class JustDesserts extends Table
         // TODO: setup the initial game situation here
         $cards = array();
 
-        //guests cards init
-        $i = 1;
-        foreach ($this->guests as $guest) {
-            $cards[] = array('type' => $i, 'type_arg' => $guest["name"], 'nbr' => 1);
-            $i++;
-        }
-        $this->guestcards->createCards($cards, 'guestDeck');
-        $this->guestcards->shuffle('guestDeck');
-        $this->guestcards->pickCardsForLocation(3, 'guestDeck', 'river');
-        foreach ($players as $player_id => $player) {
-            // Notify player about cards on table
-            self::notifyPlayer($player_id, 'newRiver', '', array('cards' => $this->guestcards->getCardsInLocation('river')));
-        }
-
-        //dessert cards init
-        $cards = array();
-        $j = 1;
-        foreach ($this->desserts as $dessert) {
-            $cards[] = array('type' => $j, 'type_arg' => $dessert["name"], 'nbr' => 1);
-            $j++;
-        }
-
-        $this->dessertcards->createCards($cards, 'dessertDeck');
-        $this->dessertcards->shuffle('dessertDeck');
-        foreach ($players as $player_id => $player) {
-            $cards = $this->dessertcards->pickCards(2, 'dessertDeck', $player_id);
-            // Notify player about his cards
-            self::notifyPlayer($player_id, 'newHand', '', array('cards' => $cards));
-        }
-
-
+        self::setupGuestsDeck($players);
+        self::setupDessertsDeck($players);
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -187,7 +158,42 @@ class JustDesserts extends Table
     /*
         In this space, you can put any utility methods useful for your game logic
     */
+    function setupGuestsDeck($players)
+    {
+        $cards = array();
+        $i = 1;
+        foreach ($this->guests as $guest) {
+            $cards[] = array('type' => $i, 'type_arg' => $guest["name"], 'nbr' => 1);
+            $i++;
+        }
+        $this->guestcards->createCards($cards, 'guestDeck');
+        $this->guestcards->shuffle('guestDeck');
+        $this->guestcards->pickCardsForLocation(3, 'guestDeck', 'river');
 
+        foreach ($players as $player_id => $player) {
+            // Notify player about cards on table
+            self::notifyPlayer($player_id, 'newRiver', '', array('cards' => $this->guestcards->getCardsInLocation('river')));
+        }
+    }
+
+    function setupDessertsDeck($players)
+    {
+        $cards = array();
+        $j = 1;
+        foreach ($this->desserts as $dessert) {
+            $cards[] = array('type' => $j, 'type_arg' => $dessert["name"], 'nbr' => 1);
+            $j++;
+        }
+
+        $this->dessertcards->createCards($cards, 'dessertDeck');
+        $this->dessertcards->shuffle('dessertDeck');
+
+        foreach ($players as $player_id => $player) {
+            $cards = $this->dessertcards->pickCards(2, 'dessertDeck', $player_id);
+            // Notify player about his cards
+            self::notifyPlayer($player_id, 'newHand', '', array('cards' => $cards));
+        }
+    }
 
 
     //////////////////////////////////////////////////////////////////////////////
