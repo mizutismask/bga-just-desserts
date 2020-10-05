@@ -59,7 +59,7 @@ $machinestates = array(
         "description" => "",
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array("" => 2)
+        "transitions" => array("" => 23)
     ),
 
     // Note: ID=2 => your first state
@@ -70,10 +70,11 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must draw a dessert, serve guests or swap ingredients'),
         "type" => "activeplayer",
         "possibleactions" => array("draw", "serve", "swap"),
-        "transitions" => array("playCard" => 3, "serve" => 3, "swap" => 3, "discardGuest" => 4)
+        "transitions" => array("playCard" => 23, "serve" => 23, "swap" => 23, "discardGuest" => 24)
     ),
 
-    3 => array(
+
+    23 => array(
         "name" => "nextPlayer",
         "description" => '',
         "type" => "game",
@@ -82,13 +83,13 @@ $machinestates = array(
         "transitions" => array("endGame" => 99, "playerTurn" => 2)
     ),
 
-    4 => array(
+    24 => array(
         "name" => "playerDiscardGuest",
         "description" => clienttranslate('${actplayer} must draw discard guests to keep only one of each suit'),
         "descriptionmyturn" => clienttranslate('${you} must draw discard guests to keep only one of each suit'),
         "type" => "activeplayer",
         "action" => "stDiscardGuests",
-        "transitions" => array("discard" => 3)
+        "transitions" => array("discard" => 23)
     ),
 
     /*

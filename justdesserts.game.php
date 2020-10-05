@@ -293,8 +293,10 @@ class JustDesserts extends Table
     */
     function stNextPlayer()
     {
+        $players = self::loadPlayersBasicInfos();
         $player_id = self::activeNextPlayer();
-        $this->pickGuestCardsAndNotifyPlayers(1);
+        $this->pickGuestCardsAndNotifyPlayers(1, $players);
+        $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
         self::giveExtraTime($player_id);
         $this->gamestate->nextState('playerTurn');
     }
