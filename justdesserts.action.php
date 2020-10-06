@@ -68,4 +68,27 @@ class action_justdesserts extends APP_GameAction
 
     self::ajaxResponse();
   }
+
+  public function swapAction()
+  {
+    self::setAjaxMode();
+    $cards_id = array();
+    $cards_id = self::getArg("cards_id", AT_numberlist, true);
+    $cards_id = $this->convertStringToArray($cards_id);
+    $this->game->swap($cards_id);
+
+    self::ajaxResponse();
+  }
+
+  function convertStringToArray($card_ids_raw)
+  {
+    // Removing last ';' if exists
+    if (substr($card_ids_raw, -1) == ';')
+      $card_ids_raw = substr($card_ids_raw, 0, -1);
+    if ($card_ids_raw == '')
+      $card_ids = array();
+    else
+      $card_ids = explode(';', $card_ids_raw);
+    return $card_ids;
+  }
 }

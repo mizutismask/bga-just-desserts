@@ -64,7 +64,7 @@ define([
                 this.playerHand.image_items_per_row = 10; // 10 images per row
 
                 // Create cards types:
-                for (var card_id = 1; card_id <= 35; card_id++) {
+                for (var card_id = 1; card_id <= 36; card_id++) {
                     // Build card type id
                     //var card_type_id = this.getCardUniqueId(color, value);
                     this.playerHand.addItemType(card_id, card_id, g_gamethemeurl + 'img/desserts180.jpg', card_id);
@@ -72,8 +72,8 @@ define([
                 console.log(gamedatas);
                 for (var card_id in gamedatas.hand) {
                     var card = gamedatas.hand[card_id];
-                    console.log("ajout de la carte :" + card.type);
-                    this.playerHand.addToStockWithId(card.type, card.type);
+                    console.log("ajout dans la main de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    this.playerHand.addToStockWithId(card.type_arg, card.id);
                     // TODO: Setting up players boards if needed
                 }
                 //this.playerHand.addToStockWithId(6);
@@ -91,8 +91,8 @@ define([
                 console.log(gamedatas);
                 for (var card_id in gamedatas.guestsOnTable) {
                     var card = gamedatas.guestsOnTable[card_id];
-                    console.log("ajout de la carte :" + card.type);
-                    this.guestsOnTable.addToStockWithId(card.type, card.type);
+                    console.log("ajout dans les guests de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    this.guestsOnTable.addToStockWithId(card.type_arg, card.id);
                     // TODO: Setting up players boards if needed
                 }
 
@@ -176,6 +176,7 @@ define([
                         */
                         case "playerTurn":
                             this.addActionButton('button_draw', _('Draw a dessert'), 'onDraw');
+                            this.addActionButton('button_exchange', _('Exchange desserts'), 'onExchange');
                             break;
                     }
                 }
@@ -224,6 +225,39 @@ define([
                         });
                 }
             },
+
+            onExchange: function (evt) {
+                console.log('onExchange');
+
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+
+                var items = this.playerHand.getSelectedItems();
+                if (items.length > 0) {
+                    if (this.checkAction('swap')) {
+                        this.ajaxcall('/justdesserts/justdesserts/swapAction.html',
+                            {
+                                lock: true,
+                                cards_id: items.map(i => i.id).join(";")
+                            },
+                            this,
+                            function (result) {
+                                items.forEach(removed => {
+                                    this.playerHand.removeFromStockById(removed.id);
+                                });
+
+                            });
+                    }
+                }
+            },
+
+            onSelectionChangeFunction: function (evt) {
+                var items = this.playerHand.getSelectedItems();
+                if (items.length > 0) {
+                    console.log('Selected items ' + items.map(i => i.id).join());
+                }
+            },
+
 
             /* Example:
             
@@ -288,6 +322,7 @@ define([
                 // 
                 dojo.subscribe('newHand', this, "notif_newHand");
                 dojo.subscribe('newRiver', this, "notif_newRiver");
+                dojo.connect(this.playerHand, 'onChangeSelection', this, "onSelectionChangeFunction");
 
             },
 
@@ -313,8 +348,10 @@ define([
                 for (var i in notif.args.cards) {
                     console.log(notif.args.cards);
                     var card = notif.args.cards[i];
-                    console.log("card.id1", card.id);
-                    this.playerHand.addToStockWithId(card.id);
+                    console.log("card.id", card.id);
+                    console.log("card.type", card.type);
+                    console.log("card.type_arg", card.type_arg);
+                    this.playerHand.addToStockWithId(card.type_arg, card.id);
                 }
             },
 
@@ -324,8 +361,8 @@ define([
                 for (var i in notif.args.cards) {
                     console.log(notif.args.cards);
                     var card = notif.args.cards[i];
-                    console.log("card.id1", card.id);
-                    this.guestsOnTable.addToStockWithId(card.id);
+                    console.log("card.id", card.id);
+                    this.guestsOnTable.addToStockWithId(card.type_arg);
                 }
             },
 

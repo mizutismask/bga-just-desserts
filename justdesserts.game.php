@@ -163,7 +163,7 @@ class JustDesserts extends Table
         $cards = array();
         $i = 1;
         foreach ($this->guests as $guest) {
-            $cards[] = array('type' => $i, 'type_arg' => $guest["name"], 'nbr' => 1);
+            $cards[] = array('type' => $guest["name"], 'type_arg' => $i, 'nbr' => 1);
             $i++;
         }
         $this->guestcards->createCards($cards, 'guestDeck');
@@ -176,7 +176,7 @@ class JustDesserts extends Table
         $cards = array();
         $j = 1;
         foreach ($this->desserts as $dessert) {
-            $cards[] = array('type' => $j, 'type_arg' => $dessert["name"], 'nbr' => 1);
+            $cards[] = array('type' => $dessert["name"], 'type_arg' => $j, 'nbr' => 1);
             $j++;
         }
 
@@ -254,6 +254,26 @@ class JustDesserts extends Table
 
         $this->gamestate->nextState('draw'); //computes the next state when draw is given to the current state.
     }
+
+    function swap($cards_id)
+    {
+        $player_id = self::getActivePlayerId();
+        $cards_nb = sizeof($cards_id);
+
+        // Make sure this is an accepted action
+        if (self::checkAction('swap')) {
+            $this->dessertcards->moveCards($cards_id, 'dessertDiscard');
+            $new_cards = $this->dessertcards->pickCards($cards_nb, 'dessertDeck', $player_id);
+            // Notify player about his cards
+            //$playerCards = $this->dessertcards->getCardsInLocation('hand', $player_id);
+            self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
+        }
+
+        self::notifyAllPlayers('swap', clienttranslate('${player_name} swaps ${cards_nb} cards'), array('player_name' => self::getActivePlayerName(), 'cards_nb' => $cards_nb));
+
+        $this->gamestate->nextState('swap'); //computes the next state when draw is given to the current state.
+    }
+
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments
