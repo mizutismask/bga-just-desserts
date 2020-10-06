@@ -190,12 +190,9 @@ class JustDesserts extends Table
 
     function pickGuestCardsAndNotifyPlayers($nb, $players)
     {
-        $this->guestcards->pickCardsForLocation($nb, 'guestDeck', 'river');
-
-        foreach ($players as $player_id => $player) {
-            // Notify player about cards on table
-            self::notifyPlayer($player_id, 'newRiver', '', array('cards' => $this->guestcards->getCardsInLocation('river')));
-        }
+        $cards = $this->guestcards->pickCardsForLocation($nb, 'guestDeck', 'river');
+        // Notify player about cards on table
+        self::notifyAllPlayers('newRiver', '', array('cards' => $cards));
     }
 
     function pickDessertCardsAndNotifyPlayer($nb, $player_id)
@@ -205,6 +202,27 @@ class JustDesserts extends Table
         self::notifyPlayer($player_id, 'newHand', '', array('cards' => $cards));
     }
 
+    function dessertsAreEnoughForGuest($dessertsFromMaterial, $guestFromMaterial)
+    {
+        $allTastes = array();
+        foreach ($dessertsFromMaterial as $dessert) {
+            $allTastes = array_merge($allTastes, $dessert["tastes"]);
+        }
+        $allTastes = array_unique($allTastes);
+
+        return !array_diff($guestFromMaterial["tastes"], $allTastes);
+    }
+
+    function guestDislikesSomething($dessertsFromMaterial, $guestFromMaterial)
+    {
+        $allTastes = array();
+        foreach ($dessertsFromMaterial as $dessert) {
+            $allTastes = array_merge($allTastes, $dessert["tastes"]);
+        }
+        $allTastes = array_unique($allTastes);
+
+        return !in_array($guestFromMaterial["dislike"], $allTastes);
+    }
 
 
     //////////////////////////////////////////////////////////////////////////////
@@ -273,6 +291,48 @@ class JustDesserts extends Table
 
         $this->gamestate->nextState('swap'); //computes the next state when draw is given to the current state.
     }
+
+    function serve($guest_id, $cards_id)
+    {
+        $player_id = self::getActivePlayerId();
+        $guest = $this->guestcards->getCard($guest_id);
+        $guestFromMaterial = $this->guests[$guest["type_arg"]];
+
+        $desserts = $this->dessertcards->getCards($cards_id);
+        $dessertsFromMaterial = array();
+        foreach ($desserts as $dessert) {
+            $dessertsFromMaterial[] = $this->desserts[$dessert["type_arg"]];
+        }
+
+        // Make sure this is an accepted action
+        if (self::checkAction('serve')) {
+            if (self::dessertsAreEnoughForGuest($dessertsFromMaterial, $guestFromMaterial)) {
+                if (self::guestDislikesSomething($dessertsFromMaterial, $guestFromMaterial)) {
+
+                    $this->dessertcards->moveCards($cards_id, 'dessertDiscard');
+                    $this->guestcards->moveCard($guest_id, 'won', $player_id);
+
+                    self::notifyAllPlayers('serve', clienttranslate('${player_name} serves ${guest_name}'), array('player_name' => self::getActivePlayerName(), 'guest_name' => $guestFromMaterial["name"]));
+                    self::notifyAllPlayers('guestsRemoved', '', array('cards' => [$guest]));
+
+                    if (false) {
+                        //if the guest got his favorite, there’s a tip
+                        $new_cards = $this->dessertcards->pickCards(1, 'dessertDeck', $player_id);
+                        // Notify player about his tip
+                        self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
+                    }
+                } else {
+                    throw new BgaUserException(self::_("This guest refuses to eat one of the ingredients you provided"));
+                }
+            } else {
+                throw new BgaUserException(self::_("This guest is not satisfied with your desserts"));
+            }
+        }
+
+
+        $this->gamestate->nextState('serve'); //computes the next state when draw is given to the current state.
+    }
+
 
 
     //////////////////////////////////////////////////////////////////////////////

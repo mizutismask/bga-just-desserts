@@ -177,6 +177,7 @@ define([
                         case "playerTurn":
                             this.addActionButton('button_draw', _('Draw a dessert'), 'onDraw');
                             this.addActionButton('button_exchange', _('Exchange desserts'), 'onExchange');
+                            this.addActionButton('button_serve', _('Serve a guest'), 'onServeGuest');
                             break;
                     }
                 }
@@ -251,13 +252,46 @@ define([
                 }
             },
 
-            onSelectionChangeFunction: function (evt) {
-                var items = this.playerHand.getSelectedItems();
-                if (items.length > 0) {
-                    console.log('Selected items ' + items.map(i => i.id).join());
+            onServeGuest: function (evt) {
+                console.log('onServeGuest');
+
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+
+                var selectedDesserts = this.playerHand.getSelectedItems();
+                var selectedGuests = this.guestsOnTable.getSelectedItems();
+                if (selectedDesserts.length > 0 && selectedGuests.length == 1) {
+                    if (this.checkAction('serve')) {
+                        this.ajaxcall('/justdesserts/justdesserts/serveAction.html',
+                            {
+                                lock: true,
+                                cards_id: selectedDesserts.map(i => i.id).join(";"),
+                                guest_id: selectedGuests[0].id
+                            },
+                            this,
+                            function (result) {
+                                selectedDesserts.forEach(removed => {
+                                    this.playerHand.removeFromStockById(removed.id);
+                                });
+
+                            });
+                    }
                 }
             },
 
+
+            onDessertSelectionChangeFunction: function (evt) {
+                var items = this.playerHand.getSelectedItems();
+                if (items.length > 0) {
+                    console.log('Selected desserts ' + items.map(i => i.id).join());
+                }
+            },
+            onGuestSelectionChangeFunction: function (evt) {
+                var items = this.guestsOnTable.getSelectedItems();
+                if (items.length > 0) {
+                    console.log('Selected guests ' + items.map(i => i.id).join());
+                }
+            },
 
             /* Example:
             
@@ -322,7 +356,9 @@ define([
                 // 
                 dojo.subscribe('newHand', this, "notif_newHand");
                 dojo.subscribe('newRiver', this, "notif_newRiver");
-                dojo.connect(this.playerHand, 'onChangeSelection', this, "onSelectionChangeFunction");
+                dojo.subscribe('guestsRemoved', this, "notif_guestsRemoved");
+                dojo.connect(this.playerHand, 'onChangeSelection', this, "onDessertSelectionChangeFunction");
+                dojo.connect(this.guestsOnTable, 'onChangeSelection', this, "onGuestSelectionChangeFunction");
 
             },
 
@@ -343,28 +379,31 @@ define([
             
             */
             notif_newHand: function (notif) {
-                console.log("notif_newHand");
 
                 for (var i in notif.args.cards) {
-                    console.log(notif.args.cards);
                     var card = notif.args.cards[i];
-                    console.log("card.id", card.id);
-                    console.log("card.type", card.type);
-                    console.log("card.type_arg", card.type_arg);
+                    console.log("notif_newHand card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.playerHand.addToStockWithId(card.type_arg, card.id);
                 }
             },
 
             notif_newRiver: function (notif) {
-                console.log("notif_newRiver");
 
                 for (var i in notif.args.cards) {
-                    console.log(notif.args.cards);
                     var card = notif.args.cards[i];
-                    console.log("card.id", card.id);
-                    this.guestsOnTable.addToStockWithId(card.type_arg);
+                    console.log("notif_newRiver card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    this.guestsOnTable.addToStockWithId(card.type_arg, card.id);
                 }
             },
+
+            notif_guestsRemoved: function (notif) {
+                for (var i in notif.args.cards) {
+                    var card = notif.args.cards[i];
+                    console.log("notif_guestsRemoved card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    this.guestsOnTable.removeFromStockById(card.id);
+                }
+            },
+
 
         });
     });

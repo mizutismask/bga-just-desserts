@@ -80,6 +80,17 @@ class action_justdesserts extends APP_GameAction
     self::ajaxResponse();
   }
 
+  public function serveAction()
+  {
+    self::setAjaxMode();
+    $cards_id = self::getArg("cards_id", AT_numberlist, true);
+    $guest_id = self::getArg("guest_id", AT_posint, true);
+    $cards_id = $this->convertStringToArray($cards_id);
+    $this->game->serve($guest_id, $cards_id);
+
+    self::ajaxResponse();
+  }
+
   function convertStringToArray($card_ids_raw)
   {
     // Removing last ';' if exists
