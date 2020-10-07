@@ -224,6 +224,39 @@ class JustDesserts extends Table
         return !in_array($guestFromMaterial["dislike1"], $allTastes) && !in_array($guestFromMaterial["dislike2"], $allTastes);
     }
 
+    function isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)
+    {
+        $allDessertNames = array();
+        foreach ($dessertsFromMaterial as $dessert) {
+            $allDessertNames[] = $dessert["name"];
+        }
+
+        return in_array($guestFromMaterial["favourite1"], $allDessertNames)
+            || in_array($guestFromMaterial["favourite2"], $allDessertNames);
+    }
+
+    /*
+     When the guest is satisfied, it goes to the won pile of the player and used desserts are discarded.
+     The player can have a tip.
+     */
+    function doSatisfiedGuestActions($dessert_cards_id, $guest, $guestFromMaterial, $dessertsFromMaterial)
+    {
+        $player_id = self::getActivePlayerId();
+        $this->dessertcards->moveCards($dessert_cards_id, 'dessertDiscard');
+        $this->guestcards->moveCard($guest["id"], 'won', $player_id);
+
+        self::notifyAllPlayers('serve', clienttranslate('${player_name} serves ${guest_name}'), array('player_name' => self::getActivePlayerName(), 'guest_name' => $guestFromMaterial["name"]));
+        self::notifyAllPlayers('guestsRemoved', '', array('cards' => [$guest]));
+
+        //if the guest got his favorite, there’s a tip
+        if (self::isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)) {
+            $new_cards = $this->dessertcards->pickCards(1, 'dessertDeck', $player_id);
+            // Notify player about his tip
+            self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
+            //notify other that he got one tip
+            self::notifyAllPlayers('serve', clienttranslate('${player_name} gets a new dessert card as a tip.'), array('player_name' => self::getActivePlayerName()));
+        }
+    }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
@@ -292,9 +325,8 @@ class JustDesserts extends Table
         $this->gamestate->nextState('swap'); //computes the next state when draw is given to the current state.
     }
 
-    function serve($guest_id, $cards_id)
+    private function serve($guest_id, $cards_id, $nextState)
     {
-        $player_id = self::getActivePlayerId();
         $guest = $this->guestcards->getCard($guest_id);
         $guestFromMaterial = $this->guests[$guest["type_arg"]];
 
@@ -305,22 +337,10 @@ class JustDesserts extends Table
         }
 
         // Make sure this is an accepted action
-        if (self::checkAction('serve')) {
+        if (self::checkAction($nextState)) {
             if (self::dessertsAreEnoughForGuest($dessertsFromMaterial, $guestFromMaterial)) {
                 if (self::guestDislikesSomething($dessertsFromMaterial, $guestFromMaterial)) {
-
-                    $this->dessertcards->moveCards($cards_id, 'dessertDiscard');
-                    $this->guestcards->moveCard($guest_id, 'won', $player_id);
-
-                    self::notifyAllPlayers('serve', clienttranslate('${player_name} serves ${guest_name}'), array('player_name' => self::getActivePlayerName(), 'guest_name' => $guestFromMaterial["name"]));
-                    self::notifyAllPlayers('guestsRemoved', '', array('cards' => [$guest]));
-
-                    if (false) {
-                        //if the guest got his favorite, there’s a tip
-                        $new_cards = $this->dessertcards->pickCards(1, 'dessertDeck', $player_id);
-                        // Notify player about his tip
-                        self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
-                    }
+                    doSatisfiedGuestActions($cards_id, $guest, $guestFromMaterial, $dessertsFromMaterial);
                 } else {
                     throw new BgaUserException(self::_("This guest refuses to eat one of the ingredients you provided"));
                 }
@@ -330,10 +350,23 @@ class JustDesserts extends Table
         }
 
 
-        $this->gamestate->nextState('serve'); //computes the next state when draw is given to the current state.
+        $this->gamestate->nextState($nextState);
     }
 
+    function serveFirstGuest($guest_id, $cards_id)
+    {
+        self::serve($guest_id, $cards_id, 'serve');
+    }
 
+    function serveSecondGuest($guest_id, $cards_id)
+    {
+        self::serve($guest_id, $cards_id, 'serveSecondGuest');
+    }
+
+    function pass()
+    {
+        $this->gamestate->nextState("pass");
+    }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments

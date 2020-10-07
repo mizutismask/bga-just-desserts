@@ -86,7 +86,18 @@ class action_justdesserts extends APP_GameAction
     $cards_id = self::getArg("cards_id", AT_numberlist, true);
     $guest_id = self::getArg("guest_id", AT_posint, true);
     $cards_id = $this->convertStringToArray($cards_id);
-    $this->game->serve($guest_id, $cards_id);
+    $this->game->serveFirstGuest($guest_id, $cards_id);
+
+    self::ajaxResponse();
+  }
+
+  public function serveSecondGuestAction()
+  {
+    self::setAjaxMode();
+    $cards_id = self::getArg("cards_id", AT_numberlist, true);
+    $guest_id = self::getArg("guest_id", AT_posint, true);
+    $cards_id = $this->convertStringToArray($cards_id);
+    $this->game->serveSecondGuest($guest_id, $cards_id);
 
     self::ajaxResponse();
   }
@@ -101,5 +112,14 @@ class action_justdesserts extends APP_GameAction
     else
       $card_ids = explode(';', $card_ids_raw);
     return $card_ids;
+  }
+
+  public function passAction()
+  {
+    self::setAjaxMode();
+
+    $this->game->pass();
+
+    self::ajaxResponse();
   }
 }

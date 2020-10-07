@@ -179,6 +179,9 @@ define([
                             this.addActionButton('button_exchange', _('Exchange desserts'), 'onExchange');
                             this.addActionButton('button_serve', _('Serve a guest'), 'onServeGuest');
                             break;
+                        case "serveSecondGuest":
+                            this.addActionButton('button_serve_second_guest', _('Serve another guest'), 'onServeSecondGuest');
+                            this.addActionButton('button_pass', _('Pass'), 'onPass');
                     }
                 }
             },
@@ -279,6 +282,50 @@ define([
                 }
             },
 
+            onServeSecondGuest: function (evt) {
+                console.log('onServeSecondGuest');
+
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+
+                var selectedDesserts = this.playerHand.getSelectedItems();
+                var selectedGuests = this.guestsOnTable.getSelectedItems();
+                if (selectedDesserts.length > 0 && selectedGuests.length == 1) {
+                    if (this.checkAction('serve')) {
+                        this.ajaxcall('/justdesserts/justdesserts/serveSecondGuestAction.html',
+                            {
+                                lock: true,
+                                cards_id: selectedDesserts.map(i => i.id).join(";"),
+                                guest_id: selectedGuests[0].id
+                            },
+                            this,
+                            function (result) {
+                                selectedDesserts.forEach(removed => {
+                                    this.playerHand.removeFromStockById(removed.id);
+                                });
+
+                            });
+                    }
+                }
+            },
+
+            onPass: function (evt) {
+                console.log('onPass');
+
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+
+                if (this.checkAction('pass')) {
+                    this.ajaxcall('/justdesserts/justdesserts/passAction.html',
+                        {
+                            lock: true,
+                        },
+                        this,
+                        function (result) { }
+                    );
+                }
+            }
+        },
 
             onDessertSelectionChangeFunction: function (evt) {
                 var items = this.playerHand.getSelectedItems();

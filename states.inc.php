@@ -70,7 +70,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must draw a dessert, serve guests or swap ingredients'),
         "type" => "activeplayer",
         "possibleactions" => array("draw", "serve", "swap"),
-        "transitions" => array("draw" => 23, "serve" => 23, "swap" => 23, "discardGuest" => 24)
+        "transitions" => array("draw" => 23, "serve" => 23, "serveSecondGuest" => 25, "swap" => 23, "discardGuest" => 24)
     ),
 
 
@@ -91,6 +91,16 @@ $machinestates = array(
         "action" => "stDiscardGuests",
         "transitions" => array("discard" => 23)
     ),
+
+    25 => array(
+        "name" => "serveSecondGuest",
+        "description" => clienttranslate('${actplayer} can serve another guest'),
+        "descriptionmyturn" => clienttranslate('${you} must serve another guest or pass'),
+        "type" => "activeplayer",
+        "possibleactions" => array("pass", "serveSecondGuest"),
+        "transitions" => array("pass" => 23, "serveSecondGuest" => 23)
+    ),
+
 
     /*
     Examples:
