@@ -83,8 +83,8 @@
 }
 
 .pile, .stockitem  {
-    width: 180px;
-    height: 280px;
+    width: 150px;
+    height: 233px;
     /*display: inline-block;*/
     border-radius: 20px;
 }
@@ -100,12 +100,12 @@
 
 .guest_pile {
     grid-row: 1;
-    background-image: url('img/guests180.jpg');
+    background-image: url('img/guests150.jpg');
 }
 
 .dessert_pile {
     grid-row: 2;
-    background-image: url('img/desserts180.jpg');
+    background-image: url('img/desserts150.jpg');
 }
 
 .guestsname {
@@ -113,7 +113,7 @@
 }
 
 .guests {
-    height: 280px;
+    height: 233px;
     display: inline-block;
 }
 
@@ -121,7 +121,7 @@
     position: relative;
     text-align: center;
     width: 100%;
-    height: 280px;
+    height: 233px;
 }
 
 

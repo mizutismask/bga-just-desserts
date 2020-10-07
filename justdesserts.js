@@ -26,8 +26,8 @@ define([
             constructor: function () {
                 console.log('justdesserts constructor');
 
-                this.cardwidth = 180;
-                this.cardheight = 280;
+                this.cardwidth = 150;
+                this.cardheight = 233;
                 // Here, you can init the global variables of your user interface
                 // Example:
                 // this.myGlobalValue = 0;
@@ -67,7 +67,7 @@ define([
                 for (var card_id = 1; card_id <= 36; card_id++) {
                     // Build card type id
                     //var card_type_id = this.getCardUniqueId(color, value);
-                    this.playerHand.addItemType(card_id, card_id, g_gamethemeurl + 'img/desserts180.jpg', card_id);
+                    this.playerHand.addItemType(card_id, card_id, g_gamethemeurl + 'img/desserts150.jpg', card_id);
                 }
                 console.log(gamedatas);
                 for (var card_id in gamedatas.hand) {
@@ -86,7 +86,7 @@ define([
                 for (var card_id = 1; card_id <= 24; card_id++) {
                     // Build card type id
                     //var card_type_id = this.getCardUniqueId(color, value);
-                    this.guestsOnTable.addItemType(card_id, card_id, g_gamethemeurl + 'img/guests180.jpg', card_id);
+                    this.guestsOnTable.addItemType(card_id, card_id, g_gamethemeurl + 'img/guests150.jpg', card_id);
                 }
                 console.log(gamedatas);
                 for (var card_id in gamedatas.guestsOnTable) {
