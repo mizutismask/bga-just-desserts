@@ -221,7 +221,7 @@ class JustDesserts extends Table
         }
         $allTastes = array_unique($allTastes);
 
-        return !in_array($guestFromMaterial["dislike"], $allTastes);
+        return !in_array($guestFromMaterial["dislike1"], $allTastes) && !in_array($guestFromMaterial["dislike2"], $allTastes);
     }
 
 
