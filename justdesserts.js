@@ -64,7 +64,7 @@ define([
                 this.playerHand.image_items_per_row = 10; // 10 images per row
 
                 // Create cards types:
-                for (var card_id = 1; card_id <= 36; card_id++) {
+                for (var card_id = 1; card_id <= 76; card_id++) {
                     // Build card type id
                     //var card_type_id = this.getCardUniqueId(color, value);
                     this.playerHand.addItemType(card_id, card_id, g_gamethemeurl + 'img/desserts150.jpg', card_id);
@@ -182,6 +182,10 @@ define([
                         case "serveSecondGuest":
                             this.addActionButton('button_serve_second_guest', _('Serve another guest'), 'onServeSecondGuest');
                             this.addActionButton('button_pass', _('Pass'), 'onPass');
+                            break;
+                        case "playerDiscardGuest":
+                            this.addActionButton('button_discard', _('Discard until there is only one guest from each suite'), 'onDiscardGuests');
+                            break;
                     }
                 }
             },
@@ -291,7 +295,7 @@ define([
                 var selectedDesserts = this.playerHand.getSelectedItems();
                 var selectedGuests = this.guestsOnTable.getSelectedItems();
                 if (selectedDesserts.length > 0 && selectedGuests.length == 1) {
-                    if (this.checkAction('serve')) {
+                    if (this.checkAction('serveSecondGuest')) {
                         this.ajaxcall('/justdesserts/justdesserts/serveSecondGuestAction.html',
                             {
                                 lock: true,
@@ -309,6 +313,27 @@ define([
                 }
             },
 
+            onDiscardGuests: function (evt) {
+                console.log('onDiscardGuests');
+
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+
+                var selectedGuests = this.guestsOnTable.getSelectedItems();
+                if (selectedGuests.length > 0) {
+                    if (this.checkAction('discardGuests')) {
+                        this.ajaxcall('/justdesserts/justdesserts/discardGuestsAction.html',
+                            {
+                                lock: true,
+                                cards_id: selectedGuests.map(i => i.id).join(";"),
+                            },
+                            this,
+                            function (result) { });
+                    }
+                }
+            },
+
+
             onPass: function (evt) {
                 console.log('onPass');
 
@@ -324,8 +349,8 @@ define([
                         function (result) { }
                     );
                 }
-            }
-        },
+
+            },
 
             onDessertSelectionChangeFunction: function (evt) {
                 var items = this.playerHand.getSelectedItems();

@@ -66,8 +66,8 @@ $machinestates = array(
 
     2 => array(
         "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must draw a dessert, serve guests or swap ingredients'),
-        "descriptionmyturn" => clienttranslate('${you} must draw a dessert, serve guests or swap ingredients'),
+        "description" => clienttranslate('${actplayer} must draw a dessert, serve guests or swap desserts'),
+        "descriptionmyturn" => clienttranslate('${you} must choose 1 action'),
         "type" => "activeplayer",
         "possibleactions" => array("draw", "serve", "swap"),
         "transitions" => array("draw" => 23, "serve" => 23, "serveSecondGuest" => 25, "swap" => 23, "discardGuest" => 24)
@@ -88,8 +88,8 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} must draw discard guests to keep only one of each suit'),
         "descriptionmyturn" => clienttranslate('${you} must draw discard guests to keep only one of each suit'),
         "type" => "activeplayer",
-        "action" => "stDiscardGuests",
-        "transitions" => array("discard" => 23)
+        "possibleactions" => array("discardGuests"),
+        "transitions" => array("discardGuests" => 23)
     ),
 
     25 => array(

@@ -221,7 +221,7 @@ class JustDesserts extends Table
         }
         $allTastes = array_unique($allTastes);
 
-        return !in_array($guestFromMaterial["dislike1"], $allTastes) && !in_array($guestFromMaterial["dislike2"], $allTastes);
+        return !in_array($guestFromMaterial["dislike1"], $allTastes) || $guestFromMaterial["dislike2"] && !in_array($guestFromMaterial["dislike2"], $allTastes);
     }
 
     function isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)
@@ -233,6 +233,20 @@ class JustDesserts extends Table
 
         return in_array($guestFromMaterial["favourite1"], $allDessertNames)
             || in_array($guestFromMaterial["favourite2"], $allDessertNames);
+    }
+
+    /**
+     * True if there is several guests with the same color.
+     */
+    function guestsNeedsToBeDiscarded()
+    {
+        $cards = $this->guestcards->getCardsInLocation('river');
+        $guests = $this->getGuestsFromMaterialByCards($cards);
+        $allSuits = array();
+        foreach ($guests as $guest) {
+            $allSuits[] = $guest["color"];
+        }
+        return count($allSuits) != count(array_unique($allSuits));
     }
 
     /*
@@ -303,7 +317,11 @@ class JustDesserts extends Table
 
         self::notifyAllPlayers('draw', clienttranslate('${player_name} draws a dessert'), array('player_name' => self::getActivePlayerName()));
 
-        $this->gamestate->nextState('draw'); //computes the next state when draw is given to the current state.
+        if ($this->guestsNeedsToBeDiscarded()) {
+            $this->gamestate->nextState('discardGuest');
+        } else {
+            $this->gamestate->nextState('draw'); //computes the next state when draw is given to the current state.
+        }
     }
 
     function swap($cards_id)
@@ -322,10 +340,89 @@ class JustDesserts extends Table
 
         self::notifyAllPlayers('swap', clienttranslate('${player_name} swaps ${cards_nb} cards'), array('player_name' => self::getActivePlayerName(), 'cards_nb' => $cards_nb));
 
-        $this->gamestate->nextState('swap'); //computes the next state when draw is given to the current state.
+        if ($this->guestsNeedsToBeDiscarded()) {
+            $this->gamestate->nextState('discardGuest');
+        } else {
+            $this->gamestate->nextState('swap'); //computes the next state when draw is given to the current state.
+        }
     }
 
-    private function serve($guest_id, $cards_id, $nextState)
+    function discardGuests($cards_id)
+    {
+        $cards_nb = sizeof($cards_id);
+
+        // Make sure this is an accepted action
+        if (self::checkAction('discardGuests')) {
+
+            $cards = $this->guestcards->getCardsInLocation('river');
+            $guests_in_river = $this->getGuestsFromMaterialByCards($cards);
+
+            $guests_to_remove = $this->guestcards->getCards($cards_id);
+            $guests_to_remove_from_material = $this->getGuestsFromMaterialByIds($cards_id);
+
+            foreach ($guests_in_river as $guest) {
+                $allSuits[] = $guest["color"];
+            }
+
+            $valuesOccurrences = array_count_values($allSuits);
+            $pbOccurrences = array_filter($valuesOccurrences, function ($occurrences) {
+                return $occurrences > 1;
+            });
+
+            $cardsFromOtherColors = false;
+            foreach ($guests_to_remove_from_material as $guest_to_remove) {
+                $color = $guest_to_remove['color'];
+                self::trace("color: $color");
+                self::dump("pbOccurrences", $pbOccurrences);
+
+                $valuesOccurrences[$color] += -1;
+                if (!$pbOccurrences[$color]) {
+                    self::trace("$color not found in problematic occurrences");
+                    $cardsFromOtherColors = true;
+                }
+            }
+            //there is only one card of each and no extra card is discarded
+            if (!$cardsFromOtherColors && max($valuesOccurrences) == 1 && min($valuesOccurrences) >= 0) {
+                $this->guestcards->moveCards($cards_id, 'guestDiscard');
+                self::notifyAllPlayers('guestsRemoved', '', array('cards' => $guests_to_remove));
+                self::notifyAllPlayers('discardGuests', clienttranslate('${player_name} discards ${cards_nb} guest(s)'), array('player_name' => self::getActivePlayerName(), 'cards_nb' => $cards_nb));
+                $this->gamestate->nextState('discardGuests');
+            } else {
+                throw new BgaUserException(self::_("Dicard only guests needed to keep one of each suite at most"));
+            }
+        }
+    }
+
+    /**
+     * Takes an array and returns an array of duplicate items
+     */
+    function get_duplicates($array)
+    {
+        return array_unique(array_diff_assoc($array, array_unique($array)));
+    }
+
+    private function getGuestFromMaterial($guest_id)
+    {
+        $guest = $this->guestcards->getCard($guest_id);
+        return $this->guests[$guest["type_arg"]];
+    }
+
+    private function getGuestsFromMaterialByCards($guests)
+    {
+        $guestsFromMaterial = array();
+        foreach ($guests as $guest) {
+            $guestsFromMaterial[] = $this->guests[$guest["type_arg"]];
+        }
+        return $guestsFromMaterial;
+    }
+
+    private function getGuestsFromMaterialByIds($guest_ids)
+    {
+        $guests = $this->guestcards->getCards($guest_ids);
+        return $this->getGuestsFromMaterialByCards($guests);
+    }
+
+    private function serve($guest_id, $cards_id, $action, $nextState)
     {
         $guest = $this->guestcards->getCard($guest_id);
         $guestFromMaterial = $this->guests[$guest["type_arg"]];
@@ -337,10 +434,10 @@ class JustDesserts extends Table
         }
 
         // Make sure this is an accepted action
-        if (self::checkAction($nextState)) {
+        if (self::checkAction($action)) {
             if (self::dessertsAreEnoughForGuest($dessertsFromMaterial, $guestFromMaterial)) {
                 if (self::guestDislikesSomething($dessertsFromMaterial, $guestFromMaterial)) {
-                    doSatisfiedGuestActions($cards_id, $guest, $guestFromMaterial, $dessertsFromMaterial);
+                    $this->doSatisfiedGuestActions($cards_id, $guest, $guestFromMaterial, $dessertsFromMaterial);
                 } else {
                     throw new BgaUserException(self::_("This guest refuses to eat one of the ingredients you provided"));
                 }
@@ -349,18 +446,21 @@ class JustDesserts extends Table
             }
         }
 
-
-        $this->gamestate->nextState($nextState);
+        if ($this->guestsNeedsToBeDiscarded() && $action == "serveSecondGuest") {
+            $this->gamestate->nextState('discardGuest');
+        } else {
+            $this->gamestate->nextState($nextState);
+        }
     }
 
     function serveFirstGuest($guest_id, $cards_id)
     {
-        self::serve($guest_id, $cards_id, 'serve');
+        self::serve($guest_id, $cards_id, 'serve', 'serveSecondGuest');
     }
 
     function serveSecondGuest($guest_id, $cards_id)
     {
-        self::serve($guest_id, $cards_id, 'serveSecondGuest');
+        self::serve($guest_id, $cards_id, 'serveSecondGuest', 'serveSecondGuest');
     }
 
     function pass()
@@ -418,15 +518,32 @@ class JustDesserts extends Table
     */
     function stNextPlayer()
     {
-        $players = self::loadPlayersBasicInfos();
-        $player_id = self::activeNextPlayer();
-        $this->pickGuestCardsAndNotifyPlayers(1, $players);
-        $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
+        //getting data to check if the active player hit a winning requirement
+        $active_player = self::getActivePlayerId();
+        $woncards = $this->dessertcards->getCardsInLocation('won', $active_player);
+        $guests = $this->getGuestsFromMaterialByCards($woncards);
+        $allSuits = array();
+        foreach ($guests as $guest) {
+            $allSuits[] = $guest["color"];
+        }
+        $valuesOccurrences = array_count_values($allSuits);
 
-        self::notifyAllPlayers('playerTurn', clienttranslate('New turn : ${player_name} draws a dessert and a guest'), array('player_name' => self::getActivePlayerName()));
+        //5 different colors or 3 of the same one
+        if (count(array_unique($allSuits)) == 5 || in_array(3, $valuesOccurrences)) {
+            //victory
+            $this->gamestate->nextState('endGame');
+        } else {
 
-        self::giveExtraTime($player_id);
-        $this->gamestate->nextState('playerTurn');
+            $players = self::loadPlayersBasicInfos();
+            $player_id = self::activeNextPlayer();
+            $this->pickGuestCardsAndNotifyPlayers(1, $players);
+            $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
+
+            self::notifyAllPlayers('playerTurn', clienttranslate('New turn : ${player_name} draws a dessert and a guest'), array('player_name' => self::getActivePlayerName()));
+
+            self::giveExtraTime($player_id);
+            $this->gamestate->nextState('playerTurn');
+        }
     }
     //////////////////////////////////////////////////////////////////////////////
     //////////// Zombie
