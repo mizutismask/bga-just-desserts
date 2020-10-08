@@ -130,6 +130,13 @@ class JustDesserts extends Table
         // Cards in player hand
         $result['hand'] = $this->dessertcards->getCardsInLocation('hand', $current_player_id);
         $result['guestsOnTable'] = $this->guestcards->getCardsInLocation('river');
+
+        //won cards for each player
+        $players = self::loadPlayersBasicInfos();
+        foreach ($players as $player) {
+            $result['won'][$player["player_id"]] = $this->guestcards->getCardsInLocation('won', $player["player_id"]);
+        }
+
         return $result;
     }
 
@@ -260,7 +267,7 @@ class JustDesserts extends Table
         $this->guestcards->moveCard($guest["id"], 'won', $player_id);
 
         self::notifyAllPlayers('serve', clienttranslate('${player_name} serves ${guest_name}'), array('player_name' => self::getActivePlayerName(), 'guest_name' => $guestFromMaterial["name"]));
-        self::notifyAllPlayers('guestsRemoved', '', array('cards' => [$guest]));
+        self::notifyAllPlayers('newGuestWon', '', array('card' => $guest, 'player_id' => $player_id));
 
         //if the guest got his favorite, there’s a tip
         if (self::isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)) {
@@ -468,6 +475,25 @@ class JustDesserts extends Table
         $this->gamestate->nextState("pass");
     }
 
+    function updateScores($winner_id)
+    {
+        $players = self::loadPlayersBasicInfos();
+        foreach ($players as $player_id => $player) {
+            $score = 0;
+            if ($player_id == $winner_id) {
+                $score = 1;
+            }
+            $sql = "UPDATE player set player_score=" . $score . " where player_id=" . $player_id;
+            self::DbQuery($sql);
+        }
+        $playerInfo = self::getCollectionFromDB("SELECT player_id, player_score FROM player");
+
+        // Update the scores on the client side
+        self::notifyAllPlayers('updateScore', clienttranslate('Game Over.'), array(
+            'players' => $playerInfo
+        ));
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments
     ////////////
@@ -520,17 +546,18 @@ class JustDesserts extends Table
     {
         //getting data to check if the active player hit a winning requirement
         $active_player = self::getActivePlayerId();
-        $woncards = $this->dessertcards->getCardsInLocation('won', $active_player);
+        $woncards = $this->guestcards->getCardsInLocation('won', $active_player);
         $guests = $this->getGuestsFromMaterialByCards($woncards);
         $allSuits = array();
         foreach ($guests as $guest) {
             $allSuits[] = $guest["color"];
         }
         $valuesOccurrences = array_count_values($allSuits);
-
+        self::dump("valuesOccurrences", $valuesOccurrences);
         //5 different colors or 3 of the same one
         if (count(array_unique($allSuits)) == 5 || in_array(3, $valuesOccurrences)) {
             //victory
+            $this->updateScores($active_player);
             $this->gamestate->nextState('endGame');
         } else {
 

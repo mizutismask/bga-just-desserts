@@ -85,8 +85,8 @@ $machinestates = array(
 
     24 => array(
         "name" => "playerDiscardGuest",
-        "description" => clienttranslate('${actplayer} must draw discard guests to keep only one of each suit'),
-        "descriptionmyturn" => clienttranslate('${you} must draw discard guests to keep only one of each suit'),
+        "description" => clienttranslate('${actplayer} must discard guests to keep only one of each suit'),
+        "descriptionmyturn" => clienttranslate('${you} must discard guests to keep only one of each suit'),
         "type" => "activeplayer",
         "possibleactions" => array("discardGuests"),
         "transitions" => array("discardGuests" => 23)

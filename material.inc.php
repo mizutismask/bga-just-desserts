@@ -96,7 +96,7 @@ $this->desserts = array(
   8 => array(
     'name' => clienttranslate('CARAMEL_NUT_TORTE'),
     'nametr' => self::_('caramelNutTorte'),
-    'tastes' => array($NUTS, $PIE),
+    'tastes' => array($NUTS, $CAKE),
   ),
   9 => array(
     'name' => clienttranslate('CARROT_CAKE'),

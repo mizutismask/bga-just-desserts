@@ -31,7 +31,11 @@ define([
                 // Here, you can init the global variables of your user interface
                 // Example:
                 // this.myGlobalValue = 0;
-
+                this.image_items_per_row = 10;
+                this.dessert_cards_nb = 76;
+                this.guest_cards_nb = 24;
+                this.desserts_img = 'img/desserts150.jpg';
+                this.guest_img = 'img/guests150.jpg';
             },
 
             /*
@@ -49,51 +53,66 @@ define([
 
             setup: function (gamedatas) {
                 console.log("Starting game setup");
-
-                // Setting up player boards
-                for (var player_id in gamedatas.players) {
-                    var player = gamedatas.players[player_id];
-
-                    // TODO: Setting up players boards if needed
-                }
-
+                console.log(gamedatas);
                 // TODO: Set up your game interface here, according to "gamedatas"
-                // Player hand
+
+                //---------- Player hand setup
                 this.playerHand = new ebg.stock(); // new stock object for hand
                 this.playerHand.create(this, $('myhand'), this.cardwidth, this.cardheight);//myhand is the div where the card is going
-                this.playerHand.image_items_per_row = 10; // 10 images per row
+                this.playerHand.image_items_per_row = this.image_items_per_row;
 
                 // Create cards types:
-                for (var card_id = 1; card_id <= 76; card_id++) {
+                for (var card_id = 1; card_id <= this.dessert_cards_nb; card_id++) {
                     // Build card type id
-                    //var card_type_id = this.getCardUniqueId(color, value);
-                    this.playerHand.addItemType(card_id, card_id, g_gamethemeurl + 'img/desserts150.jpg', card_id);
+                    this.playerHand.addItemType(card_id, card_id, g_gamethemeurl + this.desserts_img, card_id);
                 }
-                console.log(gamedatas);
+
                 for (var card_id in gamedatas.hand) {
                     var card = gamedatas.hand[card_id];
                     console.log("ajout dans la main de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.playerHand.addToStockWithId(card.type_arg, card.id);
-                    // TODO: Setting up players boards if needed
                 }
-                //this.playerHand.addToStockWithId(6);
-                //guest on table setup
+
+
+                //-----------guest on table setup
                 this.guestsOnTable = new ebg.stock(); // new stock object for hand
                 this.guestsOnTable.create(this, $('guests_on_table'), this.cardwidth, this.cardheight);
-                this.guestsOnTable.image_items_per_row = 10; // 10 images per row
+                this.guestsOnTable.image_items_per_row = this.image_items_per_row;
 
                 // Create cards types:
-                for (var card_id = 1; card_id <= 24; card_id++) {
+                for (var card_id = 1; card_id <= this.guest_cards_nb; card_id++) {
                     // Build card type id
-                    //var card_type_id = this.getCardUniqueId(color, value);
-                    this.guestsOnTable.addItemType(card_id, card_id, g_gamethemeurl + 'img/guests150.jpg', card_id);
+                    this.guestsOnTable.addItemType(card_id, card_id, g_gamethemeurl + this.guest_img, card_id);
                 }
-                console.log(gamedatas);
+
                 for (var card_id in gamedatas.guestsOnTable) {
                     var card = gamedatas.guestsOnTable[card_id];
                     console.log("ajout dans les guests de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.guestsOnTable.addToStockWithId(card.type_arg, card.id);
-                    // TODO: Setting up players boards if needed
+                }
+
+                //-----------won cards setup for each player
+                this.wonStocksByPlayerId = [];
+                for (var player_id in gamedatas.won) {
+
+                    var playerWonCards = new ebg.stock();
+                    playerWonCards.create(this, $('guestscards_' + player_id), this.cardwidth, this.cardheight);
+                    playerWonCards.image_items_per_row = this.image_items_per_row;
+
+                    // Create cards types:
+                    for (var card_id = 1; card_id <= this.guest_cards_nb; card_id++) {
+                        // Build card type id
+                        playerWonCards.addItemType(card_id, card_id, g_gamethemeurl + this.guest_img, card_id);
+                    }
+
+                    //adds already won cards
+                    var cards = gamedatas.won[player_id];
+                    for (var card_id in cards) {
+                        var card = cards[card_id];
+                        console.log("ajout dans les cartes gagnées de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                        playerWonCards.addToStockWithId(card.type_arg, card.id);
+                    }
+                    this.wonStocksByPlayerId[player_id] = playerWonCards;
                 }
 
                 // Setup game notifications to handle (see "setupNotifications" method below)
@@ -199,10 +218,6 @@ define([
                 script.
             
             */
-            playCardOnTable: function (player_id, color, value, card_id) {
-                // player_id => direction
-                dojo.place(this.format_block('jstpl_cardontable', null), $('guests_on_table'));
-            },
 
             ///////////////////////////////////////////////////
             //// Player's action
@@ -429,6 +444,8 @@ define([
                 dojo.subscribe('newHand', this, "notif_newHand");
                 dojo.subscribe('newRiver', this, "notif_newRiver");
                 dojo.subscribe('guestsRemoved', this, "notif_guestsRemoved");
+                dojo.subscribe('newGuestWon', this, "notif_newGuestWon");
+                dojo.subscribe('updateScore', this, "notif_updateScore");
                 dojo.connect(this.playerHand, 'onChangeSelection', this, "onDessertSelectionChangeFunction");
                 dojo.connect(this.guestsOnTable, 'onChangeSelection', this, "onGuestSelectionChangeFunction");
 
@@ -476,6 +493,22 @@ define([
                 }
             },
 
+            notif_newGuestWon: function (notif) {
+                var card = notif.args.card;
+                var player_id = notif.args.player_id;
+                console.log("notif_newGuestWon card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                this.guestsOnTable.removeFromStockById(card.id);
+                this.wonStocksByPlayerId[player_id].addToStockWithId(card.type_arg, card.id);
+            },
 
+            notif_updateScore: function (notif) {
+                // Adjust the score for all the players
+                for (var player_id in notif.args.players) {
+                    var player = notif.args.players[player_id];
+                    var playerID = player['player_id'];
+
+                    this.scoreCtrl[playerID].setValue(player['player_score']);
+                }
+            }
         });
     });

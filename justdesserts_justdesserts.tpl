@@ -47,11 +47,11 @@
     <div id="guests_wrapper">
 
         <!-- BEGIN player -->
-        <div id="guest_{PLAYER_ID}" class="guests whiteblock">
+        <div id="guest_{PLAYER_ID}" class="whiteblock">
             <div class="guestsname" style="color:#{PLAYER_COLOR}">
                 {PLAYER_NAME}
             </div>
-            <div class="guestscard" id="guestscard_{PLAYER_ID}">
+            <div class="guestscard" id="guestscards_{PLAYER_ID}" class="guests">
             </div>
         </div>
         <!-- END player -->
@@ -68,7 +68,6 @@
     var jstpl_some_game_item='<div class="my_game_item" id="my_game_item_${MY_ITEM_ID}"></div>';
     
     */
-    var jstpl_cardontable = '<div class="cardontable"">\</div>';
 
 </script>
 
