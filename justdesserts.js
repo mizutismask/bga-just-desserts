@@ -96,6 +96,8 @@ define([
                 for (var player_id in gamedatas.won) {
 
                     var playerWonCards = new ebg.stock();
+                    playerWonCards.setSelectionMode(0);
+                    playerWonCards.setOverlap(16, 0);
                     playerWonCards.create(this, $('guestscards_' + player_id), this.cardwidth, this.cardheight);
                     playerWonCards.image_items_per_row = this.image_items_per_row;
 
