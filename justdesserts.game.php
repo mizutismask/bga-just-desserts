@@ -228,7 +228,7 @@ class JustDesserts extends Table
         }
         $allTastes = array_unique($allTastes);
 
-        return !in_array($guestFromMaterial["dislike1"], $allTastes) || $guestFromMaterial["dislike2"] && !in_array($guestFromMaterial["dislike2"], $allTastes);
+        return !in_array($guestFromMaterial["dislike1"], $allTastes) || array_key_exists("dislike2", $guestFromMaterial) && !in_array($guestFromMaterial["dislike2"], $allTastes);
     }
 
     function isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)
@@ -239,7 +239,7 @@ class JustDesserts extends Table
         }
 
         return in_array($guestFromMaterial["favourite1"], $allDessertNames)
-            || in_array($guestFromMaterial["favourite2"], $allDessertNames);
+            || $guestFromMaterial["favourite2"] && in_array($guestFromMaterial["favourite2"], $allDessertNames);
     }
 
     /**
