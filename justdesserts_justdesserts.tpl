@@ -25,29 +25,22 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 <div id="container">
-    <div id="decks">
-        <div id="dessert_draw" class="pile draw dessert_pile"></div>
-        <div id="dessert_discard" class="pile discard dessert_pile"></div>
+    <div id="guest_line">
         <div id="guest_draw" class="pile draw guest_pile"></div>
         <div id="guest_discard" class="pile discard guest_pile"></div>
+        <div id="guests_on_table" class="whiteblock"></div>
     </div>
-
-    <div id="board">
-        <div id=guests_on_table class="whiteblock">
-
-        </div>
-
-        <div id="myhand_wrap" class="whiteblock">
-            <h3>{MY_HAND}</h3>
-            <div id="myhand">
-            </div>
+   
+    <div id="myhand_wrap" class="whiteblock">
+        <h3>{MY_HAND}</h3>
+        <div id="myhand">
         </div>
     </div>
 
     <div id="guests_wrapper">
 
         <!-- BEGIN player -->
-        <div id="guest_{PLAYER_ID}" class="whiteblock">
+        <div id="guest_{PLAYER_ID}" class="whiteblock guestsWon">
             <div class="guestsname" style="color:#{PLAYER_COLOR}">
                 {PLAYER_NAME}
             </div>

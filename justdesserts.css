@@ -66,20 +66,15 @@
         background-repeat: none;
     }
 */
-#container {
-    /*display: inline-block;
-    position: relative;*/
-}
-
-#decks {
-    display: inline-grid;
-    grid-gap: 5px;
-    width: 470px;
+#guest_line {
+    width: 100%;
+    display: inline-flex;
+        flex-direction: row;
 }
 
 #board {
    display: inline-block;
-   width: 100%;
+  /* width: 100%;*/
 }
 
 .pile, .stockitem  {
@@ -90,22 +85,12 @@
 }
 
 .discard {
-    grid-column: 2;
     background-image: none !important;
 }
 
-.draw {
-    grid-column: 1;
-}
-
 .guest_pile {
-    grid-row: 1;
     background-image: url('img/guests150.jpg');
-}
-
-.dessert_pile {
-    grid-row: 2;
-    background-image: url('img/desserts150.jpg');
+    display: inline-block;
 }
 
 .guestsname {
@@ -117,13 +102,15 @@
     display: inline-block;
 }
 
-.guests_on_table {
-    position: relative;
-    text-align: center;
-    width: 100%;
-    height: 233px;
+.guestsWon{
+   /* display: inline-block;*/
+   /* width: max-content;*/
 }
 
+#guests_on_table {
+    width: 65%;
+    display: inline-block;
+}
 
 #myhand div {
     display: inline-grid;
