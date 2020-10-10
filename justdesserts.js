@@ -75,7 +75,7 @@ define([
 
 
                 //-----------guest on table setup
-                this.guestsOnTable = new ebg.stock(); // new stock object for hand
+                this.guestsOnTable = new ebg.stock();
                 this.guestsOnTable.create(this, $('guests_on_table'), this.cardwidth, this.cardheight);
                 this.guestsOnTable.image_items_per_row = this.image_items_per_row;
 
@@ -89,6 +89,23 @@ define([
                     var card = gamedatas.guestsOnTable[card_id];
                     console.log("ajout dans les guests de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.guestsOnTable.addToStockWithId(card.type_arg, card.id);
+                }
+
+                //-----------guest discard setup
+                this.guestsDiscard = new ebg.stock();
+                this.guestsDiscard.create(this, $('guest_discard'), this.cardwidth, this.cardheight);
+                this.guestsDiscard.image_items_per_row = this.image_items_per_row;
+
+                // Create cards types:
+                for (var card_id = 1; card_id <= this.guest_cards_nb; card_id++) {
+                    // Build card type id
+                    this.guestsDiscard.addItemType(card_id, card_id, g_gamethemeurl + this.guest_img, card_id);
+                }
+
+                var lastDiscardedGuest = gamedatas.lastDiscardedGuest;
+                if (lastDiscardedGuest) {
+                    console.log("ajout dans la defausse de la carte id/type/type arg :" + lastDiscardedGuest.id + " " + lastDiscardedGuest.type + " " + lastDiscardedGuest.type_arg);
+                    this.guestsDiscard.addToStockWithId(card.type_arg, card.id);
                 }
 
                 //-----------won cards setup for each player
@@ -283,7 +300,10 @@ define([
                 dojo.stopEvent(evt);
 
                 var selectedDesserts = this.playerHand.getSelectedItems();
-                var selectedGuests = this.guestsOnTable.getSelectedItems();
+                var selectedGuestsOnTable = this.guestsOnTable.getSelectedItems();
+                var selectedDiscardedGuests = this.guestsDiscard.getSelectedItems();
+
+                var selectedGuests = selectedGuestsOnTable.concat(selectedDiscardedGuests);
                 if (selectedDesserts.length > 0 && selectedGuests.length == 1) {
                     if (this.checkAction('serve')) {
                         this.ajaxcall('/justdesserts/justdesserts/serveAction.html',
@@ -310,7 +330,10 @@ define([
                 dojo.stopEvent(evt);
 
                 var selectedDesserts = this.playerHand.getSelectedItems();
-                var selectedGuests = this.guestsOnTable.getSelectedItems();
+                var selectedGuestsOnTable = this.guestsOnTable.getSelectedItems();
+                var selectedDiscardedGuests = this.guestsDiscard.getSelectedItems();
+
+                var selectedGuests = selectedGuestsOnTable.concat(selectedDiscardedGuests);
                 if (selectedDesserts.length > 0 && selectedGuests.length == 1) {
                     if (this.checkAction('serveSecondGuest')) {
                         this.ajaxcall('/justdesserts/justdesserts/serveSecondGuestAction.html',
@@ -381,6 +404,13 @@ define([
                     console.log('Selected guests ' + items.map(i => i.id).join());
                 }
             },
+            onGuestsDiscardSelectionChangeFunction: function (evt) {
+                var items = this.guestsDiscard.getSelectedItems();
+                if (items.length > 0) {
+                    console.log('Selected discarded guests ' + items.map(i => i.id).join());
+                }
+            },
+
 
             /* Example:
             
@@ -448,9 +478,10 @@ define([
                 dojo.subscribe('guestsRemoved', this, "notif_guestsRemoved");
                 dojo.subscribe('newGuestWon', this, "notif_newGuestWon");
                 dojo.subscribe('updateScore', this, "notif_updateScore");
+                dojo.subscribe('newGuestOnTopOfDiscard', this, "notif_newGuestOnTopOfDiscard");
                 dojo.connect(this.playerHand, 'onChangeSelection', this, "onDessertSelectionChangeFunction");
                 dojo.connect(this.guestsOnTable, 'onChangeSelection', this, "onGuestSelectionChangeFunction");
-
+                dojo.connect(this.guestsDiscard, 'onChangeSelection', this, "onGuestsDiscardSelectionChangeFunction");
             },
 
             // TODO: from this point and below, you can write your game notifications handling methods
@@ -503,6 +534,15 @@ define([
                 this.wonStocksByPlayerId[player_id].addToStockWithId(card.type_arg, card.id);
             },
 
+            notif_newGuestOnTopOfDiscard: function (notif) {
+                var card = notif.args.card;
+                this.guestsDiscard.removeAll();
+                if (card) {
+                    console.log("notif_newGuestOnTopOfDiscard card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    this.guestsDiscard.addToStockWithId(card.type_arg, card.id);
+                }
+            },
+
             notif_updateScore: function (notif) {
                 // Adjust the score for all the players
                 for (var player_id in notif.args.players) {
@@ -512,5 +552,7 @@ define([
                     this.scoreCtrl[playerID].setValue(player['player_score']);
                 }
             }
+
+
         });
     });

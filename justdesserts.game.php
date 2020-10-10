@@ -137,6 +137,8 @@ class JustDesserts extends Table
             $result['won'][$player["player_id"]] = $this->guestcards->getCardsInLocation('won', $player["player_id"]);
         }
 
+        //last discarded guest
+        $result['lastDiscardedGuest'] = $this->guestcards->getCardOnTop('discard');
         return $result;
     }
 
@@ -173,8 +175,8 @@ class JustDesserts extends Table
             $cards[] = array('type' => $guest["name"], 'type_arg' => $i, 'nbr' => 1);
             $i++;
         }
-        $this->guestcards->createCards($cards, 'guestDeck');
-        $this->guestcards->shuffle('guestDeck');
+        $this->guestcards->createCards($cards, 'deck');
+        $this->guestcards->shuffle('deck');
         $this->pickGuestCardsAndNotifyPlayers(3, $players);
     }
 
@@ -187,8 +189,8 @@ class JustDesserts extends Table
             $j++;
         }
 
-        $this->dessertcards->createCards($cards, 'dessertDeck');
-        $this->dessertcards->shuffle('dessertDeck');
+        $this->dessertcards->createCards($cards, 'deck');
+        $this->dessertcards->shuffle('deck');
 
         foreach ($players as $player_id => $player) {
             $this->pickDessertCardsAndNotifyPlayer(3, $player_id);
@@ -197,14 +199,14 @@ class JustDesserts extends Table
 
     function pickGuestCardsAndNotifyPlayers($nb, $players)
     {
-        $cards = $this->guestcards->pickCardsForLocation($nb, 'guestDeck', 'river');
+        $cards = $this->guestcards->pickCardsForLocation($nb, 'deck', 'river');
         // Notify player about cards on table
         self::notifyAllPlayers('newRiver', '', array('cards' => $cards));
     }
 
     function pickDessertCardsAndNotifyPlayer($nb, $player_id)
     {
-        $cards = $this->dessertcards->pickCards($nb, 'dessertDeck', $player_id);
+        $cards = $this->dessertcards->pickCards($nb, 'deck', $player_id);
         // Notify player about his cards
         self::notifyPlayer($player_id, 'newHand', '', array('cards' => $cards));
     }
@@ -263,19 +265,40 @@ class JustDesserts extends Table
     function doSatisfiedGuestActions($dessert_cards_id, $guest, $guestFromMaterial, $dessertsFromMaterial)
     {
         $player_id = self::getActivePlayerId();
-        $this->dessertcards->moveCards($dessert_cards_id, 'dessertDiscard');
+        $this->playDessertCards($dessert_cards_id);
+        $fromDiscard = $guest["location"] == "discard";
+        self::dump("guest", $guest);
         $this->guestcards->moveCard($guest["id"], 'won', $player_id);
+        if ($fromDiscard) {
+            $this->notifyAllPlayersNewDiscardedGuestOnTop();
+        }
 
         self::notifyAllPlayers('serve', clienttranslate('${player_name} serves ${guest_name}'), array('player_name' => self::getActivePlayerName(), 'guest_name' => $guestFromMaterial["name"]));
         self::notifyAllPlayers('newGuestWon', '', array('card' => $guest, 'player_id' => $player_id));
 
         //if the guest got his favorite, there’s a tip
         if (self::isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)) {
-            $new_cards = $this->dessertcards->pickCards(1, 'dessertDeck', $player_id);
+            $new_cards = $this->dessertcards->pickCards(1, 'deck', $player_id);
             // Notify player about his tip
             self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
             //notify other that he got one tip
             self::notifyAllPlayers('serve', clienttranslate('${player_name} gets a new dessert card as a tip.'), array('player_name' => self::getActivePlayerName()));
+        }
+
+        //getting data to check if the active player hit a winning requirement
+        $woncards = $this->guestcards->getCardsInLocation('won', $player_id);
+        $guests = $this->getGuestsFromMaterialByCards($woncards);
+        $allSuits = array();
+        foreach ($guests as $guest) {
+            $allSuits[] = $guest["color"];
+        }
+        $valuesOccurrences = array_count_values($allSuits);
+        self::dump("valuesOccurrences", $valuesOccurrences);
+        //5 different colors or 3 of the same one
+        if (count(array_unique($allSuits)) == 5 || in_array(3, $valuesOccurrences)) {
+            //victory
+            $this->updateScores($player_id);
+            $this->gamestate->nextState('endGame');
         }
     }
 
@@ -338,8 +361,8 @@ class JustDesserts extends Table
 
         // Make sure this is an accepted action
         if (self::checkAction('swap')) {
-            $this->dessertcards->moveCards($cards_id, 'dessertDiscard');
-            $new_cards = $this->dessertcards->pickCards($cards_nb, 'dessertDeck', $player_id);
+            $this->playDessertCards($cards_id);
+            $new_cards = $this->dessertcards->pickCards($cards_nb, 'deck', $player_id);
             // Notify player about his cards
             //$playerCards = $this->dessertcards->getCardsInLocation('hand', $player_id);
             self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
@@ -390,7 +413,7 @@ class JustDesserts extends Table
             }
             //there is only one card of each and no extra card is discarded
             if (!$cardsFromOtherColors && max($valuesOccurrences) == 1 && min($valuesOccurrences) >= 0) {
-                $this->guestcards->moveCards($cards_id, 'guestDiscard');
+                $this->playGuestCards($cards_id);
                 self::notifyAllPlayers('guestsRemoved', '', array('cards' => $guests_to_remove));
                 self::notifyAllPlayers('discardGuests', clienttranslate('${player_name} discards ${cards_nb} guest(s)'), array('player_name' => self::getActivePlayerName(), 'cards_nb' => $cards_nb));
                 $this->gamestate->nextState('discardGuests');
@@ -406,6 +429,28 @@ class JustDesserts extends Table
     function get_duplicates($array)
     {
         return array_unique(array_diff_assoc($array, array_unique($array)));
+    }
+
+    function playGuestCards($cards_id)
+    {
+        foreach ($cards_id as $card_id) {
+            $this->guestcards->playCard($card_id);
+        }
+        $this->notifyAllPlayersNewDiscardedGuestOnTop();
+    }
+
+    function notifyAllPlayersNewDiscardedGuestOnTop()
+    {
+        $top = $this->guestcards->getCardOnTop('discard');
+        self::notifyAllPlayers('newGuestOnTopOfDiscard', '',  array('card' => $top));
+    }
+
+    function playDessertCards($cards_id)
+    {
+        foreach ($cards_id as $card_id) {
+            //moves the card to the discard
+            $this->dessertcards->playCard($card_id);
+        }
     }
 
     private function getGuestFromMaterial($guest_id)
@@ -544,33 +589,15 @@ class JustDesserts extends Table
     */
     function stNextPlayer()
     {
-        //getting data to check if the active player hit a winning requirement
-        $active_player = self::getActivePlayerId();
-        $woncards = $this->guestcards->getCardsInLocation('won', $active_player);
-        $guests = $this->getGuestsFromMaterialByCards($woncards);
-        $allSuits = array();
-        foreach ($guests as $guest) {
-            $allSuits[] = $guest["color"];
-        }
-        $valuesOccurrences = array_count_values($allSuits);
-        self::dump("valuesOccurrences", $valuesOccurrences);
-        //5 different colors or 3 of the same one
-        if (count(array_unique($allSuits)) == 5 || in_array(3, $valuesOccurrences)) {
-            //victory
-            $this->updateScores($active_player);
-            $this->gamestate->nextState('endGame');
-        } else {
+        $players = self::loadPlayersBasicInfos();
+        $player_id = self::activeNextPlayer();
+        $this->pickGuestCardsAndNotifyPlayers(1, $players);
+        $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
 
-            $players = self::loadPlayersBasicInfos();
-            $player_id = self::activeNextPlayer();
-            $this->pickGuestCardsAndNotifyPlayers(1, $players);
-            $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
+        self::notifyAllPlayers('playerTurn', clienttranslate('New turn : ${player_name} draws a dessert and a guest'), array('player_name' => self::getActivePlayerName()));
 
-            self::notifyAllPlayers('playerTurn', clienttranslate('New turn : ${player_name} draws a dessert and a guest'), array('player_name' => self::getActivePlayerName()));
-
-            self::giveExtraTime($player_id);
-            $this->gamestate->nextState('playerTurn');
-        }
+        self::giveExtraTime($player_id);
+        $this->gamestate->nextState('playerTurn');
     }
     //////////////////////////////////////////////////////////////////////////////
     //////////// Zombie
