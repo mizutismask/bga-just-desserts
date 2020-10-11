@@ -302,6 +302,11 @@ class JustDesserts extends Table
         }
     }
 
+    function publicGetCurrentPlayerId()
+    {
+        return self::getCurrentPlayerId();
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
     //////////// 
