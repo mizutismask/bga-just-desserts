@@ -475,10 +475,10 @@ define([
                 // 
                 dojo.subscribe('newHand', this, "notif_newHand");
                 dojo.subscribe('newRiver', this, "notif_newRiver");
-                dojo.subscribe('guestsRemoved', this, "notif_guestsRemoved");
+                dojo.subscribe('discardedGuests', this, "notif_discardedGuests");
                 dojo.subscribe('newGuestWon', this, "notif_newGuestWon");
                 dojo.subscribe('updateScore', this, "notif_updateScore");
-                dojo.subscribe('newGuestOnTopOfDiscard', this, "notif_newGuestOnTopOfDiscard");
+
                 dojo.connect(this.playerHand, 'onChangeSelection', this, "onDessertSelectionChangeFunction");
                 dojo.connect(this.guestsOnTable, 'onChangeSelection', this, "onGuestSelectionChangeFunction");
                 dojo.connect(this.guestsDiscard, 'onChangeSelection', this, "onGuestsDiscardSelectionChangeFunction");
@@ -505,7 +505,7 @@ define([
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
                     console.log("notif_newHand card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
-                    this.playerHand.addToStockWithId(card.type_arg, card.id);
+                    this.playerHand.addToStockWithId(card.type_arg, card.id, 'guest_draw');
                 }
             },
 
@@ -514,14 +514,17 @@ define([
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
                     console.log("notif_newRiver card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
-                    this.guestsOnTable.addToStockWithId(card.type_arg, card.id);
+                    this.guestsOnTable.addToStockWithId(card.type_arg, card.id, 'guest_draw');
                 }
             },
 
-            notif_guestsRemoved: function (notif) {
+            notif_discardedGuests: function (notif) {
+                console.log(notif.args);
+                var card = notif.args.newGuestOnTopOfDiscard;
+                this.newGuestOnTopOfDiscard(card, 'guests_on_table');
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
-                    console.log("notif_guestsRemoved card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    console.log("notif_discardedGuests card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.guestsOnTable.removeFromStockById(card.id);
                 }
             },
@@ -529,17 +532,29 @@ define([
             notif_newGuestWon: function (notif) {
                 var card = notif.args.card;
                 var player_id = notif.args.player_id;
+                var from_discard = notif.args.fromDiscard;
                 console.log("notif_newGuestWon card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
-                this.guestsOnTable.removeFromStockById(card.id);
-                this.wonStocksByPlayerId[player_id].addToStockWithId(card.type_arg, card.id);
+
+                this.wonStocksByPlayerId[player_id].addToStockWithId(card.type_arg, card.id, from_discard ? 'guest_discard' : 'guests_on_table');
+
+                if (from_discard) {
+                    this.newGuestOnTopOfDiscard(notif.args.newGuestOnTopOfDiscard, null);
+                }
+                else {
+                    this.guestsOnTable.removeFromStockById(card.id);
+                }
             },
 
-            notif_newGuestOnTopOfDiscard: function (notif) {
-                var card = notif.args.card;
+            newGuestOnTopOfDiscard: function (card, from) {
                 this.guestsDiscard.removeAll();
                 if (card) {
-                    console.log("notif_newGuestOnTopOfDiscard card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
-                    this.guestsDiscard.addToStockWithId(card.type_arg, card.id);
+                    console.log("newGuestOnTopOfDiscard card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    if (from) {
+                        this.guestsDiscard.addToStockWithId(card.type_arg, card.id, from);
+                    }
+                    else {
+                        this.guestsDiscard.addToStockWithId(card.type_arg, card.id);
+                    }
                 }
             },
 
@@ -551,7 +566,7 @@ define([
 
                     this.scoreCtrl[playerID].setValue(player['player_score']);
                 }
-            }
+            },
 
 
         });

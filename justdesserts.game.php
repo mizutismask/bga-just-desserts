@@ -269,12 +269,15 @@ class JustDesserts extends Table
         $fromDiscard = $guest["location"] == "discard";
         self::dump("guest", $guest);
         $this->guestcards->moveCard($guest["id"], 'won', $player_id);
-        if ($fromDiscard) {
-            $this->notifyAllPlayersNewDiscardedGuestOnTop();
-        }
 
-        self::notifyAllPlayers('serve', clienttranslate('${player_name} serves ${guest_name}'), array('player_name' => self::getActivePlayerName(), 'guest_name' => $guestFromMaterial["name"]));
-        self::notifyAllPlayers('newGuestWon', '', array('card' => $guest, 'player_id' => $player_id));
+        self::notifyAllPlayers('newGuestWon', clienttranslate('${player_name} serves ${guest_name}'), array(
+            'player_name' => self::getActivePlayerName(),
+            'guest_name' => $guestFromMaterial["name"],
+            'card' => $guest,
+            'player_id' => $player_id,
+            'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop('discard'),
+            'fromDiscard' => $fromDiscard
+        ));
 
         //if the guest got his favorite, there’s a tip
         if (self::isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)) {
@@ -419,8 +422,16 @@ class JustDesserts extends Table
             //there is only one card of each and no extra card is discarded
             if (!$cardsFromOtherColors && max($valuesOccurrences) == 1 && min($valuesOccurrences) >= 0) {
                 $this->playGuestCards($cards_id);
-                self::notifyAllPlayers('guestsRemoved', '', array('cards' => $guests_to_remove));
-                self::notifyAllPlayers('discardGuests', clienttranslate('${player_name} discards ${cards_nb} guest(s)'), array('player_name' => self::getActivePlayerName(), 'cards_nb' => $cards_nb));
+                self::notifyAllPlayers(
+                    'discardedGuests',
+                    clienttranslate('${player_name} discards ${cards_nb} guest(s)'),
+                    array(
+                        'player_name' => self::getActivePlayerName(),
+                        'cards_nb' => $cards_nb,
+                        'cards' => $guests_to_remove,
+                        'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop('discard')
+                    )
+                );
                 $this->gamestate->nextState('discardGuests');
             } else {
                 throw new BgaUserException(self::_("Dicard only guests needed to keep one of each suite at most"));
@@ -441,13 +452,6 @@ class JustDesserts extends Table
         foreach ($cards_id as $card_id) {
             $this->guestcards->playCard($card_id);
         }
-        $this->notifyAllPlayersNewDiscardedGuestOnTop();
-    }
-
-    function notifyAllPlayersNewDiscardedGuestOnTop()
-    {
-        $top = $this->guestcards->getCardOnTop('discard');
-        self::notifyAllPlayers('newGuestOnTopOfDiscard', '',  array('card' => $top));
     }
 
     function playDessertCards($cards_id)
@@ -522,7 +526,11 @@ class JustDesserts extends Table
 
     function pass()
     {
-        $this->gamestate->nextState("pass");
+        if ($this->guestsNeedsToBeDiscarded()) {
+            $this->gamestate->nextState('discardGuest');
+        } else {
+            $this->gamestate->nextState("pass");
+        }
     }
 
     function updateScores($winner_id)
