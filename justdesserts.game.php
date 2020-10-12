@@ -303,7 +303,7 @@ class JustDesserts extends Table
         if (count(array_unique($allSuits)) == 5 || in_array(3, $valuesOccurrences)) {
             //victory
             $this->updateScores($player_id);
-            $this->gamestate->nextState('endGame');
+            $this->gamestate->nextState(TRANSITION_END_GAME);
         }
     }
 
@@ -358,9 +358,9 @@ class JustDesserts extends Table
         self::notifyAllPlayers('draw', clienttranslate('${player_name} draws a dessert'), array('player_name' => self::getActivePlayerName()));
 
         if ($this->guestsNeedsToBeDiscarded()) {
-            $this->gamestate->nextState('discardGuest');
+            $this->gamestate->nextState(TRANSITION_DISCARD_GUEST);
         } else {
-            $this->gamestate->nextState('draw'); //computes the next state when draw is given to the current state.
+            $this->gamestate->nextState(TRANSITION_DRAW); //computes the next state when draw is given to the current state.
         }
     }
 
@@ -381,9 +381,9 @@ class JustDesserts extends Table
         self::notifyAllPlayers('swap', clienttranslate('${player_name} swaps ${cards_nb} cards'), array('player_name' => self::getActivePlayerName(), 'cards_nb' => $cards_nb));
 
         if ($this->guestsNeedsToBeDiscarded()) {
-            $this->gamestate->nextState('discardGuest');
+            $this->gamestate->nextState(TRANSITION_DISCARD_GUEST);
         } else {
-            $this->gamestate->nextState('swap'); //computes the next state when draw is given to the current state.
+            $this->gamestate->nextState(TRANSITION_SWAP); //computes the next state when draw is given to the current state.
         }
     }
 
@@ -434,7 +434,7 @@ class JustDesserts extends Table
                         'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop('discard')
                     )
                 );
-                $this->gamestate->nextState('discardGuests');
+                $this->gamestate->nextState(TRANSITION_DISCARD_GUESTS);
             } else {
                 throw new BgaUserException(self::_("Dicard only guests needed to keep one of each suite at most"));
             }
@@ -510,7 +510,7 @@ class JustDesserts extends Table
         }
 
         if ($this->guestsNeedsToBeDiscarded() && $action == "serveSecondGuest") {
-            $this->gamestate->nextState('discardGuest');
+            $this->gamestate->nextState(TRANSITION_DISCARD_GUEST);
         } else {
             $this->gamestate->nextState($nextState);
         }
@@ -518,20 +518,20 @@ class JustDesserts extends Table
 
     function serveFirstGuest($guest_id, $cards_id)
     {
-        self::serve($guest_id, $cards_id, 'serve', 'serveSecondGuest');
+        self::serve($guest_id, $cards_id, 'serve', TRANSITION_SERVE_SECOND_GUEST);
     }
 
     function serveSecondGuest($guest_id, $cards_id)
     {
-        self::serve($guest_id, $cards_id, 'serveSecondGuest', 'serveSecondGuest');
+        self::serve($guest_id, $cards_id, 'serveSecondGuest', TRANSITION_SERVE_SECOND_GUEST);
     }
 
     function pass()
     {
         if ($this->guestsNeedsToBeDiscarded()) {
-            $this->gamestate->nextState('discardGuest');
+            $this->gamestate->nextState(TRANSITION_DISCARD_GUEST);
         } else {
-            $this->gamestate->nextState("pass");
+            $this->gamestate->nextState(TRANSITION_PASS);
         }
     }
 
@@ -612,7 +612,7 @@ class JustDesserts extends Table
         self::notifyAllPlayers('playerTurn', clienttranslate('New turn : ${player_name} draws a dessert and a guest'), array('player_name' => self::getActivePlayerName()));
 
         self::giveExtraTime($player_id);
-        $this->gamestate->nextState('playerTurn');
+        $this->gamestate->nextState(TRANSITION_PLAYER_TURN);
     }
     //////////////////////////////////////////////////////////////////////////////
     //////////// Zombie

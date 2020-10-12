@@ -57,6 +57,16 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_DISCARD", 24);
     define("STATE_SERVE_SECOND_GUEST", 25);
     define("STATE_END_GAME", 99);
+
+    define("TRANSITION_DRAW", "draw");
+    define("TRANSITION_SERVE", "serve");
+    define("TRANSITION_SWAP", "swap");
+    define("TRANSITION_DISCARD_GUEST", "discardGuest");
+    define("TRANSITION_SERVE_SECOND_GUEST", "serveSecondGuest");
+    define("TRANSITION_PLAYER_TURN", "playerTurn");
+    define("TRANSITION_DISCARD_GUESTS", "discardGuests");
+    define("TRANSITION_PASS", "pass");
+    define("TRANSITION_END_GAME", "endGame");
 }
 
 $machinestates = array(
@@ -78,7 +88,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must choose 1 action'),
         "type" => "activeplayer",
         "possibleactions" => array("draw", "serve", "swap"),
-        "transitions" => array("draw" => STATE_NEXT_PLAYER, "serve" => STATE_NEXT_PLAYER, "serveSecondGuest" => STATE_SERVE_SECOND_GUEST, "swap" => STATE_NEXT_PLAYER, "discardGuest" => STATE_DISCARD, "endGame" => STATE_END_GAME)
+        "transitions" => array(TRANSITION_DRAW => STATE_NEXT_PLAYER, TRANSITION_SERVE => STATE_NEXT_PLAYER, TRANSITION_SERVE_SECOND_GUEST => STATE_SERVE_SECOND_GUEST, TRANSITION_SWAP => STATE_NEXT_PLAYER, TRANSITION_DISCARD_GUEST => STATE_DISCARD, TRANSITION_END_GAME => STATE_END_GAME)
     ),
 
 
@@ -88,7 +98,7 @@ $machinestates = array(
         "type" => "game",
         "action" => "stNextPlayer",
         "updateGameProgression" => true,
-        "transitions" => array("playerTurn" => STATE_PLAYER_TURN)
+        "transitions" => array(TRANSITION_PLAYER_TURN => STATE_PLAYER_TURN)
     ),
 
     STATE_DISCARD => array(
@@ -97,7 +107,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must discard guests to keep only one of each suit'),
         "type" => "activeplayer",
         "possibleactions" => array("discardGuests"),
-        "transitions" => array("discardGuests" => STATE_NEXT_PLAYER)
+        "transitions" => array(TRANSITION_DISCARD_GUESTS => STATE_NEXT_PLAYER)
     ),
 
     STATE_SERVE_SECOND_GUEST => array(
@@ -106,7 +116,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must serve another guest or pass'),
         "type" => "activeplayer",
         "possibleactions" => array("pass", "serveSecondGuest"),
-        "transitions" => array("pass" => STATE_NEXT_PLAYER, "serveSecondGuest" => STATE_NEXT_PLAYER, "discardGuest" => STATE_DISCARD, "endGame" => 99)
+        "transitions" => array(TRANSITION_PASS => STATE_NEXT_PLAYER, TRANSITION_SERVE_SECOND_GUEST => STATE_NEXT_PLAYER, TRANSITION_DISCARD_GUEST => STATE_DISCARD, TRANSITION_END_GAME => 99)
     ),
 
 
