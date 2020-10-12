@@ -356,7 +356,7 @@ class JustDesserts extends Table
         }
 
         self::notifyAllPlayers('draw', clienttranslate('${player_name} draws a dessert'), array('player_name' => self::getActivePlayerName()));
-        $this->goToDiscardIfNeededOrGoTo(TRANSITION_DRAW);
+        $this->goToDiscardIfNeededOrGoTo(TRANSITION_DRAWN);
     }
 
     function swap($cards_id)
@@ -374,7 +374,7 @@ class JustDesserts extends Table
         }
 
         self::notifyAllPlayers('swap', clienttranslate('${player_name} swaps ${cards_nb} cards'), array('player_name' => self::getActivePlayerName(), 'cards_nb' => $cards_nb));
-        $this->goToDiscardIfNeededOrGoTo(TRANSITION_SWAP);
+        $this->goToDiscardIfNeededOrGoTo(TRANSITION_SWAPPED);
     }
 
     function discardGuests($cards_id)
@@ -406,7 +406,7 @@ class JustDesserts extends Table
                 self::dump("pbOccurrences", $pbOccurrences);
 
                 $valuesOccurrences[$color] += -1;
-                if (!$pbOccurrences[$color]) {
+                if (!array_key_exists($color, $pbOccurrences)) {
                     self::trace("$color not found in problematic occurrences");
                     $cardsFromOtherColors = true;
                 }
@@ -424,7 +424,7 @@ class JustDesserts extends Table
                         'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop('discard')
                     )
                 );
-                $this->gamestate->nextState(TRANSITION_DISCARD_GUESTS);
+                $this->gamestate->nextState(TRANSITION_GUESTS_DISCARDED);
             } else {
                 throw new BgaUserException(self::_("Dicard only guests needed to keep one of each suite at most"));
             }
@@ -500,7 +500,7 @@ class JustDesserts extends Table
         }
 
         if ($this->guestsNeedsToBeDiscarded() && $action == "serveSecondGuest") {
-            $this->gamestate->nextState(TRANSITION_DISCARD_GUEST);
+            $this->gamestate->nextState(TRANSITION_DISCARD_GUEST_NEEDED);
         } else {
             $this->gamestate->nextState($nextState);
         }
@@ -508,18 +508,19 @@ class JustDesserts extends Table
 
     function serveFirstGuest($guest_id, $cards_id)
     {
-        self::serve($guest_id, $cards_id, 'serve', TRANSITION_SERVE_SECOND_GUEST);
+        //TRANSITION_SECOND_GUEST_SERVED
+        self::serve($guest_id, $cards_id, 'serve', TRANSITION_SERVED);
     }
 
     function serveSecondGuest($guest_id, $cards_id)
     {
-        self::serve($guest_id, $cards_id, 'serveSecondGuest', TRANSITION_SERVE_SECOND_GUEST);
+        self::serve($guest_id, $cards_id, 'serveSecondGuest', TRANSITION_SECOND_GUEST_SERVED);
     }
 
     function goToDiscardIfNeededOrGoTo($nextState)
     {
         if ($this->guestsNeedsToBeDiscarded()) {
-            $this->gamestate->nextState(TRANSITION_DISCARD_GUEST);
+            $this->gamestate->nextState(TRANSITION_DISCARD_GUEST_NEEDED);
         } else {
             $this->gamestate->nextState($nextState);
         }
@@ -527,7 +528,7 @@ class JustDesserts extends Table
 
     function pass()
     {
-        $this->goToDiscardIfNeededOrGoTo(TRANSITION_PASS);
+        $this->goToDiscardIfNeededOrGoTo(TRANSITION_PASSED);
     }
 
     function updateScores($winner_id)
