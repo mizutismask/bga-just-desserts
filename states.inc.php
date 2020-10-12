@@ -50,6 +50,14 @@
 
 //    !! It is not a good idea to modify this file when a game is running !!
 
+// define contants for state ids
+if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
+    define("STATE_PLAYER_TURN", 2);
+    define("STATE_NEXT_PLAYER", 23);
+    define("STATE_DISCARD", 24);
+    define("STATE_SERVE_SECOND_GUEST", 25);
+    define("STATE_END_GAME", 99);
+}
 
 $machinestates = array(
 
@@ -59,46 +67,46 @@ $machinestates = array(
         "description" => "",
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array("" => 23)
+        "transitions" => array("" => STATE_NEXT_PLAYER)
     ),
 
     // Note: ID=2 => your first state
 
-    2 => array(
+    STATE_PLAYER_TURN => array(
         "name" => "playerTurn",
         "description" => clienttranslate('${actplayer} must draw a dessert, serve guests or swap desserts'),
         "descriptionmyturn" => clienttranslate('${you} must choose 1 action'),
         "type" => "activeplayer",
         "possibleactions" => array("draw", "serve", "swap"),
-        "transitions" => array("draw" => 23, "serve" => 23, "serveSecondGuest" => 25, "swap" => 23, "discardGuest" => 24, "endGame" => 99)
+        "transitions" => array("draw" => STATE_NEXT_PLAYER, "serve" => STATE_NEXT_PLAYER, "serveSecondGuest" => STATE_SERVE_SECOND_GUEST, "swap" => STATE_NEXT_PLAYER, "discardGuest" => STATE_DISCARD, "endGame" => STATE_END_GAME)
     ),
 
 
-    23 => array(
+    STATE_NEXT_PLAYER => array(
         "name" => "nextPlayer",
         "description" => '',
         "type" => "game",
         "action" => "stNextPlayer",
         "updateGameProgression" => true,
-        "transitions" => array("playerTurn" => 2)
+        "transitions" => array("playerTurn" => STATE_PLAYER_TURN)
     ),
 
-    24 => array(
+    STATE_DISCARD => array(
         "name" => "playerDiscardGuest",
         "description" => clienttranslate('${actplayer} must discard guests to keep only one of each suit'),
         "descriptionmyturn" => clienttranslate('${you} must discard guests to keep only one of each suit'),
         "type" => "activeplayer",
         "possibleactions" => array("discardGuests"),
-        "transitions" => array("discardGuests" => 23)
+        "transitions" => array("discardGuests" => STATE_NEXT_PLAYER)
     ),
 
-    25 => array(
+    STATE_SERVE_SECOND_GUEST => array(
         "name" => "serveSecondGuest",
         "description" => clienttranslate('${actplayer} can serve another guest'),
         "descriptionmyturn" => clienttranslate('${you} must serve another guest or pass'),
         "type" => "activeplayer",
         "possibleactions" => array("pass", "serveSecondGuest"),
-        "transitions" => array("pass" => 23, "serveSecondGuest" => 23, "discardGuest" => 24, "endGame" => 99)
+        "transitions" => array("pass" => STATE_NEXT_PLAYER, "serveSecondGuest" => STATE_NEXT_PLAYER, "discardGuest" => STATE_DISCARD, "endGame" => 99)
     ),
 
 
