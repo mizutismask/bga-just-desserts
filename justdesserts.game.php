@@ -118,6 +118,8 @@ class JustDesserts extends Table
     {
         $result = array();
 
+        $result['guestCards'] = $this->guests;
+
         $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
 
         // Get information about players

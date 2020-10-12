@@ -55,6 +55,7 @@ define([
                 console.log("Starting game setup");
                 console.log(gamedatas);
                 // TODO: Set up your game interface here, according to "gamedatas"
+                this.guestCards = gamedatas.guestCards;
 
                 //---------- Player hand setup
                 this.playerHand = new ebg.stock(); // new stock object for hand
@@ -90,6 +91,8 @@ define([
                     var card = gamedatas.guestsOnTable[card_id];
                     console.log("ajout dans les guests de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.guestsOnTable.addToStockWithId(card.type_arg, card.id);
+                    this.addTooltipHtml(this.guestsOnTable.getItemDivId(card.id), this.createGuestTooltip(card.type_arg), 1);
+
                 }
 
                 //-----------guest discard setup
@@ -238,7 +241,19 @@ define([
                 script.
             
             */
+            createGuestTooltip: function (guest_type) {
+                var favorite1 = this.guestCards[guest_type].favourite1;
+                var favorite2 = this.guestCards[guest_type].favourite2;
 
+                var html = '';
+                if (favorite1) {
+                    html += '<span class="favorite">' + favorite1 + "</span>";
+                }
+                if (favorite2) {
+                    html += '<br><span class="favorite">' + favorite2 + "</span>"
+                }
+                return html;
+            },
             ///////////////////////////////////////////////////
             //// Player's action
 
