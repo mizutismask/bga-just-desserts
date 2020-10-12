@@ -26,9 +26,13 @@
 -->
 <div id="container">
     <div id="guest_line">
-        <div id="guest_draw" class="pile draw guest_pile"></div>
-        <div id="guest_discard" class="pile discard guest_pile"></div>
-        <div id="guests_on_table" class="whiteblock"></div>
+        <div class="whiteblock piles">
+            <div id="guest_draw" class="pile draw guest_pile"></div>
+            <div id="guest_discard" class="pile discard guest_pile"></div>
+        </div>
+        <div id="guests_on_table_wrapper" class="whiteblock">
+            <div id="guests_on_table"></div>
+        </div>
     </div>
    
     <div id="myhand_wrap" class="whiteblock">

@@ -78,6 +78,7 @@ define([
                 this.guestsOnTable = new ebg.stock();
                 this.guestsOnTable.create(this, $('guests_on_table'), this.cardwidth, this.cardheight);
                 this.guestsOnTable.image_items_per_row = this.image_items_per_row;
+                this.guestsOnTable.centerItems = true;
 
                 // Create cards types:
                 for (var card_id = 1; card_id <= this.guest_cards_nb; card_id++) {
@@ -420,11 +421,11 @@ define([
                 
                 // Preventing default browser reaction
                 dojo.stopEvent( evt );
-    
+         
                 // Check that this action is possible (see "possibleactions" in states.inc.php)
                 if( ! this.checkAction( 'myAction' ) )
                 {   return; }
-    
+         
                 this.ajaxcall( "/justdesserts/justdesserts/myAction.html", { 
                                                                         lock: true, 
                                                                         myArgument1: arg1, 
@@ -437,10 +438,10 @@ define([
                                 // (most of the time: nothing)
                                 
                              }, function( is_error) {
-    
+         
                                 // What to do after the server call in anyway (success or failure)
                                 // (most of the time: nothing)
-    
+         
                              } );        
             },        
             

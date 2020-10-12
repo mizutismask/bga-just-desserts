@@ -74,15 +74,16 @@
 
 #board {
    display: inline-block;
-  /* width: 100%;*/
+}
+
+#guest_draw {
+    margin-bottom: 8px;
 }
 
 .pile, .stockitem  {
     width: 150px;
     height: 233px;
-    /*display: inline-block;*/
     border-radius: 20px;
-    margin: 7px;
 }
 
 .discard {
@@ -94,6 +95,12 @@
     display: inline-block;
 }
 
+.piles {
+    margin-right: 10px;
+    float: left;
+    width: 150px;
+}
+
 .guestsname {
     font-weight: bold;
 }
@@ -103,20 +110,11 @@
     display: inline-block;
 }
 
-.guestsWon{
-   /* display: inline-block;*/
-   /* width: max-content;*/
-}
-
-#guests_on_table {
-    width: 65%;
+#guests_on_table_wrapper {
+    width: 100%;
     display: inline-block;
 }
 
 #myhand div {
     display: inline-grid;
 }
-
-
-
-
