@@ -105,7 +105,7 @@ define([
                 var lastDiscardedGuest = gamedatas.lastDiscardedGuest;
                 if (lastDiscardedGuest) {
                     console.log("ajout dans la defausse de la carte id/type/type arg :" + lastDiscardedGuest.id + " " + lastDiscardedGuest.type + " " + lastDiscardedGuest.type_arg);
-                    this.guestsDiscard.addToStockWithId(card.type_arg, card.id);
+                    this.guestsDiscard.addToStockWithId(lastDiscardedGuest.type_arg, lastDiscardedGuest.id);
                 }
 
                 //-----------won cards setup for each player
