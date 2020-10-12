@@ -46,7 +46,7 @@
         <!-- BEGIN player -->
         <div id="guest_{PLAYER_ID}" class="whiteblock guestsWon">
             <div class="guestsname" style="color:#{PLAYER_COLOR}">
-                {PLAYER_NAME}
+                <h3>{PLAYER_NAME}</h3>
             </div>
             <div class="guestscard" id="guestscards_{PLAYER_ID}" class="guests">
             </div>
