@@ -156,9 +156,22 @@ class JustDesserts extends Table
     */
     function getGameProgression()
     {
-        // TODO: compute and return the game progression
+        $players = self::loadPlayersBasicInfos();
+        $progressionByPlayerId = array();
 
-        return 0;
+        foreach ($players as $player_id => $player) {
+            $cards = $this->guestcards->getCardsInLocation('won', $player_id);
+            $differentColors = $this->countCardsForObjective5Differents($cards);
+            $suite = $this->countCardsForObjective3OfAKind($cards);
+
+            $prog = $differentColors * 100 / 5;
+            if ($suite == 2) {
+                $prog = max($suite * 100 / 3, $prog);
+            }
+            $progressionByPlayerId[$player_id] = $prog;
+        }
+        self::dump("progressionByPlayerId", $progressionByPlayerId);
+        return max($progressionByPlayerId);
     }
 
 
@@ -292,19 +305,38 @@ class JustDesserts extends Table
 
         //getting data to check if the active player hit a winning requirement
         $woncards = $this->guestcards->getCardsInLocation('won', $player_id);
-        $guests = $this->getGuestsFromMaterialByCards($woncards);
-        $allSuits = array();
-        foreach ($guests as $guest) {
-            $allSuits[] = $guest["color"];
-        }
-        $valuesOccurrences = array_count_values($allSuits);
-        self::dump("valuesOccurrences", $valuesOccurrences);
+
         //5 different colors or 3 of the same one
-        if (count(array_unique($allSuits)) == 5 || in_array(3, $valuesOccurrences)) {
+        if ($this->countCardsForObjective5Differents($woncards) == 5 || $this->countCardsForObjective3OfAKind($woncards) == 3) {
             //victory
             $this->updateScores($player_id);
             $this->gamestate->nextState(TRANSITION_END_GAME);
         }
+    }
+
+    function concatenateColorsFromCards($cards)
+    {
+        $guests = $this->getGuestsFromMaterialByCards($cards);
+        $allSuits = array();
+        foreach ($guests as $guest) {
+            $allSuits[] = $guest["color"];
+        }
+        return $allSuits;
+    }
+
+    function countCardsForObjective5Differents($woncards)
+    {
+        $allSuits = $this->concatenateColorsFromCards($woncards);
+        return count(array_unique($allSuits));
+    }
+
+    function countCardsForObjective3OfAKind($woncards)
+    {
+        $allSuits = $this->concatenateColorsFromCards($woncards);
+        $valuesOccurrences = array_count_values($allSuits);
+        self::dump("valuesOccurrences", $valuesOccurrences);
+
+        return $valuesOccurrences ? max($valuesOccurrences) : 0;
     }
 
     function publicGetCurrentPlayerId()

@@ -122,6 +122,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must serve another guest or pass'),
         "type" => "activeplayer",
         "possibleactions" => array("pass", "serveSecondGuest"),
+        "updateGameProgression" => true,
         "transitions" => array(TRANSITION_PASSED => STATE_NEXT_PLAYER, TRANSITION_SECOND_GUEST_SERVED => STATE_NEXT_PLAYER, TRANSITION_DISCARD_GUEST_NEEDED => STATE_DISCARD, TRANSITION_END_GAME => 99)
     ),
 
@@ -156,6 +157,7 @@ $machinestates = array(
         "description" => clienttranslate("End of game"),
         "type" => "manager",
         "action" => "stGameEnd",
+        "updateGameProgression" => true,
         "args" => "argGameEnd"
     )
 
