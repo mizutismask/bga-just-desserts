@@ -66,12 +66,9 @@ $this->desserts = array(
     'tastes' => array($CAKE, $PUDDING, $PIE, $CHOCOLATE),
   ),
   3 => array(
-    'name' => clienttranslate('BUTTER_PECAN_ICE_CREAM'),
-    'nametr' => self::_('butterPecanIceCream'),
-    'taste1' => $NUTS,
-    'taste2' => $ICE_CREAM,
-    'taste3' => null,
-    'taste4' => null,
+    'name' => clienttranslate('BREAD_PUDDING'),
+    'nametr' => self::_('breadPudding'),
+    'tastes' => array($SPICES, $PUDDING),
   ),
   4 => array(
     'name' => clienttranslate('BUTTER_PECAN_ICE_CREAM'),
