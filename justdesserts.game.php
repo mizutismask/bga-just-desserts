@@ -97,7 +97,10 @@ class JustDesserts extends Table
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
-        //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
+        self::initStat('player', 'guests_number', 0);  // Init a player statistics (for all players)
+        self::initStat('player', 'turns_number', 0);
+        self::initStat('player', 'player_tips_number', 0);
+        self::initStat('player', 'player_swaps_number', 0);
 
         // TODO: setup the initial game situation here
         $cards = array();
@@ -296,6 +299,7 @@ class JustDesserts extends Table
         $fromDiscard = $guest["location"] == "discard";
         self::dump("guest", $guest);
         $this->guestcards->moveCard($guest["id"], 'won', $player_id);
+        self::incStat(1, "guests_number", $player_id);
 
         self::notifyAllPlayers('newGuestWon', clienttranslate('${player_name} serves ${guest_name}'), array(
             'player_name' => self::getActivePlayerName(),
@@ -311,6 +315,7 @@ class JustDesserts extends Table
             $new_cards = $this->dessertcards->pickCards(1, 'deck', $player_id);
             // Notify player about his tip
             self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
+            self::incStat(1, "player_tips_number", $player_id);
             //notify other that he got one tip
             self::notifyAllPlayers('serve', clienttranslate('${player_name} gets a new dessert card as a tip.'), array('player_name' => self::getActivePlayerName()));
         }
@@ -415,6 +420,7 @@ class JustDesserts extends Table
             // Notify player about his cards
             //$playerCards = $this->dessertcards->getCardsInLocation('hand', $player_id);
             self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
+            self::incStat(1, "player_swaps_number", $player_id);
         }
 
         self::notifyAllPlayers('swap', clienttranslate('${player_name} swaps ${cards_nb} cards'), array('player_name' => self::getActivePlayerName(), 'cards_nb' => $cards_nb));
@@ -596,7 +602,7 @@ class JustDesserts extends Table
         $playerInfo = self::getCollectionFromDB("SELECT player_id, player_score FROM player");
 
         // Update the scores on the client side
-        self::notifyAllPlayers('updateScore', clienttranslate('Game over.'), array(
+        self::notifyAllPlayers('updateScore', '', array(
             'players' => $playerInfo
         ));
     }
@@ -653,6 +659,8 @@ class JustDesserts extends Table
     {
         $players = self::loadPlayersBasicInfos();
         $player_id = self::activeNextPlayer();
+        self::incStat(1, "turns_number", $player_id);
+
         $pickedGuests = $this->pickGuestCardsAndNotifyPlayers(1, $players);
         $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
 
