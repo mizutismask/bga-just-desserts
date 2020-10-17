@@ -78,6 +78,7 @@
 
 #guest_draw {
     margin-bottom: 8px;
+    margin-right: 0px;
 }
 
 .jd_pile, .stockitem  {
@@ -98,13 +99,13 @@
 
 .jd_guest_pile {
     background-image: url('img/guests150.jpg');
-    display: inline-block;
+    /*display: inline-block;*/
 }
 
 .jd_piles {
     margin-right: 10px;
-    float: left;
-    width: 150px;
+  /*  float: left;
+    width: 150px;*/
 }
 
 .jd_guestsname {
@@ -128,3 +129,27 @@
 .jd_favorite{
     font-weight: bold;
 }
+
+@media only screen and (min-width: 1100px) {
+ 
+    #guests_on_table {
+        width: 100%;
+        display: inline-block;
+    }
+
+    #board {
+        display: inline-block;
+    /* width: 100%;*/
+    }
+
+    .jd_piles {
+        margin-right: 10px;
+        display: inline-flex;
+        flex-direction: row;
+    }
+
+    #guest_draw {
+        margin-bottom: 0px;
+        margin-right: 8px;
+    }
+  }
