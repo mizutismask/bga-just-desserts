@@ -3,7 +3,7 @@
 <!-- 
 --------
 -- BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
--- JustDesserts implementation : © <Your name here> <Your email address here>
+-- JustDesserts implementation : © Séverine Kamycki severinek@gmail.com
 -- 
 -- This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
 -- See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -26,9 +26,9 @@
 -->
 <div id="container">
     <div id="guest_line">
-        <div class="whiteblock piles">
-            <div id="guest_draw" class="pile draw guest_pile"></div>
-            <div id="guest_discard" class="pile discard guest_pile"></div>
+        <div class="whiteblock jd_piles">
+            <div id="guest_draw" class="jd_pile jd_draw jd_guest_pile"></div>
+            <div id="guest_discard" class="jd_pile jd_discard jd_guest_pile jd_empty"></div>
         </div>
         <div id="guests_on_table_wrapper" class="whiteblock">
             <div id="guests_on_table"></div>
@@ -44,11 +44,11 @@
     <div id="guests_wrapper">
 
         <!-- BEGIN player -->
-        <div id="guest_{PLAYER_ID}" class="whiteblock guestsWon">
+        <div id="guest_{PLAYER_ID}" class="whiteblock jd_guestsWon">
             <div class="guestsname" style="color:#{PLAYER_COLOR}">
                 <h3>{PLAYER_NAME}</h3>
             </div>
-            <div class="guestscard" id="guestscards_{PLAYER_ID}" class="guests">
+            <div class="guestscard" id="guestscards_{PLAYER_ID}" class="jd_guests">
             </div>
         </div>
         <!-- END player -->

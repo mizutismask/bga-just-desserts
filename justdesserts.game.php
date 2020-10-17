@@ -3,7 +3,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * JustDesserts implementation : © <Your name here> <Your email address here>
+ * JustDesserts implementation : © Séverine Kamycki severinek@gmail.com
  * 
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -34,6 +34,7 @@ class JustDesserts extends Table
         parent::__construct();
 
         self::initGameStateLabels(array(
+            "last_discarded_guest_id" => 10,
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
             //      ...
@@ -44,9 +45,14 @@ class JustDesserts extends Table
 
         $this->dessertcards = self::getNew("module.common.deck");
         $this->dessertcards->init("dessertcard");
+        $this->dessertcards->autoreshuffle = true;
+        $this->dessertcards->shuffle('deck');
 
         $this->guestcards = self::getNew("module.common.deck");
         $this->guestcards->init("guestcard");
+        $this->guestcards->autoreshuffle = true;
+        $this->guestcards->autoreshuffle_trigger = array('obj' => $this, 'method' => 'deckAutoReshuffle');
+        $this->dessertcards->shuffle('deck');
     }
 
     protected function getGameName()
@@ -86,7 +92,7 @@ class JustDesserts extends Table
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
+        self::setGameStateInitialValue('last_discarded_guest_id', 0);
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -170,7 +176,6 @@ class JustDesserts extends Table
             }
             $progressionByPlayerId[$player_id] = $prog;
         }
-        self::dump("progressionByPlayerId", $progressionByPlayerId);
         return max($progressionByPlayerId);
     }
 
@@ -191,7 +196,6 @@ class JustDesserts extends Table
             $i++;
         }
         $this->guestcards->createCards($cards, 'deck');
-        $this->guestcards->shuffle('deck');
         $this->pickGuestCardsAndNotifyPlayers(3, $players);
     }
 
@@ -203,12 +207,19 @@ class JustDesserts extends Table
             $cards[] = array('type' => $dessert["name"], 'type_arg' => $j, 'nbr' => 1);
             $j++;
         }
-
         $this->dessertcards->createCards($cards, 'deck');
-        $this->dessertcards->shuffle('deck');
 
         foreach ($players as $player_id => $player) {
             $this->pickDessertCardsAndNotifyPlayer(3, $player_id);
+        }
+    }
+
+    /** Reset the last discarded guest on top of discard. */
+    function deckAutoReshuffle()
+    {
+        $card_id = self::getGameStateValue('last_discarded_guest_id');
+        if ($card_id) {
+            $this->playGuestCards([$card_id]);
         }
     }
 
@@ -217,6 +228,7 @@ class JustDesserts extends Table
         $cards = $this->guestcards->pickCardsForLocation($nb, 'deck', 'river');
         // Notify player about cards on table
         self::notifyAllPlayers('newRiver', '', array('cards' => $cards));
+        return $cards;
     }
 
     function pickDessertCardsAndNotifyPlayer($nb, $player_id)
@@ -473,9 +485,12 @@ class JustDesserts extends Table
 
     function playGuestCards($cards_id)
     {
+        $last_card_id = null;
         foreach ($cards_id as $card_id) {
             $this->guestcards->playCard($card_id);
+            $last_card_id =  $card_id;
         }
+        self::setGameStateValue('last_discarded_guest_id', $last_card_id);
     }
 
     function playDessertCards($cards_id)
@@ -489,6 +504,11 @@ class JustDesserts extends Table
     private function getGuestFromMaterial($guest_id)
     {
         $guest = $this->guestcards->getCard($guest_id);
+        return $this->guests[$guest["type_arg"]];
+    }
+
+    private function getGuestFromMaterialFromCard($guest)
+    {
         return $this->guests[$guest["type_arg"]];
     }
 
@@ -540,7 +560,6 @@ class JustDesserts extends Table
 
     function serveFirstGuest($guest_id, $cards_id)
     {
-        //TRANSITION_SECOND_GUEST_SERVED
         self::serve($guest_id, $cards_id, 'serve', TRANSITION_SERVED);
     }
 
@@ -577,7 +596,7 @@ class JustDesserts extends Table
         $playerInfo = self::getCollectionFromDB("SELECT player_id, player_score FROM player");
 
         // Update the scores on the client side
-        self::notifyAllPlayers('updateScore', clienttranslate('Game Over.'), array(
+        self::notifyAllPlayers('updateScore', clienttranslate('Game over.'), array(
             'players' => $playerInfo
         ));
     }
@@ -634,10 +653,14 @@ class JustDesserts extends Table
     {
         $players = self::loadPlayersBasicInfos();
         $player_id = self::activeNextPlayer();
-        $this->pickGuestCardsAndNotifyPlayers(1, $players);
+        $pickedGuests = $this->pickGuestCardsAndNotifyPlayers(1, $players);
         $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
 
-        self::notifyAllPlayers('playerTurn', clienttranslate('New turn : ${player_name} draws a dessert and a guest'), array('player_name' => self::getActivePlayerName()));
+        $guestName = "";
+        if ($pickedGuests)
+            $guestName = $this->getGuestFromMaterial($pickedGuests[0]["id"])["name"];
+
+        self::notifyAllPlayers('playerTurn', clienttranslate('New turn : ${player_name} draws a dessert and ${guestName}'), array('player_name' => self::getActivePlayerName(), "guestName" => $guestName));
 
         self::giveExtraTime($player_id);
         $this->gamestate->nextState(TRANSITION_PLAYER_TURN);
@@ -664,23 +687,64 @@ class JustDesserts extends Table
         $statename = $state['name'];
 
         if ($state['type'] === "activeplayer") {
+
             switch ($statename) {
-                default:
-                    $this->gamestate->nextState("zombiePass");
+                case "playerTurn":
+                    //draws a dessert and discards it
+                    $this->dessertcards->pickCardForLocation('deck', "discard");
+                    $this->gamestate->nextState(TRANSITION_DRAWN);
+                    break;
+                case "serveSecondGuest":
+                    $this->gamestate->nextState(TRANSITION_PASSED);
+                    break;
+                case "playerDiscardGuest":
+                    $this->zombieDiscard();
+                    $this->gamestate->nextState(TRANSITION_GUESTS_DISCARDED);
                     break;
             }
-
             return;
         }
-
-        if ($state['type'] === "multipleactiveplayer") {
-            // Make sure player is in a non blocking status for role turn
-            $this->gamestate->setPlayerNonMultiactive($active_player, '');
-
-            return;
-        }
-
         throw new feException("Zombie mode not supported at this game state: " . $statename);
+    }
+
+
+    function zombieDiscard()
+    {
+        if ($this->guestsNeedsToBeDiscarded()) {
+            $river_cards = $this->guestcards->getCardsInLocation('river');
+            $allSuits = $this->concatenateColorsFromCards($river_cards);
+            $valuesOccurrences = array_count_values($allSuits);
+            $pbOccurrences = array_filter($valuesOccurrences, function ($occurrences) {
+                return $occurrences > 1;
+            });
+            $guests_to_remove = array();
+            do {
+                foreach ($pbOccurrences as $pbColor => $occ) {
+                    $removed = false;
+                    foreach ($river_cards as $river_card) {
+                        if (!$removed) {
+                            $cardFromMaterial = $this->getGuestFromMaterialFromCard($river_card);
+                            if ($cardFromMaterial["color"] == $pbColor) {
+                                $this->playGuestCards([$river_card["id"]]);
+                                $guests_to_remove[] = $river_card;
+                                $removed = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } while ($this->guestsNeedsToBeDiscarded());
+
+            self::notifyAllPlayers(
+                'discardedGuests',
+                clienttranslate('The player who left discards ${cards_nb} guest(s)'),
+                array(
+                    'cards_nb' => count($guests_to_remove),
+                    'cards' => $guests_to_remove,
+                    'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop('discard')
+                )
+            );
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////:

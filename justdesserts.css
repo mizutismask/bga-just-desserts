@@ -1,7 +1,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * JustDesserts implementation : © <Your name here> <Your email address here>
+ * JustDesserts implementation : © Séverine Kamycki severinek@gmail.com
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -80,32 +80,38 @@
     margin-bottom: 8px;
 }
 
-.pile, .stockitem  {
+.jd_pile, .stockitem  {
     width: 150px;
     height: 233px;
     border-radius: 20px;
 }
 
-.discard {
+.jd_discard {
     background-image: none !important;
 }
 
-.guest_pile {
+.jd_empty {
+    border-style: dashed;
+    border-color: darkgrey;
+    border-width: 2px;
+}
+
+.jd_guest_pile {
     background-image: url('img/guests150.jpg');
     display: inline-block;
 }
 
-.piles {
+.jd_piles {
     margin-right: 10px;
     float: left;
     width: 150px;
 }
 
-.guestsname {
+.jd_guestsname {
     font-weight: bold;
 }
 
-.guests {
+.jd_guests {
     height: 233px;
     display: inline-block;
 }
@@ -117,4 +123,8 @@
 
 #myhand div {
     display: inline-grid;
+}
+
+.jd_favorite{
+    font-weight: bold;
 }

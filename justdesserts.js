@@ -1,7 +1,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * JustDesserts implementation : © <Your name here> <Your email address here>
+ * JustDesserts implementation : © Séverine Kamycki severinek@gmail.com
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -110,6 +110,7 @@ define([
                 if (lastDiscardedGuest) {
                     console.log("ajout dans la defausse de la carte id/type/type arg :" + lastDiscardedGuest.id + " " + lastDiscardedGuest.type + " " + lastDiscardedGuest.type_arg);
                     this.guestsDiscard.addToStockWithId(lastDiscardedGuest.type_arg, lastDiscardedGuest.id);
+                    dojo.removeClass("guest_discard", "jd_empty");
                 }
 
                 //-----------won cards setup for each player
@@ -247,10 +248,12 @@ define([
 
                 var html = '';
                 if (favorite1) {
-                    html += '<span class="favorite">' + favorite1 + "</span>";
+                    html += _("My favourite dessert is : ");
+                    html += '<span class="jd_favorite">' + favorite1 + "</span>";
                 }
                 if (favorite2) {
-                    html += '<br><span class="favorite">' + favorite2 + "</span>"
+                    html += _(" or ");
+                    html += '<br><span class="jd_favorite">' + favorite2 + "</span>"
                 }
                 return html;
             },
@@ -563,7 +566,9 @@ define([
 
             newGuestOnTopOfDiscard: function (card, from) {
                 this.guestsDiscard.removeAll();
+                dojo.addClass("guest_discard", "jd_empty");
                 if (card) {
+                    dojo.removeClass("guest_discard", "jd_empty");
                     console.log("newGuestOnTopOfDiscard card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     if (from) {
                         this.guestsDiscard.addToStockWithId(card.type_arg, card.id, from);
