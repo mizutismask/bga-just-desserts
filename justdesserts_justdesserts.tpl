@@ -34,7 +34,7 @@
             <div id="guests_on_table"></div>
         </div>
     </div>
-   
+
     <div id="myhand_wrap" class="whiteblock">
         <h3>{MY_HAND}</h3>
         <div id="myhand">
@@ -65,7 +65,10 @@
     var jstpl_some_game_item='<div class="my_game_item" id="my_game_item_${MY_ITEM_ID}"></div>';
     
     */
-
+    var jstpl_cards_icon = '<div id= "cards_panel_${id}"> \
+    <div id="cards_icon_${id}" class="jd_cards_icon"></div><span id="cards_count_${id}" class="cards_count"></span></div>';
 </script>
+
+
 
 {OVERALL_GAME_FOOTER}

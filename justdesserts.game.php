@@ -150,6 +150,9 @@ class JustDesserts extends Table
 
         //last discarded guest
         $result['lastDiscardedGuest'] = $this->guestcards->getCardOnTop('discard');
+
+        //cards in hand number
+        $result['counters'] = $this->argNbrCardsInHand();
         return $result;
     }
 
@@ -273,6 +276,21 @@ class JustDesserts extends Table
         return in_array($guestFromMaterial["favourite1"], $allDessertNames)
             || $guestFromMaterial["favourite2"] && in_array($guestFromMaterial["favourite2"], $allDessertNames);
     }
+
+    function argNbrCardsInHand()
+    {
+        $players = self::getObjectListFromDB("SELECT player_id id FROM player", true);
+        $counters = array();
+        for ($i = 0; $i < ($this->getPlayersNumber()); $i++) {
+            $counters['cards_count_' . $players[$i]] = array('counter_name' => 'cards_count_' . $players[$i], 'counter_value' => 0);
+        }
+        $cards_in_hand = $this->dessertcards->countCardsByLocationArgs('hand');
+        foreach ($cards_in_hand as $player_id => $cards_nbr) {
+            $counters['cards_count_' . $player_id]['counter_value'] = $cards_nbr;
+        }
+        return $counters;
+    }
+
 
     /**
      * True if there is several guests with the same color.
@@ -668,7 +686,14 @@ class JustDesserts extends Table
         if ($pickedGuests)
             $guestName = $this->getGuestFromMaterial($pickedGuests[0]["id"])["name"];
 
-        self::notifyAllPlayers('playerTurn', clienttranslate('New turn : ${player_name} draws a dessert and ${guestName}'), array('player_name' => self::getActivePlayerName(), "guestName" => $guestName));
+        self::notifyAllPlayers(
+            'playerTurn',
+            clienttranslate('New turn : ${player_name} draws a dessert and ${guestName}'),
+            array(
+                'player_name' => self::getActivePlayerName(),
+                "guestName" => $guestName,
+            )
+        );
 
         self::giveExtraTime($player_id);
         $this->gamestate->nextState(TRANSITION_PLAYER_TURN);

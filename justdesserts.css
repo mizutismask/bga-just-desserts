@@ -129,6 +129,15 @@
     font-weight: bold;
 }
 
+.jd_cards_icon {
+    width: 30px;
+    height: 23px;
+    background: url("img/player_cards_icon1.png");
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
 @media only screen and (min-width: 1100px) {
 
     .jd_piles {

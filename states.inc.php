@@ -88,6 +88,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must choose 1 action'),
         "type" => "activeplayer",
         "possibleactions" => array("draw", "serve", "swap"),
+        "args" => "argNbrCardsInHand",
         "transitions" => array(
             TRANSITION_DRAWN => STATE_NEXT_PLAYER,
             TRANSITION_SERVED => STATE_SERVE_SECOND_GUEST,
@@ -103,6 +104,7 @@ $machinestates = array(
         "description" => '',
         "type" => "game",
         "action" => "stNextPlayer",
+        "args" => "argNbrCardsInHand",
         "updateGameProgression" => true,
         "transitions" => array(TRANSITION_PLAYER_TURN => STATE_PLAYER_TURN)
     ),
@@ -122,6 +124,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must serve another guest or pass'),
         "type" => "activeplayer",
         "possibleactions" => array("pass", "serveSecondGuest"),
+        "args" => "argNbrCardsInHand",
         "updateGameProgression" => true,
         "transitions" => array(TRANSITION_PASSED => STATE_NEXT_PLAYER, TRANSITION_SECOND_GUEST_SERVED => STATE_NEXT_PLAYER, TRANSITION_DISCARD_GUEST_NEEDED => STATE_DISCARD, TRANSITION_END_GAME => 99)
     ),

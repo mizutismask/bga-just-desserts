@@ -139,6 +139,17 @@ define([
                     this.wonStocksByPlayerId[player_id] = playerWonCards;
                 }
 
+                //cards number
+                for (var player_id in gamedatas.players) {
+                    var player_board_div = $('player_board_' + player_id);
+                    dojo.place(this.format_block('jstpl_cards_icon', {
+                        id: player_id,
+                    }), player_board_div);
+                    var el = 'cards_icon_' + player_id;
+                    this.addTooltipHtml(el, _('Number of cards in hand'));
+                }
+                this.updateCounters(this.gamedatas.counters);
+
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
@@ -154,7 +165,6 @@ define([
             //
             onEnteringState: function (stateName, args) {
                 console.log('Entering state: ' + stateName);
-
                 switch (stateName) {
 
                     /* Example:
@@ -166,10 +176,16 @@ define([
                         
                         break;
                    */
-
-
-                    case 'dummmy':
+                    case 'playerTurn':
+                        this.updateCounters(args.args);
                         break;
+                    case 'serveSecondGuest':
+                        this.updateCounters(args.args);
+                        break;
+                    case 'nextPlayer':
+                        this.updateCounters(args.args);
+                        break;
+
                 }
             },
 
