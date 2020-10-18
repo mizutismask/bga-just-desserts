@@ -19,7 +19,7 @@ $gameinfos = array(
     'designer' => 'Andrew Looney',
 
     // Game artist (or game artists, separated by commas)
-    'artist' => 'Brooke Allen', 'Andrew Heath',
+    'artist' => 'Brooke Allen, Andrew Heath',
 
     // Year of FIRST publication of this game. Can be negative.
     'year' => 2015,
