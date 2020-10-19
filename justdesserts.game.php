@@ -691,25 +691,29 @@ class JustDesserts extends Table
     {
         $players = self::loadPlayersBasicInfos();
         $player_id = self::activeNextPlayer();
-        self::incStat(1, "turns_number", $player_id);
 
-        $pickedGuests = $this->pickGuestCardsAndNotifyPlayers(1, $players);
-        $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
+        if (!self::isCurrentPlayerZombie()) {
+            self::incStat(1, "turns_number", $player_id);
 
-        $guestName = "";
-        if ($pickedGuests)
-            $guestName = $this->getGuestFromMaterial($pickedGuests[0]["id"])["name"];
+            $pickedGuests = $this->pickGuestCardsAndNotifyPlayers(1, $players);
+            $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
 
-        self::notifyAllPlayers(
-            'playerTurn',
-            clienttranslate('New turn : ${player_name} draws a dessert and ${guestName}'),
-            array(
-                'player_name' => self::getActivePlayerName(),
-                "guestName" => $guestName,
-            )
-        );
+            $guestName = "";
+            if ($pickedGuests)
+                $guestName = $this->getGuestFromMaterial($pickedGuests[0]["id"])["name"];
 
-        self::giveExtraTime($player_id);
+            self::notifyAllPlayers(
+                'playerTurn',
+                clienttranslate('New turn : ${player_name} draws a dessert and ${guestName}'),
+                array(
+                    'player_name' => self::getActivePlayerName(),
+                    "guestName" => $guestName,
+                )
+            );
+
+            self::giveExtraTime($player_id);
+        }
+
         $this->gamestate->nextState(TRANSITION_PLAYER_TURN);
     }
     //////////////////////////////////////////////////////////////////////////////
