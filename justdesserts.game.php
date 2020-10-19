@@ -225,7 +225,11 @@ class JustDesserts extends Table
     {
         $card_id = self::getGameStateValue('last_discarded_guest_id');
         if ($card_id) {
-            $this->playGuestCards([$card_id]);
+            $card = $this->guestcards->getCard($card_id);
+            //if card was not won since
+            if ($card["location"] != "won") {
+                $this->playGuestCards([$card_id]);
+            }
         }
     }
 
@@ -346,18 +350,18 @@ class JustDesserts extends Table
             //victory
             $this->updateScores($player_id);
             $this->gamestate->nextState(TRANSITION_END_GAME);
-        }/* else if ($this->gameCanNotBeWonAnyWonAnymore()) {
+        } else if ($this->gameCanNotBeWonAnyWonAnymore()) {
             $this->updateScoresWithoutWinner();
             $this->gamestate->nextState(TRANSITION_END_GAME);
-        }*/
+        }
     }
 
-    /*  function gameCanNotBeWonAnyWonAnymore()
+    function gameCanNotBeWonAnyWonAnymore()
     {
         return $this->guestcards->countCardInLocation("river") == 0
             && $this->guestcards->countCardInLocation("deck") == 0
             && $this->guestcards->countCardInLocation("discard") == 0;
-    }*/
+    }
 
     function concatenateColorsFromCards($cards)
     {
@@ -393,7 +397,7 @@ class JustDesserts extends Table
     /**
      * Each player get 1 point per satisfied guest + 1 point per pair
      */
-    /*  function updateScoresWithoutWinner()
+    function updateScoresWithoutWinner()
     {
         $players = self::loadPlayersBasicInfos();
         foreach ($players as $player_id => $player) {
@@ -410,7 +414,7 @@ class JustDesserts extends Table
             $this->updateScore($player_id, $score);
         }
         $this->reloadScoresAndNotify();
-    }*/
+    }
 
     function updateScores($winner_id)
     {
@@ -420,16 +424,16 @@ class JustDesserts extends Table
             if ($player_id == $winner_id) {
                 $score = 100;
             }
-            //  $this->updateScore($player_id, $score);
+            $this->updateScore($player_id, $score);
         }
         $this->reloadScoresAndNotify();
     }
 
-    /* function updateScore($player_id, $score)
+    function updateScore($player_id, $score)
     {
         $sql = "UPDATE player set player_score=" . $score . " where player_id=" . $player_id;
         self::DbQuery($sql);
-    }*/
+    }
 
     function reloadScoresAndNotify()
     {
@@ -740,18 +744,26 @@ class JustDesserts extends Table
             $pickedGuests = $this->pickGuestCardsAndNotifyPlayers(1, $players);
             $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
 
-            $guestName = "";
-            if ($pickedGuests)
+            if ($pickedGuests) {
                 $guestName = $this->getGuestFromMaterial($pickedGuests[0]["id"])["name"];
+                self::notifyAllPlayers(
+                    'playerTurn',
+                    clienttranslate('New turn : ${player_name} draws a dessert and ${guestName}'),
+                    array(
+                        'player_name' => self::getActivePlayerName(),
+                        "guestName" => $guestName,
+                    )
+                );
+            } else {
+                self::notifyAllPlayers(
+                    'playerTurn',
+                    clienttranslate('New turn : ${player_name} draws a dessert. There’s no more guests on the pile.'),
+                    array(
+                        'player_name' => self::getActivePlayerName(),
+                    )
+                );
+            }
 
-            self::notifyAllPlayers(
-                'playerTurn',
-                clienttranslate('New turn : ${player_name} draws a dessert and ${guestName}'),
-                array(
-                    'player_name' => self::getActivePlayerName(),
-                    "guestName" => $guestName,
-                )
-            );
 
             self::giveExtraTime($player_id);
         }
