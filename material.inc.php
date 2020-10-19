@@ -737,8 +737,8 @@ $this->guests = array(
   ),
   23 => array(
     'nameId' => 'WALLY',
-    'name' => 'WALLY',
-    'nametr' => 'wally',
+    'name' => 'Wally',
+    'nametr' => 'Wally',
     'tastes' => array($COOOKIE, $CHOCOLATE, $NUTS),
     'dislike1' => null,
     'color' => $PURPLE,
