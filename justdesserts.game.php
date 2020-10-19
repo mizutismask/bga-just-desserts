@@ -329,7 +329,7 @@ class JustDesserts extends Table
         ));
 
         //if the guest got his favorite, there’s a tip
-        if (self::isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)) {
+        if ($this->isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)) {
             $new_cards = $this->dessertcards->pickCards(1, 'deck', $player_id);
             // Notify player about his tip
             self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
@@ -346,8 +346,18 @@ class JustDesserts extends Table
             //victory
             $this->updateScores($player_id);
             $this->gamestate->nextState(TRANSITION_END_GAME);
-        }
+        }/* else if ($this->gameCanNotBeWonAnyWonAnymore()) {
+            $this->updateScoresWithoutWinner();
+            $this->gamestate->nextState(TRANSITION_END_GAME);
+        }*/
     }
+
+    /*  function gameCanNotBeWonAnyWonAnymore()
+    {
+        return $this->guestcards->countCardInLocation("river") == 0
+            && $this->guestcards->countCardInLocation("deck") == 0
+            && $this->guestcards->countCardInLocation("discard") == 0;
+    }*/
 
     function concatenateColorsFromCards($cards)
     {
@@ -380,17 +390,49 @@ class JustDesserts extends Table
     }
 
 
+    /**
+     * Each player get 1 point per satisfied guest + 1 point per pair
+     */
+    /*  function updateScoresWithoutWinner()
+    {
+        $players = self::loadPlayersBasicInfos();
+        foreach ($players as $player_id => $player) {
+            $woncards = $this->guestcards->getCardsInLocation('won', $player_id);
+            $allSuits = $this->concatenateColorsFromCards($woncards);
+            $valuesOccurrences = array_count_values($allSuits);
+            $score = 0;
+            foreach ($valuesOccurrences as $color => $occ) {
+                $score += $occ;
+                if ($occ == 2) {
+                    $score++;
+                }
+            }
+            $this->updateScore($player_id, $score);
+        }
+        $this->reloadScoresAndNotify();
+    }*/
+
     function updateScores($winner_id)
     {
         $players = self::loadPlayersBasicInfos();
         foreach ($players as $player_id => $player) {
             $score = 0;
             if ($player_id == $winner_id) {
-                $score = 1;
+                $score = 100;
             }
-            $sql = "UPDATE player set player_score=" . $score . " where player_id=" . $player_id;
-            self::DbQuery($sql);
+            //  $this->updateScore($player_id, $score);
         }
+        $this->reloadScoresAndNotify();
+    }
+
+    /* function updateScore($player_id, $score)
+    {
+        $sql = "UPDATE player set player_score=" . $score . " where player_id=" . $player_id;
+        self::DbQuery($sql);
+    }*/
+
+    function reloadScoresAndNotify()
+    {
         $playerInfo = self::getCollectionFromDB("SELECT player_id, player_score FROM player");
 
         // Update the scores on the client side
@@ -692,7 +734,7 @@ class JustDesserts extends Table
         $players = self::loadPlayersBasicInfos();
         $player_id = self::activeNextPlayer();
 
-        if (!self::isCurrentPlayerZombie()) {
+        if (!self::isZombie($player_id)) {
             self::incStat(1, "turns_number", $player_id);
 
             $pickedGuests = $this->pickGuestCardsAndNotifyPlayers(1, $players);
@@ -732,6 +774,10 @@ class JustDesserts extends Table
         As a consequence, there is no current player associated to this action. In your zombieTurn function,
         you must _never_ use getCurrentPlayerId() or getCurrentPlayerName(), otherwise it will fail with a "Not logged" error message. 
     */
+    function isZombie($player_id)
+    {
+        return self::getUniqueValueFromDB("SELECT player_zombie FROM player WHERE player_id=" . $player_id);
+    }
 
     function zombieTurn($state, $active_player)
     {
