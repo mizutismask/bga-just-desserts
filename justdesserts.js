@@ -178,13 +178,17 @@ define([
                    */
                     case 'playerTurn':
                         this.updateCounters(args.args);
+                        this.guestsOnTable.setSelectionMode(1);
                         break;
                     case 'serveSecondGuest':
                         this.updateCounters(args.args);
+                        this.guestsOnTable.setSelectionMode(1);
                         break;
                     case 'nextPlayer':
                         this.updateCounters(args.args);
                         break;
+                    default:
+                        this.guestsOnTable.setSelectionMode(2);
 
                 }
             },
@@ -234,9 +238,9 @@ define([
                                             break;
                         */
                         case "playerTurn":
-                            this.addActionButton('button_draw', _('Draw a dessert'), 'onDraw');
-                            this.addActionButton('button_exchange', _('Exchange desserts'), 'onExchange');
                             this.addActionButton('button_serve', _('Serve a guest'), 'onServeGuest');
+                            this.addActionButton('button_draw', _('Draw a dessert'), 'onDraw');
+                            this.addActionButton('button_exchange', _('Swap desserts'), 'onExchange');
                             break;
                         case "serveSecondGuest":
                             this.addActionButton('button_serve_second_guest', _('Serve another guest'), 'onServeSecondGuest');
@@ -326,6 +330,9 @@ define([
                             });
                     }
                 }
+                else {
+                    this.showMessage(_('You have to select desserts first'), 'error');
+                }
             },
 
             onServeGuest: function (evt) {
@@ -355,6 +362,8 @@ define([
 
                             });
                     }
+                } else {
+                    this.showMessage(_('You have to select one guest and one or several desserts first'), 'error');
                 }
             },
 
@@ -386,6 +395,9 @@ define([
                             });
                     }
                 }
+                else {
+                    this.showMessage(_('You have to select one guest and one or several desserts first'), 'error');
+                }
             },
 
             onDiscardGuests: function (evt) {
@@ -405,6 +417,9 @@ define([
                             this,
                             function (result) { });
                     }
+                }
+                else {
+                    this.showMessage(_('You have to select at least one guest to discard'), 'error');
                 }
             },
 
