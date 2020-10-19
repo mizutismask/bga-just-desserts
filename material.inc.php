@@ -194,9 +194,9 @@ $this->desserts = array(
     'tastes' => array($CHOCOLATE, $PUDDING),
   ),
   24 => array(
-    'nameId' => 'CHOCOLATE_SANDWICH_COOKIE',
-    'name' => clienttranslate('Chocolate sandwich cookie'),
-    'nametr' => self::_('Chocolate sandwich cookie'),
+    'nameId' => 'CHOCOLATE_SANDWICH_COOKIES',
+    'name' => clienttranslate('Chocolate sandwich cookies'),
+    'nametr' => self::_('Chocolate sandwich cookies'),
     'tastes' => array($CHOCOLATE, $COOOKIE),
   ),
   25 => array(
@@ -488,9 +488,9 @@ $this->desserts = array(
     'tastes' => array($ICE_CREAM),
   ),
   73 => array(
-    'nameId' => 'WALNUT_BROWNIE',
-    'name' => clienttranslate('Walnut brownie'),
-    'nametr' => self::_('Walnut brownie'),
+    'nameId' => 'WALNUT_BROWNIES',
+    'name' => clienttranslate('Walnut brownies'),
+    'nametr' => self::_('Walnut brownies'),
     'tastes' => array($CHOCOLATE, $NUTS, $COOOKIE),
   ),
   74 => array(
