@@ -140,7 +140,7 @@ class JustDesserts extends Table
 
         // Cards in player hand
         $result['hand'] = $this->dessertcards->getCardsInLocation('hand', $current_player_id);
-        $result['guestsOnTable'] = $this->guestcards->getCardsInLocation('river');
+        $result['guestsOnTable'] = $this->improveGuestCards($this->guestcards->getCardsInLocation('river'));
 
         //won cards for each player
         $players = self::loadPlayersBasicInfos();
@@ -198,7 +198,7 @@ class JustDesserts extends Table
         $cards = array();
         $i = 1;
         foreach ($this->guests as $guest) {
-            $cards[] = array('type' => $guest["name"], 'type_arg' => $i, 'nbr' => 1);
+            $cards[] = array('type' => $guest["nameId"], 'type_arg' => $i, 'nbr' => 1);
             $i++;
         }
         $this->guestcards->createCards($cards, 'deck');
@@ -210,7 +210,7 @@ class JustDesserts extends Table
         $cards = array();
         $j = 1;
         foreach ($this->desserts as $dessert) {
-            $cards[] = array('type' => $dessert["name"], 'type_arg' => $j, 'nbr' => 1);
+            $cards[] = array('type' => $dessert["nameId"], 'type_arg' => $j, 'nbr' => 1);
             $j++;
         }
         $this->dessertcards->createCards($cards, 'deck');
@@ -233,7 +233,7 @@ class JustDesserts extends Table
     {
         $cards = $this->guestcards->pickCardsForLocation($nb, 'deck', 'river');
         // Notify player about cards on table
-        self::notifyAllPlayers('newRiver', '', array('cards' => $cards));
+        self::notifyAllPlayers('newRiver', '', array('cards' => $this->improveGuestCards($cards)));
         return $cards;
     }
 
@@ -270,7 +270,7 @@ class JustDesserts extends Table
     {
         $allDessertNames = array();
         foreach ($dessertsFromMaterial as $dessert) {
-            $allDessertNames[] = $dessert["name"];
+            $allDessertNames[] = $dessert["nameId"];
         }
 
         return in_array($guestFromMaterial["favourite1"], $allDessertNames)
@@ -335,7 +335,7 @@ class JustDesserts extends Table
             self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
             self::incStat(1, "player_tips_number", $player_id);
             //notify other that he got one tip
-            self::notifyAllPlayers('serve', clienttranslate('${player_name} gets a new dessert card as a tip.'), array('player_name' => self::getActivePlayerName()));
+            self::notifyAllPlayers('serve', clienttranslate('${player_name} gets a new dessert card as a tip'), array('player_name' => self::getActivePlayerName()));
         }
 
         //getting data to check if the active player hit a winning requirement
@@ -377,6 +377,36 @@ class JustDesserts extends Table
     function publicGetCurrentPlayerId()
     {
         return self::getCurrentPlayerId();
+    }
+
+
+    function updateScores($winner_id)
+    {
+        $players = self::loadPlayersBasicInfos();
+        foreach ($players as $player_id => $player) {
+            $score = 0;
+            if ($player_id == $winner_id) {
+                $score = 1;
+            }
+            $sql = "UPDATE player set player_score=" . $score . " where player_id=" . $player_id;
+            self::DbQuery($sql);
+        }
+        $playerInfo = self::getCollectionFromDB("SELECT player_id, player_score FROM player");
+
+        // Update the scores on the client side
+        self::notifyAllPlayers('updateScore', '', array(
+            'players' => $playerInfo
+        ));
+    }
+
+    function improveGuestCards($cards)
+    {
+        foreach ($cards as $card) {
+            $materialCard = $this->getGuestFromMaterialFromCard($card);
+            $card["favourite1Tr"] = $materialCard["name"];
+        }
+        self::dump("*********improved",  $cards);
+        return $cards;
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -603,27 +633,11 @@ class JustDesserts extends Table
 
     function pass()
     {
-        $this->goToDiscardIfNeededOrGoTo(TRANSITION_PASSED);
-    }
-
-    function updateScores($winner_id)
-    {
-        $players = self::loadPlayersBasicInfos();
-        foreach ($players as $player_id => $player) {
-            $score = 0;
-            if ($player_id == $winner_id) {
-                $score = 1;
-            }
-            $sql = "UPDATE player set player_score=" . $score . " where player_id=" . $player_id;
-            self::DbQuery($sql);
+        if (self::checkAction("pass")) {
+            $this->goToDiscardIfNeededOrGoTo(TRANSITION_PASSED);
         }
-        $playerInfo = self::getCollectionFromDB("SELECT player_id, player_score FROM player");
-
-        // Update the scores on the client side
-        self::notifyAllPlayers('updateScore', '', array(
-            'players' => $playerInfo
-        ));
     }
+
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments

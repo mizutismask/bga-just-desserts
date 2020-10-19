@@ -262,9 +262,9 @@ define([
                 var favorite1 = this.guestCards[guest_type].favourite1;
                 var favorite2 = this.guestCards[guest_type].favourite2;
 
-                var html = '';
+                var html = _("I can’t decide on a favorite!");;
                 if (favorite1) {
-                    html += _("My favourite dessert is : ");
+                    html = _("My favourite dessert is : ");
                     html += '<span class="jd_favorite">' + favorite1 + "</span>";
                 }
                 if (favorite2) {
@@ -545,7 +545,7 @@ define([
             },
 
             notif_newRiver: function (notif) {
-
+                console.log(notif.args.cards);
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
                     console.log("notif_newRiver card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
