@@ -91,7 +91,8 @@ class view_justdesserts_justdesserts extends game_view
     $this->page->insert_block("player", array(
       "PLAYER_ID" => $active_player_id,
       "PLAYER_NAME" => $players[$active_player_id]['player_name'],
-      "PLAYER_COLOR" => $players[$active_player_id]['player_color']
+      "PLAYER_COLOR" => $players[$active_player_id]['player_color'],
+      "PLAYER_NAME_WON_CARDS_TITLE" => self::_("My satisfied guests"),
     ));
 
     //then the other players
@@ -100,7 +101,8 @@ class view_justdesserts_justdesserts extends game_view
         $this->page->insert_block("player", array(
           "PLAYER_ID" => $player_id,
           "PLAYER_NAME" => $players[$player_id]['player_name'],
-          "PLAYER_COLOR" => $players[$player_id]['player_color']
+          "PLAYER_COLOR" => $players[$player_id]['player_color'],
+          "PLAYER_NAME_WON_CARDS_TITLE" => $players[$player_id]['player_name'],
         ));
       }
     }
