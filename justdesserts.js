@@ -65,7 +65,7 @@ define([
                 // Create cards types:
                 for (var card_id = 1; card_id <= this.dessert_cards_nb; card_id++) {
                     // Build card type id
-                    this.playerHand.addItemType(card_id, card_id, g_gamethemeurl + this.desserts_img, card_id);
+                    this.playerHand.addItemType(card_id, 0, g_gamethemeurl + this.desserts_img, card_id);
                 }
 
                 for (var card_id in gamedatas.hand) {
@@ -84,7 +84,7 @@ define([
                 // Create cards types:
                 for (var card_id = 1; card_id <= this.guest_cards_nb; card_id++) {
                     // Build card type id
-                    this.guestsOnTable.addItemType(card_id, card_id, g_gamethemeurl + this.guest_img, card_id);
+                    this.guestsOnTable.addItemType(card_id, 0, g_gamethemeurl + this.guest_img, card_id);
                 }
 
                 for (var card_id in gamedatas.guestsOnTable) {
@@ -126,7 +126,7 @@ define([
                     // Create cards types:
                     for (var card_id = 1; card_id <= this.guest_cards_nb; card_id++) {
                         // Build card type id
-                        playerWonCards.addItemType(card_id, card_id, g_gamethemeurl + this.guest_img, card_id);
+                        playerWonCards.addItemType(card_id, 0, g_gamethemeurl + this.guest_img, card_id);
                     }
 
                     //adds already won cards

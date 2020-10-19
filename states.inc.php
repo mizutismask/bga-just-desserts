@@ -84,7 +84,7 @@ $machinestates = array(
 
     STATE_PLAYER_TURN => array(
         "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must draw a dessert, serve guests or swap desserts'),
+        "description" => clienttranslate('${actplayer} must serve guests, draw a dessert or swap desserts'),
         "descriptionmyturn" => clienttranslate('${you} must choose 1 action'),
         "type" => "activeplayer",
         "possibleactions" => array("draw", "serve", "swap"),

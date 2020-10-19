@@ -244,6 +244,7 @@ class JustDesserts extends Table
     function pickDessertCardsAndNotifyPlayer($nb, $player_id)
     {
         $cards = $this->dessertcards->pickCards($nb, 'deck', $player_id);
+
         // Notify player about his cards
         self::notifyPlayer($player_id, 'newHand', '', array('cards' => $cards));
     }
