@@ -46,13 +46,12 @@ class JustDesserts extends Table
         $this->dessertcards = self::getNew("module.common.deck");
         $this->dessertcards->init("dessertcard");
         $this->dessertcards->autoreshuffle = true;
-        $this->dessertcards->shuffle('deck');
+
 
         $this->guestcards = self::getNew("module.common.deck");
         $this->guestcards->init("guestcard");
         $this->guestcards->autoreshuffle = true;
         $this->guestcards->autoreshuffle_trigger = array('obj' => $this, 'method' => 'deckAutoReshuffle');
-        $this->dessertcards->shuffle('deck');
     }
 
     protected function getGameName()
@@ -204,6 +203,7 @@ class JustDesserts extends Table
             $i++;
         }
         $this->guestcards->createCards($cards, 'deck');
+        $this->dessertcards->shuffle('deck');
         $this->pickGuestCardsAndNotifyPlayers(3, $players);
     }
 
@@ -216,6 +216,7 @@ class JustDesserts extends Table
             $j++;
         }
         $this->dessertcards->createCards($cards, 'deck');
+        $this->dessertcards->shuffle('deck');
 
         foreach ($players as $player_id => $player) {
             $this->pickDessertCardsAndNotifyPlayer(3, $player_id);
