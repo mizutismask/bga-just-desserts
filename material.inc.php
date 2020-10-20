@@ -260,7 +260,7 @@ $this->desserts = array(
     'tastes' => array($COOOKIE),
   ),
   35 => array(
-    'nameId' => 'FRUIT_CAKE',
+    'nameId' => 'FRUITCAKE',
     'name' => clienttranslate('Fruit cake'),
     'nametr' => self::_('Fruit cake'),
     'tastes' => array($FRUIT, $CAKE, $NUTS),
