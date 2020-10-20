@@ -107,7 +107,8 @@ class view_justdesserts_justdesserts extends game_view
       }
     }
 
-
+    /*********** discards ********/
+    $this->tpl['DISCARDED_DESSERTS'] = self::_("Discarded desserts");
 
     /*********** Do not change anything below this line  ************/
   }

@@ -151,6 +151,8 @@ class JustDesserts extends Table
         //last discarded guest
         $result['lastDiscardedGuest'] = $this->guestcards->getCardOnTop('discard');
 
+        $result['discardedDesserts'] = $this->dessertcards->getCardsInLocation('discard');
+
         //cards in hand number
         $result['counters'] = $this->argNbrCardsInHand();
         return $result;
@@ -330,7 +332,8 @@ class JustDesserts extends Table
             'card' => $guest,
             'player_id' => $player_id,
             'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop('discard'),
-            'fromDiscard' => $fromDiscard
+            'fromDiscard' => $fromDiscard,
+            'discardedDesserts' => $this->getDessertCardsFromIds($dessert_cards_id),
         ));
 
         //if the guest got his favorite, there’s a tip
@@ -505,20 +508,26 @@ class JustDesserts extends Table
 
     function swap($cards_id)
     {
-        $player_id = self::getActivePlayerId();
-        $cards_nb = sizeof($cards_id);
-
         // Make sure this is an accepted action
         if (self::checkAction('swap')) {
+            $player_id = self::getActivePlayerId();
+            $cards_nb = sizeof($cards_id);
+
             $this->playDessertCards($cards_id);
             $new_cards = $this->dessertcards->pickCards($cards_nb, 'deck', $player_id);
             // Notify player about his cards
-            //$playerCards = $this->dessertcards->getCardsInLocation('hand', $player_id);
             self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
             self::incStat(1, "player_swaps_number", $player_id);
-        }
 
-        self::notifyAllPlayers('swap', clienttranslate('${player_name} swaps ${cards_nb} cards'), array('player_name' => self::getActivePlayerName(), 'cards_nb' => $cards_nb));
+            $discardedDesserts = $this->getDessertCardsFromIds($cards_id);
+            self::notifyAllPlayers('discardedDesserts', clienttranslate('${player_name} swaps ${cards_nb} cards'), array(
+                'player_name' => self::getActivePlayerName(),
+                'player_id' => $player_id,
+                'cards_nb' => $cards_nb,
+                'discardedDesserts' => $discardedDesserts,
+
+            ));
+        }
         $this->goToDiscardIfNeededOrGoTo(TRANSITION_SWAPPED);
     }
 
@@ -626,6 +635,15 @@ class JustDesserts extends Table
     {
         $guests = $this->guestcards->getCards($guest_ids);
         return $this->getGuestsFromMaterialByCards($guests);
+    }
+
+    function getDessertCardsFromIds($cards_id)
+    {
+        $cards = array();
+        foreach ($cards_id as $card_id) {
+            $cards[] = $this->dessertcards->getCard($card_id);
+        }
+        return $cards;
     }
 
     private function serve($guest_id, $cards_id, $action, $nextState)

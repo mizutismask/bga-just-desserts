@@ -54,6 +54,12 @@
         <!-- END player -->
 
     </div>
+
+    <div id="desserts_discarded_block" class="whiteblock">
+        <h3>{DISCARDED_DESSERTS}</h3>
+        <div id="desserts_discarded_cards">
+        </div>
+    </div>
 </div>
 
 <script type="text/javascript">

@@ -150,6 +150,24 @@ define([
                 }
                 this.updateCounters(this.gamedatas.counters);
 
+                //discarded desserts list
+                this.discardedDesserts = new ebg.stock(); // new stock object for hand
+                this.discardedDesserts.create(this, $('desserts_discarded_cards'), this.cardwidth, this.cardheight);
+                this.discardedDesserts.image_items_per_row = this.image_items_per_row;
+                this.discardedDesserts.setSelectionMode(0);
+
+                // Create cards types:
+                for (var card_id = 1; card_id <= this.dessert_cards_nb; card_id++) {
+                    // Build card type id
+                    this.discardedDesserts.addItemType(card_id, 0, g_gamethemeurl + this.desserts_img, card_id);
+                }
+
+                for (var card_id in gamedatas.discardedDesserts) {
+                    var card = gamedatas.discardedDesserts[card_id];
+                    console.log("ajout dans la liste de défausse de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    this.discardedDesserts.addToStockWithId(card.type_arg, card.id);
+                }
+
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
@@ -324,9 +342,9 @@ define([
                             this,
                             function (result) {
                                 items.forEach(removed => {
+                                    this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
                                     this.playerHand.removeFromStockById(removed.id);
                                 });
-
                             });
                     }
                 }
@@ -357,6 +375,7 @@ define([
                             this,
                             function (result) {
                                 selectedDesserts.forEach(removed => {
+                                    this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
                                     this.playerHand.removeFromStockById(removed.id);
                                 });
 
@@ -389,6 +408,7 @@ define([
                             this,
                             function (result) {
                                 selectedDesserts.forEach(removed => {
+                                    this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
                                     this.playerHand.removeFromStockById(removed.id);
                                 });
 
@@ -528,6 +548,7 @@ define([
                 dojo.subscribe('discardedGuests', this, "notif_discardedGuests");
                 dojo.subscribe('newGuestWon', this, "notif_newGuestWon");
                 dojo.subscribe('updateScore', this, "notif_updateScore");
+                dojo.subscribe('discardedDesserts', this, "notif_discardedDesserts");
 
                 dojo.connect(this.playerHand, 'onChangeSelection', this, "onDessertSelectionChangeFunction");
                 dojo.connect(this.guestsOnTable, 'onChangeSelection', this, "onGuestSelectionChangeFunction");
@@ -579,6 +600,18 @@ define([
                 }
             },
 
+            notif_discardedDesserts: function (notif) {
+                console.log(notif.args);
+                //the active player display has already been refreshed
+                if (this.playerID != notif.args.player_id) {
+                    for (var i in notif.args.discardedDesserts) {
+                        var card = notif.args.discardedDesserts[i];
+                        console.log("notif_discardedDesserts card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                        this.discardedDesserts.addToStockWithId(card.type_arg, card.id, 'overall_player_board_' + notif.args.player_id);
+                    }
+                }
+            },
+
             notif_newGuestWon: function (notif) {
                 var card = notif.args.card;
                 var player_id = notif.args.player_id;
@@ -593,6 +626,7 @@ define([
                 else {
                     this.guestsOnTable.removeFromStockById(card.id);
                 }
+                this.notif_discardedDesserts(notif);
             },
 
             newGuestOnTopOfDiscard: function (card, from) {
