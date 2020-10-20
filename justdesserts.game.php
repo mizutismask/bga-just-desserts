@@ -203,7 +203,7 @@ class JustDesserts extends Table
             $i++;
         }
         $this->guestcards->createCards($cards, 'deck');
-        $this->dessertcards->shuffle('deck');
+        $this->guestcards->shuffle('deck');
         $this->pickGuestCardsAndNotifyPlayers(3, $players);
     }
 
