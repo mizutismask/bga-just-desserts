@@ -28,6 +28,10 @@ define([
 
                 this.cardwidth = 150;
                 this.cardheight = 233;
+
+                this.smallCardwidth = 90;
+                this.smallCardheight = 140;
+
                 // Here, you can init the global variables of your user interface
                 // Example:
                 // this.myGlobalValue = 0;
@@ -35,6 +39,7 @@ define([
                 this.dessert_cards_nb = 76;
                 this.guest_cards_nb = 24;
                 this.desserts_img = 'img/desserts150.jpg';
+                this.small_desserts_img = 'img/desserts90x140.jpg';
                 this.guest_img = 'img/guests150.jpg';
             },
 
@@ -152,14 +157,14 @@ define([
 
                 //discarded desserts list
                 this.discardedDesserts = new ebg.stock(); // new stock object for hand
-                this.discardedDesserts.create(this, $('desserts_discarded_cards'), this.cardwidth, this.cardheight);
+                this.discardedDesserts.create(this, $('desserts_discarded_cards'), this.smallCardwidth, this.smallCardheight);
                 this.discardedDesserts.image_items_per_row = this.image_items_per_row;
                 this.discardedDesserts.setSelectionMode(0);
 
                 // Create cards types:
                 for (var card_id = 1; card_id <= this.dessert_cards_nb; card_id++) {
                     // Build card type id
-                    this.discardedDesserts.addItemType(card_id, 0, g_gamethemeurl + this.desserts_img, card_id);
+                    this.discardedDesserts.addItemType(card_id, 0, g_gamethemeurl + this.small_desserts_img, card_id);
                 }
 
                 for (var card_id in gamedatas.discardedDesserts) {

@@ -138,6 +138,10 @@
     margin-right: 4px;
 }
 
+#desserts_discarded_cards div{
+        border-radius: 10px;
+}
+
 @media only screen and (min-width: 1100px) {
 
     .jd_piles {
