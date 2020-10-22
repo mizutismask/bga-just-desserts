@@ -677,8 +677,8 @@ $this->guests = array(
   ),
   17 => array(
     'nameId' => 'THE_HERMIT',
-    'name' => clienttranslate('the ermit'),
-    'nametr' => self::_('the ermit'),
+    'name' => clienttranslate('the Hermit'),
+    'nametr' => self::_('the Hermit'),
     'tastes' => array($CHOCOLATE, $PASTRY, $PUDDING),
     'dislike1' => null,
     'color' => $YELLOW,
