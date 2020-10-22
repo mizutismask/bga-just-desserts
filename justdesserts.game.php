@@ -25,6 +25,7 @@ if (!defined('DECK_LOC_DECK')) {
     define("DECK_LOC_DECK", "deck");
     define("DECK_LOC_RIVER", "river");
     define("DECK_LOC_DISCARD", "discard");
+    define("DECK_LOC_HAND", "hand");
 }
 
 class JustDesserts extends Table
@@ -143,7 +144,7 @@ class JustDesserts extends Table
 
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
 
-        $result['hand'] = $this->dessertcards->getCardsInLocation('hand', $current_player_id);
+        $result['hand'] = $this->dessertcards->getCardsInLocation(DECK_LOC_HAND, $current_player_id);
         $result['guestsOnTable'] = $this->improveGuestCards($this->guestcards->getCardsInLocation(DECK_LOC_RIVER));
 
         //won cards for each player
@@ -286,32 +287,13 @@ class JustDesserts extends Table
             || $guestFromMaterial["favourite2"] && in_array($guestFromMaterial["favourite2"], $allDessertNames);
     }
 
-    function argNbrCardsInHand()
-    {
-        $players = self::getObjectListFromDB("SELECT player_id id FROM player", true);
-        $counters = array();
-        for ($i = 0; $i < ($this->getPlayersNumber()); $i++) {
-            $counters['cards_count_' . $players[$i]] = array('counter_name' => 'cards_count_' . $players[$i], 'counter_value' => 0);
-        }
-        $cards_in_hand = $this->dessertcards->countCardsByLocationArgs('hand');
-        foreach ($cards_in_hand as $player_id => $cards_nbr) {
-            $counters['cards_count_' . $player_id]['counter_value'] = $cards_nbr;
-        }
-        return $counters;
-    }
-
-
     /**
      * True if there is several guests with the same color.
      */
     function guestsNeedsToBeDiscarded()
     {
         $cards = $this->guestcards->getCardsInLocation(DECK_LOC_RIVER);
-        $guests = $this->getGuestsFromMaterialByCards($cards);
-        $allSuits = array();
-        foreach ($guests as $guest) {
-            $allSuits[] = $guest["color"];
-        }
+        $allSuits = $this->concatenateColorsFromCards($cards);
         return count($allSuits) != count(array_unique($allSuits));
     }
 
@@ -323,7 +305,7 @@ class JustDesserts extends Table
     {
         $player_id = self::getActivePlayerId();
         $this->playDessertCards($dessert_cards_id);
-        $fromDiscard = $guest["location"] == "discard";
+        $fromDiscard = $guest["location"] == DECK_LOC_DISCARD;
         self::dump("guest", $guest);
         $this->guestcards->moveCard($guest["id"], 'won', $player_id);
         self::incStat(1, "guests_number", $player_id);
@@ -356,17 +338,17 @@ class JustDesserts extends Table
             //victory
             $this->updateScores($player_id);
             $this->gamestate->nextState(TRANSITION_END_GAME);
-        } else if ($this->gameCanNotBeWonAnyWonAnymore()) {
-            $this->updateScoresWithoutWinner();
+        } else if ($this->gameCanNotBeFinished()) {
+            $this->updateScoresWithAlternativeEnd();
             $this->gamestate->nextState(TRANSITION_END_GAME);
         }
     }
 
-    function gameCanNotBeWonAnyWonAnymore()
+    function gameCanNotBeFinished()
     {
-        return $this->guestcards->countCardInLocation("river") == 0
-            && $this->guestcards->countCardInLocation("deck") == 0
-            && $this->guestcards->countCardInLocation("discard") == 0;
+        return $this->guestcards->countCardInLocation(DECK_LOC_RIVER) == 0
+            && $this->guestcards->countCardInLocation(DECK_LOC_DECK) == 0
+            && $this->guestcards->countCardInLocation(DECK_LOC_DISCARD) == 0;
     }
 
     function concatenateColorsFromCards($cards)
@@ -389,8 +371,6 @@ class JustDesserts extends Table
     {
         $allSuits = $this->concatenateColorsFromCards($woncards);
         $valuesOccurrences = array_count_values($allSuits);
-        self::dump("valuesOccurrences", $valuesOccurrences);
-
         return $valuesOccurrences ? max($valuesOccurrences) : 0;
     }
 
@@ -399,11 +379,10 @@ class JustDesserts extends Table
         return self::getCurrentPlayerId();
     }
 
-
     /**
      * Each player get 1 point per satisfied guest + 1 point per pair
      */
-    function updateScoresWithoutWinner()
+    function updateScoresWithAlternativeEnd()
     {
         $players = self::loadPlayersBasicInfos();
         foreach ($players as $player_id => $player) {
@@ -733,6 +712,20 @@ class JustDesserts extends Table
     }    
     */
 
+    function argNbrCardsInHand()
+    {
+        $players = self::getObjectListFromDB("SELECT player_id id FROM player", true);
+        $counters = array();
+        for ($i = 0; $i < ($this->getPlayersNumber()); $i++) {
+            $counters['cards_count_' . $players[$i]] = array('counter_name' => 'cards_count_' . $players[$i], 'counter_value' => 0);
+        }
+        $cards_in_hand = $this->dessertcards->countCardsByLocationArgs(DECK_LOC_HAND);
+        foreach ($cards_in_hand as $player_id => $cards_nbr) {
+            $counters['cards_count_' . $player_id]['counter_value'] = $cards_nbr;
+        }
+        return $counters;
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state actions
     ////////////
@@ -754,6 +747,8 @@ class JustDesserts extends Table
         $this->gamestate->nextState( 'some_gamestate_transition' );
     }    
     */
+
+    /** Draws a dessert and a guest at the beginning of each turn for non zombie players. */
     function stNextPlayer()
     {
         $players = self::loadPlayersBasicInfos();
@@ -821,7 +816,7 @@ class JustDesserts extends Table
             switch ($statename) {
                 case "playerTurn":
                     //draws a dessert and discards it
-                    $this->dessertcards->pickCardForLocation(DECK_LOC_DECK, "discard");
+                    $this->dessertcards->pickCardForLocation(DECK_LOC_DECK, DECK_LOC_DISCARD);
                     $this->gamestate->nextState(TRANSITION_DRAWN);
                     break;
                 case "serveSecondGuest":
