@@ -392,7 +392,7 @@ $this->desserts = array(
     'tastes' => array($PIE, $NUTS),
   ),
   57 => array(
-    'nameId' => 'PINAPPLE_UPSIDE_DOWN_CAKE',
+    'nameId' => 'PINEAPPLE_UPSIDE_DOWN_CAKE',
     'name' => clienttranslate('Pineapple upside down cake'),
     'nametr' => self::_('Pineapple upside down cake'),
     'tastes' => array($CAKE, $FRUIT),
@@ -522,7 +522,7 @@ $this->guests = array(
     'dislike1' => $NUTS,
     'color' => $RED,
     'favourite1' => "APPLE_TURNOVER",
-    'favourite2' => "BELGIAN WAFFLE",
+    'favourite2' => "BELGIAN_WAFFLE",
   ),
   2 => array(
     'nameId' => 'BOB_FRUITCAKE',
