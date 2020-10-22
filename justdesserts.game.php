@@ -440,132 +440,6 @@ class JustDesserts extends Table
         return $cards;
     }
 
-    //////////////////////////////////////////////////////////////////////////////
-    //////////// Player actions
-    //////////// 
-
-    /*
-        Each time a player is doing some game action, one of the methods below is called.
-        (note: each method below must match an input method in justdesserts.action.php)
-    */
-
-    /*
-    
-    Example:
-
-    function playCard( $card_id )
-    {
-        // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction( 'playCard' ); 
-        
-        $player_id = self::getActivePlayerId();
-        
-        // Add your game logic to play a card there 
-        ...
-        
-        // Notify all players about the card played
-        self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card_name' => $card_name,
-            'card_id' => $card_id
-        ) );
-          
-    }
-    
-    */
-    function draw()
-    {
-        $player_id = self::getActivePlayerId();
-
-        // Make sure this is an accepted action
-        if (self::checkAction('draw')) {
-            $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
-        }
-
-        self::notifyAllPlayers('draw', clienttranslate('${player_name} draws a dessert'), array('player_name' => self::getActivePlayerName()));
-        $this->goToDiscardIfNeededOrGoTo(TRANSITION_DRAWN);
-    }
-
-    function swap($cards_id)
-    {
-        // Make sure this is an accepted action
-        if (self::checkAction('swap')) {
-            $player_id = self::getActivePlayerId();
-            $cards_nb = sizeof($cards_id);
-
-            $this->playDessertCards($cards_id);
-            $new_cards = $this->dessertcards->pickCards($cards_nb, DECK_LOC_DECK, $player_id);
-            // Notify player about his cards
-            self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
-            self::incStat(1, "player_swaps_number", $player_id);
-
-            $discardedDesserts = $this->getDessertCardsFromIds($cards_id);
-            self::notifyAllPlayers('discardedDesserts', clienttranslate('${player_name} swaps ${cards_nb} cards'), array(
-                'player_name' => self::getActivePlayerName(),
-                'player_id' => $player_id,
-                'cards_nb' => $cards_nb,
-                'discardedDesserts' => $discardedDesserts,
-
-            ));
-        }
-        $this->goToDiscardIfNeededOrGoTo(TRANSITION_SWAPPED);
-    }
-
-    function discardGuests($cards_id)
-    {
-        $cards_nb = sizeof($cards_id);
-
-        // Make sure this is an accepted action
-        if (self::checkAction('discardGuests')) {
-
-            $cards = $this->guestcards->getCardsInLocation(DECK_LOC_RIVER);
-            $guests_in_river = $this->getGuestsFromMaterialByCards($cards);
-
-            $guests_to_remove = $this->guestcards->getCards($cards_id);
-            $guests_to_remove_from_material = $this->getGuestsFromMaterialByIds($cards_id);
-
-            foreach ($guests_in_river as $guest) {
-                $allSuits[] = $guest["color"];
-            }
-
-            $valuesOccurrences = array_count_values($allSuits);
-            $pbOccurrences = array_filter($valuesOccurrences, function ($occurrences) {
-                return $occurrences > 1;
-            });
-
-            $cardsFromOtherColors = false;
-            foreach ($guests_to_remove_from_material as $guest_to_remove) {
-                $color = $guest_to_remove['color'];
-                self::trace("color: $color");
-                self::dump("pbOccurrences", $pbOccurrences);
-
-                $valuesOccurrences[$color] += -1;
-                if (!array_key_exists($color, $pbOccurrences)) {
-                    self::trace("$color not found in problematic occurrences");
-                    $cardsFromOtherColors = true;
-                }
-            }
-            //there is only one card of each and no extra card is discarded
-            if (!$cardsFromOtherColors && max($valuesOccurrences) == 1 && min($valuesOccurrences) >= 0) {
-                $this->playGuestCards($cards_id);
-                self::notifyAllPlayers(
-                    'discardedGuests',
-                    clienttranslate('${player_name} discards ${cards_nb} guest(s)'),
-                    array(
-                        'player_name' => self::getActivePlayerName(),
-                        'cards_nb' => $cards_nb,
-                        'cards' => $guests_to_remove,
-                        'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop(DECK_LOC_DISCARD)
-                    )
-                );
-                $this->gamestate->nextState(TRANSITION_GUESTS_DISCARDED);
-            } else {
-                throw new BgaUserException(self::_("Dicard only guests needed to keep one of each suite at most"));
-            }
-        }
-    }
-
     /**
      * Takes an array and returns an array of duplicate items
      */
@@ -595,7 +469,7 @@ class JustDesserts extends Table
     private function getGuestFromMaterial($guest_id)
     {
         $guest = $this->guestcards->getCard($guest_id);
-        return $this->guests[$guest["type_arg"]];
+        return $this->getGuestFromMaterialFromCard($guest);
     }
 
     private function getGuestFromMaterialFromCard($guest)
@@ -607,7 +481,7 @@ class JustDesserts extends Table
     {
         $guestsFromMaterial = array();
         foreach ($guests as $guest) {
-            $guestsFromMaterial[] = $this->guests[$guest["type_arg"]];
+            $guestsFromMaterial[] = $this->getGuestFromMaterialFromCard($guest);
         }
         return $guestsFromMaterial;
     }
@@ -627,8 +501,102 @@ class JustDesserts extends Table
         return $cards;
     }
 
+    //////////////////////////////////////////////////////////////////////////////
+    //////////// Player actions
+    //////////// 
+
+    /*
+        Each time a player is doing some game action, one of the methods below is called.
+        (note: each method below must match an input method in justdesserts.action.php)
+    */
+    function draw()
+    {
+        $player_id = self::getActivePlayerId();
+
+        // Make sure this is an accepted action
+        self::checkAction('draw');
+        $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
+
+        self::notifyAllPlayers('draw', clienttranslate('${player_name} draws a dessert'), array('player_name' => self::getActivePlayerName()));
+        $this->goToDiscardIfNeededOrGoTo(TRANSITION_DRAWN);
+    }
+
+    function swap($cards_id)
+    {
+        self::checkAction('swap');
+        $player_id = self::getActivePlayerId();
+        $cards_nb = sizeof($cards_id);
+
+        $this->playDessertCards($cards_id);
+        $new_cards = $this->dessertcards->pickCards($cards_nb, DECK_LOC_DECK, $player_id);
+        // Notify player about his cards
+        self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
+        self::incStat(1, "player_swaps_number", $player_id);
+
+        $discardedDesserts = $this->getDessertCardsFromIds($cards_id);
+        self::notifyAllPlayers('discardedDesserts', clienttranslate('${player_name} swaps ${cards_nb} cards'), array(
+            'player_name' => self::getActivePlayerName(),
+            'player_id' => $player_id,
+            'cards_nb' => $cards_nb,
+            'discardedDesserts' => $discardedDesserts,
+
+        ));
+
+        $this->goToDiscardIfNeededOrGoTo(TRANSITION_SWAPPED);
+    }
+
+    function discardGuests($cards_id)
+    {
+        $cards_nb = sizeof($cards_id);
+
+        self::checkAction('discardGuests');
+
+        $cards = $this->guestcards->getCardsInLocation(DECK_LOC_RIVER);
+        $guests_in_river = $this->getGuestsFromMaterialByCards($cards);
+
+        $guests_to_remove = $this->guestcards->getCards($cards_id);
+        $guests_to_remove_from_material = $this->getGuestsFromMaterialByIds($cards_id);
+
+        foreach ($guests_in_river as $guest) {
+            $allSuits[] = $guest["color"];
+        }
+
+        $valuesOccurrences = array_count_values($allSuits);
+        $pbOccurrences = array_filter($valuesOccurrences, function ($occurrences) {
+            return $occurrences > 1;
+        });
+
+        $cardsFromOtherColors = false;
+        foreach ($guests_to_remove_from_material as $guest_to_remove) {
+            $color = $guest_to_remove['color'];
+            $valuesOccurrences[$color] += -1;
+            if (!array_key_exists($color, $pbOccurrences)) {
+                self::trace("$color not found in problematic occurrences");
+                $cardsFromOtherColors = true;
+            }
+        }
+        //there is only one card of each and no extra card is discarded
+        if (!$cardsFromOtherColors && max($valuesOccurrences) == 1 && min($valuesOccurrences) >= 0) {
+            $this->playGuestCards($cards_id);
+            self::notifyAllPlayers(
+                'discardedGuests',
+                clienttranslate('${player_name} discards ${cards_nb} guest(s)'),
+                array(
+                    'player_name' => self::getActivePlayerName(),
+                    'cards_nb' => $cards_nb,
+                    'cards' => $guests_to_remove,
+                    'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop(DECK_LOC_DISCARD)
+                )
+            );
+            $this->gamestate->nextState(TRANSITION_GUESTS_DISCARDED);
+        } else {
+            throw new BgaUserException(self::_("Dicard only guests needed to keep one of each suite at most"));
+        }
+    }
+
     private function serve($guest_id, $cards_id, $action, $nextState)
     {
+        self::checkAction($action);
         $guest = $this->guestcards->getCard($guest_id);
         $guestFromMaterial = $this->guests[$guest["type_arg"]];
 
@@ -638,17 +606,14 @@ class JustDesserts extends Table
             $dessertsFromMaterial[] = $this->desserts[$dessert["type_arg"]];
         }
 
-        // Make sure this is an accepted action
-        if (self::checkAction($action)) {
-            if (self::dessertsAreEnoughForGuest($dessertsFromMaterial, $guestFromMaterial)) {
-                if (self::guestDislikesSomething($dessertsFromMaterial, $guestFromMaterial)) {
-                    $this->doSatisfiedGuestActions($cards_id, $guest, $guestFromMaterial, $dessertsFromMaterial);
-                } else {
-                    throw new BgaUserException(self::_("This guest refuses to eat one of the ingredients you provided"));
-                }
+        if (self::dessertsAreEnoughForGuest($dessertsFromMaterial, $guestFromMaterial)) {
+            if (self::guestDislikesSomething($dessertsFromMaterial, $guestFromMaterial)) {
+                $this->doSatisfiedGuestActions($cards_id, $guest, $guestFromMaterial, $dessertsFromMaterial);
             } else {
-                throw new BgaUserException(self::_("This guest is not satisfied with your desserts"));
+                throw new BgaUserException(self::_("This guest refuses to eat one of the ingredients you provided"));
             }
+        } else {
+            throw new BgaUserException(self::_("This guest is not satisfied with your desserts"));
         }
 
         if ($this->guestsNeedsToBeDiscarded() && $action == "serveSecondGuest") {
@@ -679,9 +644,8 @@ class JustDesserts extends Table
 
     function pass()
     {
-        if (self::checkAction("pass")) {
-            $this->goToDiscardIfNeededOrGoTo(TRANSITION_PASSED);
-        }
+        self::checkAction("pass");
+        $this->goToDiscardIfNeededOrGoTo(TRANSITION_PASSED);
     }
 
 
@@ -733,19 +697,6 @@ class JustDesserts extends Table
     /*
         Here, you can create methods defined as "game state actions" (see "action" property in states.inc.php).
         The action method of state X is called everytime the current game state is set to X.
-    */
-
-    /*
-    
-    Example for game state "MyGameState":
-
-    function stMyGameState()
-    {
-        // Do some stuff ...
-        
-        // (very often) go to another gamestate
-        $this->gamestate->nextState( 'some_gamestate_transition' );
-    }    
     */
 
     /** Draws a dessert and a guest at the beginning of each turn for non zombie players. */
