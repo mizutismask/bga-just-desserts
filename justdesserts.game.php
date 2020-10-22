@@ -20,6 +20,12 @@
 
 require_once(APP_GAMEMODULE_PATH . 'module/table/table.game.php');
 
+// define contants for deck locations
+if (!defined('DECK_LOC_DECK')) {
+    define("DECK_LOC_DECK", "deck");
+    define("DECK_LOC_RIVER", "river");
+    define("DECK_LOC_DISCARD", "discard");
+}
 
 class JustDesserts extends Table
 {
@@ -137,9 +143,8 @@ class JustDesserts extends Table
 
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
 
-        // Cards in player hand
         $result['hand'] = $this->dessertcards->getCardsInLocation('hand', $current_player_id);
-        $result['guestsOnTable'] = $this->improveGuestCards($this->guestcards->getCardsInLocation('river'));
+        $result['guestsOnTable'] = $this->improveGuestCards($this->guestcards->getCardsInLocation(DECK_LOC_RIVER));
 
         //won cards for each player
         $players = self::loadPlayersBasicInfos();
@@ -147,12 +152,8 @@ class JustDesserts extends Table
             $result['won'][$player["player_id"]] = $this->guestcards->getCardsInLocation('won', $player["player_id"]);
         }
 
-        //last discarded guest
-        $result['lastDiscardedGuest'] = $this->guestcards->getCardOnTop('discard');
-
-        $result['discardedDesserts'] = $this->dessertcards->getCardsInLocation('discard');
-
-        //cards in hand number
+        $result['lastDiscardedGuest'] = $this->guestcards->getCardOnTop(DECK_LOC_DISCARD);
+        $result['discardedDesserts'] = $this->dessertcards->getCardsInLocation(DECK_LOC_DISCARD);
         $result['counters'] = $this->argNbrCardsInHand();
         return $result;
     }
@@ -202,8 +203,8 @@ class JustDesserts extends Table
             $cards[] = array('type' => $guest["nameId"], 'type_arg' => $i, 'nbr' => 1);
             $i++;
         }
-        $this->guestcards->createCards($cards, 'deck');
-        $this->guestcards->shuffle('deck');
+        $this->guestcards->createCards($cards, DECK_LOC_DECK);
+        $this->guestcards->shuffle(DECK_LOC_DECK);
         $this->pickGuestCardsAndNotifyPlayers(3, $players);
     }
 
@@ -215,8 +216,8 @@ class JustDesserts extends Table
             $cards[] = array('type' => $dessert["nameId"], 'type_arg' => $j, 'nbr' => 1);
             $j++;
         }
-        $this->dessertcards->createCards($cards, 'deck');
-        $this->dessertcards->shuffle('deck');
+        $this->dessertcards->createCards($cards, DECK_LOC_DECK);
+        $this->dessertcards->shuffle(DECK_LOC_DECK);
 
         foreach ($players as $player_id => $player) {
             $this->pickDessertCardsAndNotifyPlayer(3, $player_id);
@@ -238,7 +239,7 @@ class JustDesserts extends Table
 
     function pickGuestCardsAndNotifyPlayers($nb, $players)
     {
-        $cards = $this->guestcards->pickCardsForLocation($nb, 'deck', 'river');
+        $cards = $this->guestcards->pickCardsForLocation($nb, DECK_LOC_DECK, DECK_LOC_RIVER);
         // Notify player about cards on table
         self::notifyAllPlayers('newRiver', '', array('cards' => $this->improveGuestCards($cards)));
         return $cards;
@@ -246,7 +247,7 @@ class JustDesserts extends Table
 
     function pickDessertCardsAndNotifyPlayer($nb, $player_id)
     {
-        $cards = $this->dessertcards->pickCards($nb, 'deck', $player_id);
+        $cards = $this->dessertcards->pickCards($nb, DECK_LOC_DECK, $player_id);
 
         // Notify player about his cards
         self::notifyPlayer($player_id, 'newHand', '', array('cards' => $cards));
@@ -305,7 +306,7 @@ class JustDesserts extends Table
      */
     function guestsNeedsToBeDiscarded()
     {
-        $cards = $this->guestcards->getCardsInLocation('river');
+        $cards = $this->guestcards->getCardsInLocation(DECK_LOC_RIVER);
         $guests = $this->getGuestsFromMaterialByCards($cards);
         $allSuits = array();
         foreach ($guests as $guest) {
@@ -332,14 +333,14 @@ class JustDesserts extends Table
             'guest_name' => $guestFromMaterial["name"],
             'card' => $guest,
             'player_id' => $player_id,
-            'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop('discard'),
+            'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop(DECK_LOC_DISCARD),
             'fromDiscard' => $fromDiscard,
             'discardedDesserts' => $this->getDessertCardsFromIds($dessert_cards_id),
         ));
 
         //if the guest got his favorite, there’s a tip
         if ($this->isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)) {
-            $new_cards = $this->dessertcards->pickCards(1, 'deck', $player_id);
+            $new_cards = $this->dessertcards->pickCards(1, DECK_LOC_DECK, $player_id);
             // Notify player about his tip
             self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
             self::incStat(1, "player_tips_number", $player_id);
@@ -515,7 +516,7 @@ class JustDesserts extends Table
             $cards_nb = sizeof($cards_id);
 
             $this->playDessertCards($cards_id);
-            $new_cards = $this->dessertcards->pickCards($cards_nb, 'deck', $player_id);
+            $new_cards = $this->dessertcards->pickCards($cards_nb, DECK_LOC_DECK, $player_id);
             // Notify player about his cards
             self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
             self::incStat(1, "player_swaps_number", $player_id);
@@ -539,7 +540,7 @@ class JustDesserts extends Table
         // Make sure this is an accepted action
         if (self::checkAction('discardGuests')) {
 
-            $cards = $this->guestcards->getCardsInLocation('river');
+            $cards = $this->guestcards->getCardsInLocation(DECK_LOC_RIVER);
             $guests_in_river = $this->getGuestsFromMaterialByCards($cards);
 
             $guests_to_remove = $this->guestcards->getCards($cards_id);
@@ -576,7 +577,7 @@ class JustDesserts extends Table
                         'player_name' => self::getActivePlayerName(),
                         'cards_nb' => $cards_nb,
                         'cards' => $guests_to_remove,
-                        'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop('discard')
+                        'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop(DECK_LOC_DISCARD)
                     )
                 );
                 $this->gamestate->nextState(TRANSITION_GUESTS_DISCARDED);
@@ -820,7 +821,7 @@ class JustDesserts extends Table
             switch ($statename) {
                 case "playerTurn":
                     //draws a dessert and discards it
-                    $this->dessertcards->pickCardForLocation('deck', "discard");
+                    $this->dessertcards->pickCardForLocation(DECK_LOC_DECK, "discard");
                     $this->gamestate->nextState(TRANSITION_DRAWN);
                     break;
                 case "serveSecondGuest":
@@ -840,7 +841,7 @@ class JustDesserts extends Table
     function zombieDiscard()
     {
         if ($this->guestsNeedsToBeDiscarded()) {
-            $river_cards = $this->guestcards->getCardsInLocation('river');
+            $river_cards = $this->guestcards->getCardsInLocation(DECK_LOC_RIVER);
             $allSuits = $this->concatenateColorsFromCards($river_cards);
             $valuesOccurrences = array_count_values($allSuits);
             $pbOccurrences = array_filter($valuesOccurrences, function ($occurrences) {
@@ -870,7 +871,7 @@ class JustDesserts extends Table
                 array(
                     'cards_nb' => count($guests_to_remove),
                     'cards' => $guests_to_remove,
-                    'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop('discard')
+                    'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop(DECK_LOC_DISCARD)
                 )
             );
         }
