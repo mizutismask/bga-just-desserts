@@ -26,6 +26,14 @@ if (!defined('DECK_LOC_DECK')) {
     define("DECK_LOC_RIVER", "river");
     define("DECK_LOC_DISCARD", "discard");
     define("DECK_LOC_HAND", "hand");
+
+    define("NOTIF_DISCARDED_GUESTS", "discardedGuests");
+    define("NOTIF_DISCARDED_DESSERTS", "discardedDesserts");
+    define("NOTIF_PLAYER_TURN", "playerTurn");
+    define("NOTIF_UPDATE_SCORE", "updateScore");
+    define("NOTIF_NEW_RIVER", "newRiver");
+    define("NOTIF_NEW_HAND", "newHand");
+    define("NOTIF_NEW_GUEST_WON", "newGuestWon");
 }
 
 class JustDesserts extends Table
@@ -242,7 +250,7 @@ class JustDesserts extends Table
     {
         $cards = $this->guestcards->pickCardsForLocation($nb, DECK_LOC_DECK, DECK_LOC_RIVER);
         // Notify player about cards on table
-        self::notifyAllPlayers('newRiver', '', array('cards' => $this->improveGuestCards($cards)));
+        self::notifyAllPlayers(NOTIF_NEW_RIVER, '', array('cards' => $this->improveGuestCards($cards)));
         return $cards;
     }
 
@@ -251,7 +259,7 @@ class JustDesserts extends Table
         $cards = $this->dessertcards->pickCards($nb, DECK_LOC_DECK, $player_id);
 
         // Notify player about his cards
-        self::notifyPlayer($player_id, 'newHand', '', array('cards' => $cards));
+        self::notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $cards));
     }
 
     function dessertsAreEnoughForGuest($dessertsFromMaterial, $guestFromMaterial)
@@ -310,7 +318,7 @@ class JustDesserts extends Table
         $this->guestcards->moveCard($guest["id"], 'won', $player_id);
         self::incStat(1, "guests_number", $player_id);
 
-        self::notifyAllPlayers('newGuestWon', clienttranslate('${player_name} serves ${guest_name}'), array(
+        self::notifyAllPlayers(NOTIF_NEW_GUEST_WON, clienttranslate('${player_name} serves ${guest_name}'), array(
             'player_name' => self::getActivePlayerName(),
             'guest_name' => $guestFromMaterial["name"],
             'card' => $guest,
@@ -324,7 +332,7 @@ class JustDesserts extends Table
         if ($this->isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)) {
             $new_cards = $this->dessertcards->pickCards(1, DECK_LOC_DECK, $player_id);
             // Notify player about his tip
-            self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
+            self::notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $new_cards));
             self::incStat(1, "player_tips_number", $player_id);
             //notify other that he got one tip
             self::notifyAllPlayers('serve', clienttranslate('${player_name} gets a new dessert card as a tip'), array('player_name' => self::getActivePlayerName()));
@@ -425,7 +433,7 @@ class JustDesserts extends Table
         $playerInfo = self::getCollectionFromDB("SELECT player_id, player_score FROM player");
 
         // Update the scores on the client side
-        self::notifyAllPlayers('updateScore', '', array(
+        self::notifyAllPlayers(NOTIF_UPDATE_SCORE, '', array(
             'players' => $playerInfo
         ));
     }
@@ -530,11 +538,11 @@ class JustDesserts extends Table
         $this->playDessertCards($cards_id);
         $new_cards = $this->dessertcards->pickCards($cards_nb, DECK_LOC_DECK, $player_id);
         // Notify player about his cards
-        self::notifyPlayer($player_id, 'newHand', '', array('cards' => $new_cards));
+        self::notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $new_cards));
         self::incStat(1, "player_swaps_number", $player_id);
 
         $discardedDesserts = $this->getDessertCardsFromIds($cards_id);
-        self::notifyAllPlayers('discardedDesserts', clienttranslate('${player_name} swaps ${cards_nb} cards'), array(
+        self::notifyAllPlayers(NOTIF_DISCARDED_DESSERTS, clienttranslate('${player_name} swaps ${cards_nb} cards'), array(
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
             'cards_nb' => $cards_nb,
@@ -579,7 +587,7 @@ class JustDesserts extends Table
         if (!$cardsFromOtherColors && max($valuesOccurrences) == 1 && min($valuesOccurrences) >= 0) {
             $this->playGuestCards($cards_id);
             self::notifyAllPlayers(
-                'discardedGuests',
+                NOTIF_DISCARDED_GUESTS,
                 clienttranslate('${player_name} discards ${cards_nb} guest(s)'),
                 array(
                     'player_name' => self::getActivePlayerName(),
@@ -714,7 +722,7 @@ class JustDesserts extends Table
             if ($pickedGuests) {
                 $guestName = $this->getGuestFromMaterial($pickedGuests[0]["id"])["name"];
                 self::notifyAllPlayers(
-                    'playerTurn',
+                    NOTIF_PLAYER_TURN,
                     clienttranslate('New turn : ${player_name} draws a dessert and ${guestName}'),
                     array(
                         'player_name' => self::getActivePlayerName(),
@@ -723,7 +731,7 @@ class JustDesserts extends Table
                 );
             } else {
                 self::notifyAllPlayers(
-                    'playerTurn',
+                    NOTIF_PLAYER_TURN,
                     clienttranslate('New turn : ${player_name} draws a dessert. There’s no more guests on the pile.'),
                     array(
                         'player_name' => self::getActivePlayerName(),
@@ -812,7 +820,7 @@ class JustDesserts extends Table
             } while ($this->guestsNeedsToBeDiscarded());
 
             self::notifyAllPlayers(
-                'discardedGuests',
+                NOTIF_DISCARDED_GUESTS,
                 clienttranslate('The player who left discards ${cards_nb} guest(s)'),
                 array(
                     'cards_nb' => count($guests_to_remove),
