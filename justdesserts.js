@@ -40,7 +40,8 @@ define([
                 this.guest_cards_nb = 24;
                 this.desserts_img = 'img/desserts150.jpg';
                 this.small_desserts_img = 'img/desserts90x140.jpg';
-                this.guest_img = 'img/guests150.jpg';
+                this.guest_img = 'img/guests150x233.jpg';
+                this.big_guest_img = 'img/guests250x388.jpg';
             },
 
             /*
@@ -96,8 +97,7 @@ define([
                     var card = gamedatas.guestsOnTable[card_id];
                     console.log("ajout dans les guests de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.guestsOnTable.addToStockWithId(card.type_arg, card.id);
-                    this.addTooltipHtml(this.guestsOnTable.getItemDivId(card.id), this.createGuestTooltip(card.type_arg), 1);
-
+                    this.addCardToolTip(this.guestsOnTable, card.id);
                 }
 
                 //-----------guest discard setup
@@ -115,6 +115,7 @@ define([
                 if (lastDiscardedGuest) {
                     console.log("ajout dans la defausse de la carte id/type/type arg :" + lastDiscardedGuest.id + " " + lastDiscardedGuest.type + " " + lastDiscardedGuest.type_arg);
                     this.guestsDiscard.addToStockWithId(lastDiscardedGuest.type_arg, lastDiscardedGuest.id);
+                    this.addCardToolTip(this.guestsDiscard, lastDiscardedGuest.id);
                     dojo.removeClass("guest_discard", "jd_empty");
                 }
 
@@ -140,6 +141,7 @@ define([
                         var card = cards[card_id];
                         console.log("ajout dans les cartes gagnées de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                         playerWonCards.addToStockWithId(card.type_arg, card.id);
+                        this.addCardToolTip(playerWonCards, card.id);
                     }
                     this.wonStocksByPlayerId[player_id] = playerWonCards;
                 }
@@ -278,27 +280,17 @@ define([
 
             ///////////////////////////////////////////////////
             //// Utility methods
+            addCardToolTip: function (cards, card_id, delay = 200) {
+                // Get the div of current card
+                curDiv = cards.getItemDivId(card_id);
 
-            /*
-            
-                Here, you can defines some utility methods that you can use everywhere in your javascript
-                script.
-            
-            */
-            createGuestTooltip: function (guest_type) {
-                var favorite1 = this.guestCards[guest_type].favourite1;
-                var favorite2 = this.guestCards[guest_type].favourite2;
+                // Get the background position information 
+                backPos = dojo.style(curDiv, 'backgroundPosition');
+                // Add tooltip info
+                this.addTooltipHtml(curDiv, this.format_block('jstpl_card_tooltip', {
+                    backpos: backPos,
+                }), delay);
 
-                var html = _("I can’t decide on a favorite!");;
-                if (favorite1) {
-                    html = _("My favourite dessert is : ");
-                    html += '<span class="jd_favorite">' + favorite1 + "</span>";
-                }
-                if (favorite2) {
-                    html += _(" or ");
-                    html += '<br><span class="jd_favorite">' + favorite2 + "</span>"
-                }
-                return html;
             },
             ///////////////////////////////////////////////////
             //// Player's action
@@ -591,6 +583,7 @@ define([
                     var card = notif.args.cards[i];
                     console.log("notif_newRiver card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.guestsOnTable.addToStockWithId(card.type_arg, card.id, 'guest_draw');
+                    this.addCardToolTip(this.guestsOnTable, card.id);
                 }
             },
 
@@ -624,6 +617,7 @@ define([
                 console.log("notif_newGuestWon card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
 
                 this.wonStocksByPlayerId[player_id].addToStockWithId(card.type_arg, card.id, from_discard ? 'guest_discard' : 'guests_on_table');
+                this.addCardToolTip(this.wonStocksByPlayerId[player_id], card.id);
 
                 if (from_discard) {
                     this.newGuestOnTopOfDiscard(notif.args.newGuestOnTopOfDiscard, null);
@@ -646,6 +640,7 @@ define([
                     else {
                         this.guestsDiscard.addToStockWithId(card.type_arg, card.id);
                     }
+                    this.addCardToolTip(this.guestsDiscard, card.id);
                 }
             },
 
@@ -658,7 +653,5 @@ define([
                     this.scoreCtrl[playerID].setValue(player['player_score']);
                 }
             },
-
-
         });
     });

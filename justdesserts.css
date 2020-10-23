@@ -146,6 +146,12 @@
     display: none;
 }
 
+.jd_card-tooltip-image{
+    width: 250px;
+    height: 388px;
+    background: url("img/guests250x388.jpg");
+}
+
 @media only screen and (min-width: 1100px) {
 
     .jd_piles {

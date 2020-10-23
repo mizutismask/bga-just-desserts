@@ -73,6 +73,10 @@
     */
     var jstpl_cards_icon = '<div id= "cards_panel_${id}"> \
     <div id="cards_icon_${id}" class="jd_cards_icon"></div><span id="cards_count_${id}" class="cards_count"></span></div>';
+
+    // template for guest card tooltip
+    var jstpl_card_tooltip = '<div id="tooltipGuestBig"><div class="jd_card-tooltip-image" style="background-position: ${backpos}"></div></div>';
+
 </script>
 
 

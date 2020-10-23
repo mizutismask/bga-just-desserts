@@ -116,13 +116,10 @@ class JustDesserts extends Table
         self::initStat('player', 'player_tips_number', 0);
         self::initStat('player', 'player_swaps_number', 0);
 
-        // TODO: setup the initial game situation here
-        $cards = array();
-
         self::setupGuestsDeck($players);
         self::setupDessertsDeck($players);
 
-        // Activate first player (which is in general a good idea :) )
+        // Activate first player 
         $this->activeNextPlayer();
 
         /************ End of the game initialization *****/
