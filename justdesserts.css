@@ -81,6 +81,18 @@
     margin-right: 0px;
 }
 
+#guests_wrapper {
+    width: 100%;
+    display: inline-flex;
+    flex-flow: row wrap;
+    gap: 1%;
+}
+
+.jd_guestsWon{
+    box-sizing: border-box;
+    min-width: 390px;
+}
+
 .jd_pile, .stockitem  {
     width: 150px;
     height: 233px;
