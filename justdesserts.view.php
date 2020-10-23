@@ -92,7 +92,7 @@ class view_justdesserts_justdesserts extends game_view
       "PLAYER_ID" => $active_player_id,
       "PLAYER_NAME" => $players[$active_player_id]['player_name'],
       "PLAYER_COLOR" => $players[$active_player_id]['player_color'],
-      "PLAYER_NAME_WON_CARDS_TITLE" => self::_("My satisfied guests"),
+      "PLAYER_NAME_WON_CARDS_TITLE" => $players[$active_player_id]['player_name'],
     ));
 
     //then the other players
