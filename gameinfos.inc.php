@@ -66,7 +66,7 @@ $gameinfos = array(
     // Note: if you are NOT using any tie breaker, leave the empty string.
     //
     // Example: 'tie_breaker_description' => totranslate( "Number of remaining cards in hand" ),
-    'tie_breaker_description' => "",
+    'tie_breaker_description' => totranslate("When all Guests have been served, if no one has achieved victory, everyone gets a score: 1 point for each Guest, plus a 1 point bonus for each matching pair. High score wins. If scores are tied, the player who has the most leftover dessert cards in their hand is the winner."),
 
     // If in the game, all losers are equal (no score to rank them or explicit in the rules that losers are not ranked between them), set this to true 
     // The game end result will display "Winner" for the 1st player and "Loser" for all other players

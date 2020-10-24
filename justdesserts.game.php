@@ -26,6 +26,7 @@ if (!defined('DECK_LOC_DECK')) {
     define("DECK_LOC_RIVER", "river");
     define("DECK_LOC_DISCARD", "discard");
     define("DECK_LOC_HAND", "hand");
+    define("DECK_LOC_WON", 'won');
 
     define("NOTIF_DISCARDED_GUESTS", "discardedGuests");
     define("NOTIF_DISCARDED_DESSERTS", "discardedDesserts");
@@ -155,7 +156,7 @@ class JustDesserts extends Table
         //won cards for each player
         $players = self::loadPlayersBasicInfos();
         foreach ($players as $player) {
-            $result['won'][$player["player_id"]] = $this->guestcards->getCardsInLocation('won', $player["player_id"]);
+            $result['won'][$player["player_id"]] = $this->guestcards->getCardsInLocation(DECK_LOC_WON, $player["player_id"]);
         }
 
         $result['lastDiscardedGuest'] = $this->guestcards->getCardOnTop(DECK_LOC_DISCARD);
@@ -180,7 +181,7 @@ class JustDesserts extends Table
         $progressionByPlayerId = array();
 
         foreach ($players as $player_id => $player) {
-            $cards = $this->guestcards->getCardsInLocation('won', $player_id);
+            $cards = $this->guestcards->getCardsInLocation(DECK_LOC_WON, $player_id);
             $differentColors = $this->countCardsForObjective5Differents($cards);
             $suite = $this->countCardsForObjective3OfAKind($cards);
 
@@ -312,7 +313,7 @@ class JustDesserts extends Table
         $this->playDessertCards($dessert_cards_id);
         $fromDiscard = $guest["location"] == DECK_LOC_DISCARD;
         self::dump("guest", $guest);
-        $this->guestcards->moveCard($guest["id"], 'won', $player_id);
+        $this->guestcards->moveCard($guest["id"], DECK_LOC_WON, $player_id);
         self::incStat(1, "guests_number", $player_id);
 
         self::notifyAllPlayers(NOTIF_NEW_GUEST_WON, clienttranslate('${player_name} serves ${guest_name}'), array(
@@ -336,7 +337,7 @@ class JustDesserts extends Table
         }
 
         //getting data to check if the active player hit a winning requirement
-        $woncards = $this->guestcards->getCardsInLocation('won', $player_id);
+        $woncards = $this->guestcards->getCardsInLocation(DECK_LOC_WON, $player_id);
 
         //5 different colors or 3 of the same one
         if ($this->countCardsForObjective5Differents($woncards) == 5 || $this->countCardsForObjective3OfAKind($woncards) == 3) {
@@ -390,8 +391,9 @@ class JustDesserts extends Table
     function updateScoresWithAlternativeEnd()
     {
         $players = self::loadPlayersBasicInfos();
+        $scoresByPlayer = [];
         foreach ($players as $player_id => $player) {
-            $woncards = $this->guestcards->getCardsInLocation('won', $player_id);
+            $woncards = $this->guestcards->getCardsInLocation(DECK_LOC_WON, $player_id);
             $allSuits = $this->concatenateColorsFromCards($woncards);
             $valuesOccurrences = array_count_values($allSuits);
             $score = 0;
@@ -402,8 +404,59 @@ class JustDesserts extends Table
                 }
             }
             $this->updateScore($player_id, $score);
+            $scoresByPlayer[$player_id] = $score;
+        }
+        $tiedPlayers = array_keys($scoresByPlayer, max($scoresByPlayer));
+        if (count($tiedPlayers) > 1) {
+            //if tie on score, we look at desserts cards number in hand
+            $cardsByPlayer = $this->dessertcards->countCardsByLocationArgs(DECK_LOC_HAND);
+            //the ones with most cards win
+            foreach ($cardsByPlayer as $player => $nb) {
+                if (in_array($player, $tiedPlayers)) {
+                    $this->updateTieScore($player, $nb);
+                }
+            }
         }
         $this->reloadScoresAndNotify();
+    }
+
+    function goToTie()
+    {
+        /*
+        $reds = [1, 11, 20, 21];
+        $purples = [2, 4, 15, 24];
+        $blues = [7, 8, 12, 25];
+        $greens = [3, 5, 6, 14];
+        $oranges = [10, 13, 19, 23];
+        $yellows = [16, 17, 18, 22];
+
+        $reds = ["AGENT_17", 'MRS_JENKINS', 'THE_LITTLE_BOY', 'THE_LITTLE_GIRL'];
+        $purples = ['BOB_FRUITCAKE', 'CANDICE', 'THE_ASTRONAUT', 'WALLY'];
+        $blues = ['MARY_ANN', 'MOJO', 'GRANNY', 'THE_PROFESSOR'];
+        $greens = ['BOSTON_GUY', 'FUZZY', 'INGA', 'ROLAND'];
+        $oranges = ['MR_HEALTHY', 'NATURE_GIRL', 'THE_HIPPIE', 'THE_TOURIST'];
+        $yellows = ['THE_DUDE', 'THE_EMPEROR', 'THE_HERMIT', 'THE_LUMBERJACK'];
+        */
+
+        $notWinningSets[] = ["AGENT_17", 'MRS_JENKINS', 'BOB_FRUITCAKE', 'CANDICE', 'BOSTON_GUY', 'FUZZY', 'THE_HIPPIE', 'THE_TOURIST'];
+        $notWinningSets[] = ['THE_LITTLE_BOY', 'THE_LITTLE_GIRL', 'THE_ASTRONAUT', 'WALLY', 'GRANNY', 'THE_PROFESSOR', 'THE_HERMIT', 'THE_LUMBERJACK'];
+        $notWinningSets[] = ['MR_HEALTHY', 'NATURE_GIRL', 'THE_DUDE', 'THE_EMPEROR', 'INGA', 'ROLAND', 'MARY_ANN']; //missing MOJO
+
+        $cards = $this->guestcards->getCardsOfType("MOJO");
+        $this->guestcards->moveCard(array_shift($cards)["id"], DECK_LOC_DISCARD);
+
+        $players = self::loadPlayersBasicInfos();
+        $i = 0;
+        foreach ($players as $player_id => $player) {
+            if ($i < 3) {
+                foreach ($notWinningSets[$i] as $completeType) {
+                    $type = substr($completeType, 0, 16);
+                    $cards = $this->guestcards->getCardsOfType($type);
+                    $this->guestcards->moveCard(array_shift($cards)["id"], DECK_LOC_WON, $player_id);
+                }
+            }
+            $i++;
+        }
     }
 
     function updateScores($winner_id)
@@ -422,6 +475,12 @@ class JustDesserts extends Table
     function updateScore($player_id, $score)
     {
         $sql = "UPDATE player set player_score=" . $score . " where player_id=" . $player_id;
+        self::DbQuery($sql);
+    }
+
+    function updateTieScore($player_id, $score)
+    {
+        $sql = "UPDATE player set player_score_aux =" . $score . " where player_id=" . $player_id;
         self::DbQuery($sql);
     }
 
