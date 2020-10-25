@@ -35,6 +35,13 @@ if (!defined('DECK_LOC_DECK')) {
     define("NOTIF_NEW_RIVER", "newRiver");
     define("NOTIF_NEW_HAND", "newHand");
     define("NOTIF_NEW_GUEST_WON", "newGuestWon");
+
+    define('TYPE_OF_RULES', 100);
+    define('BASIC_RULES', 1);
+    define('ADVANCED_RULES', 2);
+    define('OPENING_BUFFET', 101);
+    define('ACTIVATED', 1);
+    define('DEACTIVATED', 0);
 }
 
 class JustDesserts extends Table
@@ -51,6 +58,7 @@ class JustDesserts extends Table
 
         self::initGameStateLabels(array(
             "last_discarded_guest_id" => 10,
+            "typeOfRules" => TYPE_OF_RULES,
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
             //      ...
