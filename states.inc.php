@@ -70,6 +70,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("TRANSITION_END_GAME", "endGame");
     define("TRANSITION_BUFFET_OPENED", "buffetOpened");
     define("TRANSITION_BUFFET_GUEST_DISCARDED", "buffetGuestDiscarded");
+    define("TRANSITION_BUFFET_SERVE", "buffetServe");
 }
 
 $machinestates = array(
@@ -100,6 +101,7 @@ $machinestates = array(
             TRANSITION_DISCARD_GUEST_NEEDED => STATE_DISCARD,
             TRANSITION_END_GAME => STATE_END_GAME,
             TRANSITION_BUFFET_OPENED => STATE_BUFFET_DISCARD,
+            TRANSITION_BUFFET_SERVE => STATE_SERVE_SECOND_GUEST,
         )
     ),
 
@@ -124,9 +126,10 @@ $machinestates = array(
 
     STATE_BUFFET_DISCARD => array(
         "name" => "allPlayersDiscardGuest",
-        "description" => clienttranslate('${actplayer} must discard one of your satisfied guests'),
+        "description" => clienttranslate('${actplayer} must discard one satisfied guest'),
         "descriptionmyturn" => clienttranslate('${you}  must discard one of your satisfied guests'),
-        "type" => "multiplayer",
+        "type" => "multipleactiveplayer",
+        "action" => "stMakeOtherActive",
         "possibleactions" => array("discardWonGuest"),
         "transitions" => array(TRANSITION_BUFFET_GUEST_DISCARDED => STATE_SERVE_SECOND_GUEST)
     ),

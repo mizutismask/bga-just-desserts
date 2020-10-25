@@ -58,6 +58,7 @@ class JustDesserts extends Table
 
         self::initGameStateLabels(array(
             "last_discarded_guest_id" => 10,
+            "opening_buffet_player" => 11,
             "type_of_rules" => TYPE_OF_RULES,
             "opening_a_buffet" => OPENING_BUFFET,
             //    "my_first_global_variable" => 10,
@@ -117,6 +118,7 @@ class JustDesserts extends Table
 
         // Init global values with their initial values
         self::setGameStateInitialValue('last_discarded_guest_id', 0);
+        self::setGameStateInitialValue('opening_buffet_player', 0);
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -749,6 +751,7 @@ class JustDesserts extends Table
             }
         }
 
+        self::setGameStateValue("opening_buffet_player", $player_id);
         $this->playDessertCards($cards_id);
         $new_cards = $this->dessertcards->pickCards(3, DECK_LOC_DECK, $player_id);
         // Notify player about his cards
@@ -763,7 +766,13 @@ class JustDesserts extends Table
             'discardedDesserts' => $discardedDesserts,
 
         ));
-        $this->gamestate->nextState(TRANSITION_BUFFET_OPENED);
+
+        $other_players = $this->getOtherPlayers();
+        if (count($other_players) > 0) {
+            $this->gamestate->nextState(TRANSITION_BUFFET_OPENED);
+        } else {
+            $this->gamestate->nextState(TRANSITION_BUFFET_SERVE);
+        }
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -853,6 +862,22 @@ class JustDesserts extends Table
         }
 
         $this->gamestate->nextState(TRANSITION_PLAYER_TURN);
+    }
+
+    /**
+     * Makes the others players active if they have won cards to discard
+     */
+    function stMakeOtherActive()
+    {
+        $other_players = $this->getOtherPlayers();
+        $this->gamestate->setPlayersMultiactive($other_players, TRANSITION_BUFFET_GUEST_DISCARDED, true);
+    }
+
+    function getOtherPlayers()
+    {
+        $player_id = self::getGameStateValue("opening_buffet_player");
+        $other_players = self::getObjectListFromDB("SELECT distinct card_location_arg id FROM guestcard WHERE card_location_arg !=" . $player_id . " and card_location='" . DECK_LOC_WON . "' group by card_location_arg having count(card_type_arg)>0", true);
+        return $other_players;
     }
     //////////////////////////////////////////////////////////////////////////////
     //////////// Zombie

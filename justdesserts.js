@@ -190,7 +190,7 @@ define([
             //                  You can use this method to perform some user interface changes at this moment.
             //
             onEnteringState: function (stateName, args) {
-                //console.log('Entering state: ' + stateName);
+                console.log('Entering state: ' + stateName);
                 switch (stateName) {
 
                     /* Example:
@@ -213,6 +213,13 @@ define([
                     case 'nextPlayer':
                         this.updateCounters(args.args);
                         break;
+                    case 'allPlayersDiscardGuest':
+                        this.guestsOnTable.setSelectionMode(0);
+                        this.guestsDiscard.setSelectionMode(0);
+                        this.playerHand.setSelectionMode(0);
+                        this.wonStocksByPlayerId[this.player_id].setSelectionMode(1);
+                        this.updateCounters(args.args);
+                        break;
                     default:
                         this.guestsOnTable.setSelectionMode(2);
 
@@ -223,7 +230,7 @@ define([
             //                 You can use this method to perform some user interface changes at this moment.
             //
             onLeavingState: function (stateName) {
-                //console.log('Leaving state: ' + stateName);
+                console.log('Leaving state: ' + stateName);
 
                 switch (stateName) {
 
@@ -236,9 +243,11 @@ define([
                         
                         break;
                    */
-
-
-                    case 'dummmy':
+                    case 'allPlayersDiscardGuest':
+                        this.guestsOnTable.setSelectionMode(1);
+                        this.guestsDiscard.setSelectionMode(1);
+                        this.wonStocksByPlayerId[this.player_id].setSelectionMode(0);
+                        this.playerHand.setSelectionMode(2);
                         break;
                 }
             },
@@ -247,7 +256,7 @@ define([
             //                        action status bar (ie: the HTML links in the status bar).
             //        
             onUpdateActionButtons: function (stateName, args) {
-                //console.log('onUpdateActionButtons: ' + stateName);
+                console.log('onUpdateActionButtons: ' + stateName);
 
                 if (this.isCurrentPlayerActive()) {
                     switch (stateName) {
@@ -266,8 +275,12 @@ define([
                         case "playerDiscardGuest":
                             this.addActionButton('button_discard', _('Discard until there is only one guest from each suite'), 'onDiscardGuests');
                             break;
+                        case "allPlayersDiscardGuest":
+                            this.addActionButton('button_discardWonGuest', _('Give back a satisfied guest'), 'onDiscardWonGuest');
+                            break;
                     }
                 }
+
             },
 
             ///////////////////////////////////////////////////
@@ -452,7 +465,7 @@ define([
             },
 
             onOpenBuffet: function (evt) {
-                //console.log('onOpenBuffet');
+                console.log('onOpenBuffet');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
@@ -466,10 +479,37 @@ define([
                             cards_id: selectedDesserts.map(i => i.id).join(";"),
                         },
                         this,
-                        function (result) { }
+                        function (result) {
+                            selectedDesserts.forEach(removed => {
+                                this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
+                                this.playerHand.removeFromStockById(removed.id);
+                            });
+                        }
                     );
                 } else {
                     this.showMessage(_('You have to select four aces to open a buffet'), 'error');
+                }
+            },
+
+            onDiscardWonGuest: function (evt) {
+                console.log('onDiscardWonGuest');
+
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+                this.checkAction('discardWonGuest');
+
+                var selectedGuests = this.wonStocksByPlayerId[this.player_id].getSelectedItems();
+                if (selectedGuests.length == 1) {
+                    this.ajaxcall('/justdesserts/justdesserts/discardWonGuestAction.html',
+                        {
+                            lock: true,
+                            guest_id: selectedGuests[0].id,
+                        },
+                        this,
+                        function (result) { }
+                    );
+                } else {
+                    this.showMessage(_('You have to select one of your satisfied guests'), 'error');
                 }
             },
 
