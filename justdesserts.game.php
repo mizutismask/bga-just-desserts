@@ -139,8 +139,6 @@ class JustDesserts extends Table
     {
         $result = array();
 
-        $result['guestCards'] = $this->guests;
-
         $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
 
         // Get information about players
@@ -151,7 +149,7 @@ class JustDesserts extends Table
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
 
         $result['hand'] = $this->dessertcards->getCardsInLocation(DECK_LOC_HAND, $current_player_id);
-        $result['guestsOnTable'] = $this->improveGuestCards($this->guestcards->getCardsInLocation(DECK_LOC_RIVER));
+        $result['guestsOnTable'] = $this->guestcards->getCardsInLocation(DECK_LOC_RIVER);
 
         //won cards for each player
         $players = self::loadPlayersBasicInfos();
@@ -248,7 +246,7 @@ class JustDesserts extends Table
     {
         $cards = $this->guestcards->pickCardsForLocation($nb, DECK_LOC_DECK, DECK_LOC_RIVER);
         // Notify player about cards on table
-        self::notifyAllPlayers(NOTIF_NEW_RIVER, '', array('cards' => $this->improveGuestCards($cards)));
+        self::notifyAllPlayers(NOTIF_NEW_RIVER, '', array('cards' => $cards));
         return $cards;
     }
 
@@ -312,7 +310,6 @@ class JustDesserts extends Table
         $player_id = self::getActivePlayerId();
         $this->playDessertCards($dessert_cards_id);
         $fromDiscard = $guest["location"] == DECK_LOC_DISCARD;
-        self::dump("guest", $guest);
         $this->guestcards->moveCard($guest["id"], DECK_LOC_WON, $player_id);
         self::incStat(1, "guests_number", $player_id);
 
@@ -494,16 +491,6 @@ class JustDesserts extends Table
         ));
     }
 
-    function improveGuestCards($cards)
-    {
-        foreach ($cards as $card) {
-            $materialCard = $this->getGuestFromMaterialFromCard($card);
-            $card["favourite1Tr"] = $materialCard["name"];
-        }
-        self::dump("*********improved",  $cards);
-        return $cards;
-    }
-
     /**
      * Takes an array and returns an array of duplicate items
      */
@@ -635,7 +622,6 @@ class JustDesserts extends Table
             $color = $guest_to_remove['color'];
             $valuesOccurrences[$color] += -1;
             if (!array_key_exists($color, $pbOccurrences)) {
-                self::trace("$color not found in problematic occurrences");
                 $cardsFromOtherColors = true;
             }
         }

@@ -58,10 +58,9 @@ define([
             */
 
             setup: function (gamedatas) {
-                console.log("Starting game setup");
-                console.log(gamedatas);
+                //console.log("Starting game setup");
+
                 // TODO: Set up your game interface here, according to "gamedatas"
-                this.guestCards = gamedatas.guestCards;
 
                 //---------- Player hand setup
                 this.playerHand = new ebg.stock(); // new stock object for hand
@@ -76,7 +75,7 @@ define([
 
                 for (var card_id in gamedatas.hand) {
                     var card = gamedatas.hand[card_id];
-                    console.log("ajout dans la main de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    //console.log("ajout dans la main de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.playerHand.addToStockWithId(card.type_arg, card.id);
                 }
 
@@ -95,7 +94,7 @@ define([
 
                 for (var card_id in gamedatas.guestsOnTable) {
                     var card = gamedatas.guestsOnTable[card_id];
-                    console.log("ajout dans les guests de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    //console.log("ajout dans les guests de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.guestsOnTable.addToStockWithId(card.type_arg, card.id);
                     this.addCardToolTip(this.guestsOnTable, card.id);
                 }
@@ -113,7 +112,7 @@ define([
 
                 var lastDiscardedGuest = gamedatas.lastDiscardedGuest;
                 if (lastDiscardedGuest) {
-                    console.log("ajout dans la defausse de la carte id/type/type arg :" + lastDiscardedGuest.id + " " + lastDiscardedGuest.type + " " + lastDiscardedGuest.type_arg);
+                    //console.log("ajout dans la defausse de la carte id/type/type arg :" + lastDiscardedGuest.id + " " + lastDiscardedGuest.type + " " + lastDiscardedGuest.type_arg);
                     this.guestsDiscard.addToStockWithId(lastDiscardedGuest.type_arg, lastDiscardedGuest.id);
                     this.addCardToolTip(this.guestsDiscard, lastDiscardedGuest.id);
                     dojo.removeClass("guest_discard", "jd_empty");
@@ -139,7 +138,7 @@ define([
                     var cards = gamedatas.won[player_id];
                     for (var card_id in cards) {
                         var card = cards[card_id];
-                        console.log("ajout dans les cartes gagnées de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                        //console.log("ajout dans les cartes gagnées de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                         playerWonCards.addToStockWithId(card.type_arg, card.id);
                         this.addCardToolTip(playerWonCards, card.id);
                     }
@@ -171,14 +170,14 @@ define([
 
                 for (var card_id in gamedatas.discardedDesserts) {
                     var card = gamedatas.discardedDesserts[card_id];
-                    console.log("ajout dans la liste de défausse de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    //console.log("ajout dans la liste de défausse de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.discardedDesserts.addToStockWithId(card.type_arg, card.id);
                 }
 
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
-                console.log("Ending game setup");
+                //console.log("Ending game setup");
             },
 
 
@@ -189,7 +188,7 @@ define([
             //                  You can use this method to perform some user interface changes at this moment.
             //
             onEnteringState: function (stateName, args) {
-                console.log('Entering state: ' + stateName);
+                //console.log('Entering state: ' + stateName);
                 switch (stateName) {
 
                     /* Example:
@@ -222,7 +221,7 @@ define([
             //                 You can use this method to perform some user interface changes at this moment.
             //
             onLeavingState: function (stateName) {
-                console.log('Leaving state: ' + stateName);
+                //console.log('Leaving state: ' + stateName);
 
                 switch (stateName) {
 
@@ -246,22 +245,10 @@ define([
             //                        action status bar (ie: the HTML links in the status bar).
             //        
             onUpdateActionButtons: function (stateName, args) {
-                console.log('onUpdateActionButtons: ' + stateName);
+                //console.log('onUpdateActionButtons: ' + stateName);
 
                 if (this.isCurrentPlayerActive()) {
                     switch (stateName) {
-                        /*               
-                                         Example:
-                         
-                                         case 'myGameState':
-                                            
-                                            // Add 3 action buttons in the action status bar:
-                                            
-                                            this.addActionButton( 'button_1_id', _('Button 1 label'), 'onMyMethodToCall1' ); 
-                                            this.addActionButton( 'button_2_id', _('Button 2 label'), 'onMyMethodToCall2' ); 
-                                            this.addActionButton( 'button_3_id', _('Button 3 label'), 'onMyMethodToCall3' ); 
-                                            break;
-                        */
                         case "playerTurn":
                             this.addActionButton('button_serve', _('Serve a guest'), 'onServeGuest');
                             this.addActionButton('button_draw', _('Draw a dessert'), 'onDraw');
@@ -307,7 +294,7 @@ define([
             */
 
             onDraw: function (evt) {
-                console.log('onDraw');
+                //console.log('onDraw');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
@@ -323,7 +310,7 @@ define([
             },
 
             onExchange: function (evt) {
-                console.log('onExchange');
+                //console.log('onExchange');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
@@ -351,7 +338,7 @@ define([
             },
 
             onServeGuest: function (evt) {
-                console.log('onServeGuest');
+                //console.log('onServeGuest');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
@@ -384,7 +371,7 @@ define([
             },
 
             onServeSecondGuest: function (evt) {
-                console.log('onServeSecondGuest');
+                //console.log('onServeSecondGuest');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
@@ -418,7 +405,7 @@ define([
             },
 
             onDiscardGuests: function (evt) {
-                console.log('onDiscardGuests');
+                //console.log('onDiscardGuests');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
@@ -442,7 +429,7 @@ define([
 
 
             onPass: function (evt) {
-                console.log('onPass');
+                //console.log('onPass');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
@@ -458,26 +445,6 @@ define([
                 }
 
             },
-
-            onDessertSelectionChangeFunction: function (evt) {
-                var items = this.playerHand.getSelectedItems();
-                if (items.length > 0) {
-                    console.log('Selected desserts ' + items.map(i => i.id).join());
-                }
-            },
-            onGuestSelectionChangeFunction: function (evt) {
-                var items = this.guestsOnTable.getSelectedItems();
-                if (items.length > 0) {
-                    console.log('Selected guests ' + items.map(i => i.id).join());
-                }
-            },
-            onGuestsDiscardSelectionChangeFunction: function (evt) {
-                var items = this.guestsDiscard.getSelectedItems();
-                if (items.length > 0) {
-                    console.log('Selected discarded guests ' + items.map(i => i.id).join());
-                }
-            },
-
 
             /* Example:
             
@@ -527,8 +494,6 @@ define([
             
             */
             setupNotifications: function () {
-                console.log('notifications subscriptions setup');
-
                 // TODO: here, associate your game notifications with local methods
 
                 // Example 1: standard notification handling
@@ -546,10 +511,6 @@ define([
                 dojo.subscribe('newGuestWon', this, "notif_newGuestWon");
                 dojo.subscribe('updateScore', this, "notif_updateScore");
                 dojo.subscribe('discardedDesserts', this, "notif_discardedDesserts");
-
-                dojo.connect(this.playerHand, 'onChangeSelection', this, "onDessertSelectionChangeFunction");
-                dojo.connect(this.guestsOnTable, 'onChangeSelection', this, "onGuestSelectionChangeFunction");
-                dojo.connect(this.guestsDiscard, 'onChangeSelection', this, "onGuestsDiscardSelectionChangeFunction");
             },
 
             // TODO: from this point and below, you can write your game notifications handling methods
@@ -572,39 +533,36 @@ define([
 
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
-                    console.log("notif_newHand card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    //console.log("notif_newHand card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.playerHand.addToStockWithId(card.type_arg, card.id, 'guest_draw');
                 }
             },
 
             notif_newRiver: function (notif) {
-                console.log(notif.args.cards);
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
-                    console.log("notif_newRiver card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    //console.log("notif_newRiver card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.guestsOnTable.addToStockWithId(card.type_arg, card.id, 'guest_draw');
                     this.addCardToolTip(this.guestsOnTable, card.id);
                 }
             },
 
             notif_discardedGuests: function (notif) {
-                console.log(notif.args);
                 var card = notif.args.newGuestOnTopOfDiscard;
                 this.newGuestOnTopOfDiscard(card, 'guests_on_table');
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
-                    console.log("notif_discardedGuests card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    //console.log("notif_discardedGuests card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.guestsOnTable.removeFromStockById(card.id);
                 }
             },
 
             notif_discardedDesserts: function (notif) {
-                console.log(notif.args);
                 //the active player display has already been refreshed
                 if (this.playerID != notif.args.player_id) {
                     for (var i in notif.args.discardedDesserts) {
                         var card = notif.args.discardedDesserts[i];
-                        console.log("notif_discardedDesserts card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                        // console.log("notif_discardedDesserts card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                         this.discardedDesserts.addToStockWithId(card.type_arg, card.id, 'overall_player_board_' + notif.args.player_id);
                     }
                 }
@@ -614,7 +572,7 @@ define([
                 var card = notif.args.card;
                 var player_id = notif.args.player_id;
                 var from_discard = notif.args.fromDiscard;
-                console.log("notif_newGuestWon card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                //console.log("notif_newGuestWon card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
 
                 this.wonStocksByPlayerId[player_id].addToStockWithId(card.type_arg, card.id, from_discard ? 'guest_discard' : 'guests_on_table');
                 this.addCardToolTip(this.wonStocksByPlayerId[player_id], card.id);
@@ -633,7 +591,7 @@ define([
                 dojo.addClass("guest_discard", "jd_empty");
                 if (card) {
                     dojo.removeClass("guest_discard", "jd_empty");
-                    console.log("newGuestOnTopOfDiscard card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    //console.log("newGuestOnTopOfDiscard card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     if (from) {
                         this.guestsDiscard.addToStockWithId(card.type_arg, card.id, from);
                     }
