@@ -87,13 +87,15 @@ class view_justdesserts_justdesserts extends game_view
     // this will inflate our player block with actual players data
     $this->page->begin_block($template, "player");
 
-    //starting with the active player
-    $this->page->insert_block("player", array(
-      "PLAYER_ID" => $active_player_id,
-      "PLAYER_NAME" => $players[$active_player_id]['player_name'],
-      "PLAYER_COLOR" => $players[$active_player_id]['player_color'],
-      "PLAYER_NAME_WON_CARDS_TITLE" => $players[$active_player_id]['player_name'],
-    ));
+    //starting with the active player if he’s not a spectator
+    if (key_exists($active_player_id, $players)) {
+      $this->page->insert_block("player", array(
+        "PLAYER_ID" => $active_player_id,
+        "PLAYER_NAME" => $players[$active_player_id]['player_name'],
+        "PLAYER_COLOR" => $players[$active_player_id]['player_color'],
+        "PLAYER_NAME_WON_CARDS_TITLE" => $players[$active_player_id]['player_name'],
+      ));
+    }
 
     //then the other players
     foreach ($players as $player_id => $info) {
