@@ -112,6 +112,16 @@ class action_justdesserts extends APP_GameAction
     self::ajaxResponse();
   }
 
+  public function openBuffetAction()
+  {
+    self::setAjaxMode();
+    $cards_id = self::getArg("cards_id", AT_numberlist, true);
+    $cards_id = $this->convertStringToArray($cards_id);
+    $this->game->openBuffet($cards_id);
+
+    self::ajaxResponse();
+  }
+
   function convertStringToArray($card_ids_raw)
   {
     // Removing last ';' if exists

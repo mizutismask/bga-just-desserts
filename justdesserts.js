@@ -59,8 +59,10 @@ define([
 
             setup: function (gamedatas) {
                 //console.log("Starting game setup");
+                console.log(gamedatas);
 
                 // TODO: Set up your game interface here, according to "gamedatas"
+                this.isOpeningABuffetOn = gamedatas.isOpeningABuffetOn;
 
                 //---------- Player hand setup
                 this.playerHand = new ebg.stock(); // new stock object for hand
@@ -177,7 +179,7 @@ define([
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
-                //console.log("Ending game setup");
+                console.log("Ending game setup");
             },
 
 
@@ -253,6 +255,9 @@ define([
                             this.addActionButton('button_serve', _('Serve a guest'), 'onServeGuest');
                             this.addActionButton('button_draw', _('Draw a dessert'), 'onDraw');
                             this.addActionButton('button_exchange', _('Swap desserts'), 'onExchange');
+                            if (this.isOpeningABuffetOn) {
+                                this.addActionButton('button_openBuffet', _('Open a buffet'), 'onOpenBuffet');
+                            }
                             break;
                         case "serveSecondGuest":
                             this.addActionButton('button_serve_second_guest', _('Serve another guest'), 'onServeSecondGuest');
@@ -445,6 +450,30 @@ define([
                 }
 
             },
+
+            onOpenBuffet: function (evt) {
+                //console.log('onOpenBuffet');
+
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+                this.checkAction('openBuffet');
+
+                var selectedDesserts = this.playerHand.getSelectedItems();
+                if (selectedDesserts.length == 4) {
+                    this.ajaxcall('/justdesserts/justdesserts/openBuffetAction.html',
+                        {
+                            lock: true,
+                            cards_id: selectedDesserts.map(i => i.id).join(";"),
+                        },
+                        this,
+                        function (result) { }
+                    );
+                } else {
+                    this.showMessage(_('You have to select four aces to open a buffet'), 'error');
+                }
+            },
+
+
 
             /* Example:
             

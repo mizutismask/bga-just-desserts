@@ -169,6 +169,7 @@ class JustDesserts extends Table
         $result['lastDiscardedGuest'] = $this->guestcards->getCardOnTop(DECK_LOC_DISCARD);
         $result['discardedDesserts'] = $this->dessertcards->getCardsInLocation(DECK_LOC_DISCARD);
         $result['counters'] = $this->argNbrCardsInHand();
+        $result['isOpeningABuffetOn'] = $this->isOpeningABuffetOn();
         return $result;
     }
 
@@ -537,6 +538,11 @@ class JustDesserts extends Table
         return $this->guests[$guest["type_arg"]];
     }
 
+    private function getDessertFromMaterialFromCard($dessert)
+    {
+        return $this->desserts[$dessert["type_arg"]];
+    }
+
     private function getGuestsFromMaterialByCards($guests)
     {
         $guestsFromMaterial = array();
@@ -544,6 +550,15 @@ class JustDesserts extends Table
             $guestsFromMaterial[] = $this->getGuestFromMaterialFromCard($guest);
         }
         return $guestsFromMaterial;
+    }
+
+    private function getDessertsFromMaterialByCards($desserts)
+    {
+        $fromMaterial = array();
+        foreach ($desserts as $guest) {
+            $fromMaterial[] = $this->getDessertFromMaterialFromCard($guest);
+        }
+        return $fromMaterial;
     }
 
     private function getGuestsFromMaterialByIds($guest_ids)
@@ -559,6 +574,17 @@ class JustDesserts extends Table
             $cards[] = $this->dessertcards->getCard($card_id);
         }
         return $cards;
+    }
+
+    private function getDessertsFromMaterialByIds($desserts_ids)
+    {
+        $cards = $this->dessertcards->getCards($desserts_ids);
+        return $this->getDessertsFromMaterialByCards($cards);
+    }
+
+    function isOpeningABuffetOn()
+    {
+        return self::getGameStateValue('opening_a_buffet') == ACTIVATED;
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -707,6 +733,38 @@ class JustDesserts extends Table
         $this->goToDiscardIfNeededOrGoTo(TRANSITION_PASSED);
     }
 
+
+    /***************************** Opening a buffet ****************************/
+
+
+    function openBuffet($cards_id)
+    {
+        self::checkAction('openBuffet');
+        $player_id = self::getActivePlayerId();
+
+        $dessertsFromMaterial = $this->getDessertsFromMaterialByIds($cards_id);
+        foreach ($dessertsFromMaterial as $dessert) {
+            if (count($dessert["tastes"]) != 1) {
+                throw new BgaUserException(self::_("You can use only one ingredient desserts to open a buffet"));
+            }
+        }
+
+        $this->playDessertCards($cards_id);
+        $new_cards = $this->dessertcards->pickCards(3, DECK_LOC_DECK, $player_id);
+        // Notify player about his cards
+        self::notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $new_cards));
+        self::incStat(1, "opened_buffets_number", $player_id);
+
+        //notify everyone about discarded desserts
+        $discardedDesserts = $this->getDessertCardsFromIds($cards_id);
+        self::notifyAllPlayers(NOTIF_DISCARDED_DESSERTS, clienttranslate('${player_name} opens a buffet and discards four aces'), array(
+            'player_name' => self::getActivePlayerName(),
+            'player_id' => $player_id,
+            'discardedDesserts' => $discardedDesserts,
+
+        ));
+        $this->gamestate->nextState(TRANSITION_BUFFET_OPENED);
+    }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments
