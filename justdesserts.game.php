@@ -760,7 +760,7 @@ class JustDesserts extends Table
 
         //notify everyone about discarded desserts
         $discardedDesserts = $this->getDessertCardsFromIds($cards_id);
-        self::notifyAllPlayers(NOTIF_DISCARDED_DESSERTS, clienttranslate('${player_name} opens a buffet and discards four aces'), array(
+        self::notifyAllPlayers(NOTIF_DISCARDED_DESSERTS, clienttranslate('${player_name} opens a buffet and gets 3 desserts'), array(
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
             'discardedDesserts' => $discardedDesserts,
@@ -773,6 +773,25 @@ class JustDesserts extends Table
         } else {
             $this->gamestate->nextState(TRANSITION_BUFFET_SERVE);
         }
+    }
+
+    /**
+     * A won guest discarded is going on the table.
+     */
+    function discardWonGuest($guest_id)
+    {
+        self::checkAction('discardWonGuest');
+        $this->guestcards->moveCard($guest_id, DECK_LOC_RIVER);
+
+        $guestName = $this->getGuestFromMaterial($guest_id)["name"];
+        self::notifyAllPlayers(NOTIF_NEW_RIVER,  clienttranslate('${player_name} discards ${card_name}'), array(
+            'cards' => [$this->guestcards->getCard($guest_id)],
+            'from_player_id' => self::getCurrentPlayerId(),
+            'player_name' => self::getCurrentPlayerName(),
+            'card_name' => $guestName,
+        ));
+
+        $this->gamestate->setPlayerNonMultiactive(self::getCurrentPlayerId(), TRANSITION_BUFFET_GUEST_DISCARDED);
     }
 
     //////////////////////////////////////////////////////////////////////////////

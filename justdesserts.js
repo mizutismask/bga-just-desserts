@@ -506,7 +506,7 @@ define([
                             guest_id: selectedGuests[0].id,
                         },
                         this,
-                        function (result) { }
+                        function (result) { this.wonStocksByPlayerId[this.player_id].removeFromStockById(selectedGuests[0].id); }
                     );
                 } else {
                     this.showMessage(_('You have to select one of your satisfied guests'), 'error');
@@ -611,7 +611,14 @@ define([
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
                     //console.log("notif_newRiver card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
-                    this.guestsOnTable.addToStockWithId(card.type_arg, card.id, 'guest_draw');
+                    $from = 'guest_draw';
+                    if (notif.args.from_player_id) {
+                        $from = "guest_" + notif.args.from_player_id;
+                    }
+                    this.guestsOnTable.addToStockWithId(card.type_arg, card.id, $from);
+                    if (notif.args.from_player_id) {
+                        this.wonStocksByPlayerId[notif.args.from_player_id].removeFromStockById(card.id);
+                    }
                     this.addCardToolTip(this.guestsOnTable, card.id);
                 }
             },
