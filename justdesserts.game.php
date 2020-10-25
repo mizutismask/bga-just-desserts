@@ -58,7 +58,8 @@ class JustDesserts extends Table
 
         self::initGameStateLabels(array(
             "last_discarded_guest_id" => 10,
-            "typeOfRules" => TYPE_OF_RULES,
+            "type_of_rules" => TYPE_OF_RULES,
+            "opening_a_buffet" => OPENING_BUFFET,
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
             //      ...
