@@ -23,30 +23,42 @@
  * !! It is not a good idea to modify this file when a game is running !!
  *
  */
+if (!defined('TYPE_OF_RULES')) {
+    define('TYPE_OF_RULES', 100);
+    define('BASIC_RULES', 1);
+    define('ADVANCED_RULES', 2);
+    define('OPENING_BUFFET', 101);
+    define('ACTIVATED', 1);
+    define('DEACTIVATED', 0);
+}
 
 $game_options = array(
 
-    /*
-    
     // note: game variant ID should start at 100 (ie: 100, 101, 102, ...). The maximum is 199.
-    100 => array(
-                'name' => totranslate('my game option'),    
-                'values' => array(
+    TYPE_OF_RULES => array(
+        'name' => totranslate('Rules'),
+        'values' => array(
+            BASIC_RULES => array('name' => totranslate('Basic rules')),
+            ADVANCED_RULES => array('name' => totranslate('Advanced rules')),
+        ),
+        'default' => BASIC_RULES
+    ),
+    OPENING_BUFFET => array(
+        'name' => totranslate('Opening a buffet'),
+        'values' => array(
 
-                            // A simple value for this option:
-                            1 => array( 'name' => totranslate('option 1') )
+            // A simple value for this option:
+            ACTIVATED => array('name' => totranslate('Yes')),
+            DEACTIVATED => array('name' => totranslate('No')),
+        ),
+        'displaycondition' => [
+            [
+                'type' => 'otheroption',
+                'id' => TYPE_OF_RULES,
+                'value' => ADVANCED_RULES,
+            ],
+        ],
+    ),
 
-                            // A simple value for this option.
-                            // If this value is chosen, the value of "tmdisplay" is displayed in the game lobby
-                            2 => array( 'name' => totranslate('option 2'), 'tmdisplay' => totranslate('option 2') ),
 
-                            // Another value, with other options:
-                            //  description => this text will be displayed underneath the option when this value is selected to explain what it does
-                            //  beta=true => this option is in beta version right now.
-                            //  nobeginner=true  =>  this option is not recommended for beginners
-                            3 => array( 'name' => totranslate('option 3'), 'description' => totranslate('this option does X'), 'beta' => true, 'nobeginner' => true )
-                        ),
-                'default' => 1
-            ),
-
-    */);
+);

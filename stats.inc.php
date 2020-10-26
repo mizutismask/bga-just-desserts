@@ -92,6 +92,12 @@ $stats_type = array(
             "type" => "int"
         ),
 
+        "opened_buffets_number" => array(
+            "id" => 14,
+            "name" => totranslate("Opened buffets"),
+            "type" => "int"
+        ),
+
 
         /*
         Examples:    

@@ -35,6 +35,16 @@ if (!defined('DECK_LOC_DECK')) {
     define("NOTIF_NEW_RIVER", "newRiver");
     define("NOTIF_NEW_HAND", "newHand");
     define("NOTIF_NEW_GUEST_WON", "newGuestWon");
+
+    define('TYPE_OF_RULES', 100);
+    define('BASIC_RULES', 1);
+    define('ADVANCED_RULES', 2);
+    define('OPENING_BUFFET', 101);
+    define('ACTIVATED', 1);
+    define('DEACTIVATED', 0);
+
+    define('GS_LAST_DISCARDED_GUEST_ID', "last_discarded_guest_id");
+    define('GS_OPENING_BUFFET_PLAYER', "opening_buffet_player");
 }
 
 class JustDesserts extends Table
@@ -50,7 +60,10 @@ class JustDesserts extends Table
         parent::__construct();
 
         self::initGameStateLabels(array(
-            "last_discarded_guest_id" => 10,
+            GS_LAST_DISCARDED_GUEST_ID => 10,
+            GS_OPENING_BUFFET_PLAYER => 11,
+            "type_of_rules" => TYPE_OF_RULES,
+            "opening_a_buffet" => OPENING_BUFFET,
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
             //      ...
@@ -107,7 +120,8 @@ class JustDesserts extends Table
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        self::setGameStateInitialValue('last_discarded_guest_id', 0);
+        self::setGameStateInitialValue(GS_LAST_DISCARDED_GUEST_ID, 0);
+        self::setGameStateInitialValue(GS_OPENING_BUFFET_PLAYER, 0);
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -116,6 +130,7 @@ class JustDesserts extends Table
         self::initStat('player', 'turns_number', 0);
         self::initStat('player', 'player_tips_number', 0);
         self::initStat('player', 'player_swaps_number', 0);
+        self::initStat('player', 'opened_buffets_number', 0);
 
         self::setupGuestsDeck($players);
         self::setupDessertsDeck($players);
@@ -160,6 +175,7 @@ class JustDesserts extends Table
         $result['lastDiscardedGuest'] = $this->guestcards->getCardOnTop(DECK_LOC_DISCARD);
         $result['discardedDesserts'] = $this->dessertcards->getCardsInLocation(DECK_LOC_DISCARD);
         $result['counters'] = $this->argNbrCardsInHand();
+        $result['isOpeningABuffetOn'] = $this->isOpeningABuffetOn();
         return $result;
     }
 
@@ -232,7 +248,7 @@ class JustDesserts extends Table
     /** Reset the last discarded guest on top of discard. */
     function deckAutoReshuffle()
     {
-        $card_id = self::getGameStateValue('last_discarded_guest_id');
+        $card_id = self::getGameStateValue(GS_LAST_DISCARDED_GUEST_ID);
         if ($card_id) {
             $card = $this->guestcards->getCard($card_id);
             //if card was not won since
@@ -506,7 +522,7 @@ class JustDesserts extends Table
             $this->guestcards->playCard($card_id);
             $last_card_id =  $card_id;
         }
-        self::setGameStateValue('last_discarded_guest_id', $last_card_id);
+        self::setGameStateValue(GS_LAST_DISCARDED_GUEST_ID, $last_card_id);
     }
 
     function playDessertCards($cards_id)
@@ -528,6 +544,11 @@ class JustDesserts extends Table
         return $this->guests[$guest["type_arg"]];
     }
 
+    private function getDessertFromMaterialFromCard($dessert)
+    {
+        return $this->desserts[$dessert["type_arg"]];
+    }
+
     private function getGuestsFromMaterialByCards($guests)
     {
         $guestsFromMaterial = array();
@@ -535,6 +556,15 @@ class JustDesserts extends Table
             $guestsFromMaterial[] = $this->getGuestFromMaterialFromCard($guest);
         }
         return $guestsFromMaterial;
+    }
+
+    private function getDessertsFromMaterialByCards($desserts)
+    {
+        $fromMaterial = array();
+        foreach ($desserts as $guest) {
+            $fromMaterial[] = $this->getDessertFromMaterialFromCard($guest);
+        }
+        return $fromMaterial;
     }
 
     private function getGuestsFromMaterialByIds($guest_ids)
@@ -550,6 +580,17 @@ class JustDesserts extends Table
             $cards[] = $this->dessertcards->getCard($card_id);
         }
         return $cards;
+    }
+
+    private function getDessertsFromMaterialByIds($desserts_ids)
+    {
+        $cards = $this->dessertcards->getCards($desserts_ids);
+        return $this->getDessertsFromMaterialByCards($cards);
+    }
+
+    function isOpeningABuffetOn()
+    {
+        return self::getGameStateValue('opening_a_buffet') == ACTIVATED;
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -699,6 +740,64 @@ class JustDesserts extends Table
     }
 
 
+    /***************************** Opening a buffet ****************************/
+
+
+    function openBuffet($cards_id)
+    {
+        self::checkAction('openBuffet');
+        $player_id = self::getActivePlayerId();
+
+        $dessertsFromMaterial = $this->getDessertsFromMaterialByIds($cards_id);
+        foreach ($dessertsFromMaterial as $dessert) {
+            if (count($dessert["tastes"]) != 1) {
+                throw new BgaUserException(self::_("You can use only one ingredient desserts to open a buffet"));
+            }
+        }
+
+        self::setGameStateValue(GS_OPENING_BUFFET_PLAYER, $player_id);
+        $this->playDessertCards($cards_id);
+        $new_cards = $this->dessertcards->pickCards(3, DECK_LOC_DECK, $player_id);
+        // Notify player about his cards
+        self::notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $new_cards));
+        self::incStat(1, "opened_buffets_number", $player_id);
+
+        //notify everyone about discarded desserts
+        $discardedDesserts = $this->getDessertCardsFromIds($cards_id);
+        self::notifyAllPlayers(NOTIF_DISCARDED_DESSERTS, clienttranslate('${player_name} opens a buffet and gets 3 desserts'), array(
+            'player_name' => self::getActivePlayerName(),
+            'player_id' => $player_id,
+            'discardedDesserts' => $discardedDesserts,
+
+        ));
+
+        $other_players = $this->getOtherPlayersHavingWonCards();
+        if (count($other_players) > 0) {
+            $this->gamestate->nextState(TRANSITION_BUFFET_OPENED);
+        } else {
+            $this->gamestate->nextState(TRANSITION_BUFFET_SERVE);
+        }
+    }
+
+    /**
+     * A won guest discarded is going on the table.
+     */
+    function discardWonGuest($guest_id)
+    {
+        self::checkAction('discardWonGuest');
+        $this->guestcards->moveCard($guest_id, DECK_LOC_RIVER);
+
+        $guestName = $this->getGuestFromMaterial($guest_id)["name"];
+        self::notifyAllPlayers(NOTIF_NEW_RIVER,  clienttranslate('${player_name} discards ${card_name}'), array(
+            'cards' => [$this->guestcards->getCard($guest_id)],
+            'from_player_id' => self::getCurrentPlayerId(),
+            'player_name' => self::getCurrentPlayerName(),
+            'card_name' => $guestName,
+        ));
+
+        $this->gamestate->setPlayerNonMultiactive(self::getCurrentPlayerId(), TRANSITION_BUFFET_GUEST_DISCARDED);
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state arguments
     ////////////
@@ -786,6 +885,22 @@ class JustDesserts extends Table
         }
 
         $this->gamestate->nextState(TRANSITION_PLAYER_TURN);
+    }
+
+    /**
+     * Makes the others players active if they have won cards to discard
+     */
+    function stMakeOtherActive()
+    {
+        $other_players = $this->getOtherPlayers();
+        $this->gamestate->setPlayersMultiactive($other_players, TRANSITION_BUFFET_GUEST_DISCARDED, true);
+    }
+
+    function getOtherPlayers()
+    {
+        $player_id = self::getGameStateValue(GS_OPENING_BUFFET_PLAYER);
+        $other_players = self::getObjectListFromDB("SELECT distinct card_location_arg id FROM guestcard WHERE card_location_arg !=" . $player_id . " and card_location='" . DECK_LOC_WON . "' group by card_location_arg having count(card_type_arg)>0", true);
+        return $other_players;
     }
     //////////////////////////////////////////////////////////////////////////////
     //////////// Zombie

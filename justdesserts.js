@@ -59,8 +59,10 @@ define([
 
             setup: function (gamedatas) {
                 //console.log("Starting game setup");
+                console.log(gamedatas);
 
                 // TODO: Set up your game interface here, according to "gamedatas"
+                this.isOpeningABuffetOn = gamedatas.isOpeningABuffetOn;
 
                 //---------- Player hand setup
                 this.playerHand = new ebg.stock(); // new stock object for hand
@@ -177,7 +179,7 @@ define([
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
-                //console.log("Ending game setup");
+                console.log("Ending game setup");
             },
 
 
@@ -188,7 +190,7 @@ define([
             //                  You can use this method to perform some user interface changes at this moment.
             //
             onEnteringState: function (stateName, args) {
-                //console.log('Entering state: ' + stateName);
+                console.log('Entering state: ' + stateName);
                 switch (stateName) {
 
                     /* Example:
@@ -211,6 +213,13 @@ define([
                     case 'nextPlayer':
                         this.updateCounters(args.args);
                         break;
+                    case 'allPlayersDiscardGuest':
+                        this.guestsOnTable.setSelectionMode(0);
+                        this.guestsDiscard.setSelectionMode(0);
+                        this.playerHand.setSelectionMode(0);
+                        this.wonStocksByPlayerId[this.player_id].setSelectionMode(1);
+                        this.updateCounters(args.args);
+                        break;
                     default:
                         this.guestsOnTable.setSelectionMode(2);
 
@@ -221,7 +230,7 @@ define([
             //                 You can use this method to perform some user interface changes at this moment.
             //
             onLeavingState: function (stateName) {
-                //console.log('Leaving state: ' + stateName);
+                console.log('Leaving state: ' + stateName);
 
                 switch (stateName) {
 
@@ -234,9 +243,11 @@ define([
                         
                         break;
                    */
-
-
-                    case 'dummmy':
+                    case 'allPlayersDiscardGuest':
+                        this.guestsOnTable.setSelectionMode(1);
+                        this.guestsDiscard.setSelectionMode(1);
+                        this.wonStocksByPlayerId[this.player_id].setSelectionMode(0);
+                        this.playerHand.setSelectionMode(2);
                         break;
                 }
             },
@@ -245,7 +256,7 @@ define([
             //                        action status bar (ie: the HTML links in the status bar).
             //        
             onUpdateActionButtons: function (stateName, args) {
-                //console.log('onUpdateActionButtons: ' + stateName);
+                console.log('onUpdateActionButtons: ' + stateName);
 
                 if (this.isCurrentPlayerActive()) {
                     switch (stateName) {
@@ -253,6 +264,9 @@ define([
                             this.addActionButton('button_serve', _('Serve a guest'), 'onServeGuest');
                             this.addActionButton('button_draw', _('Draw a dessert'), 'onDraw');
                             this.addActionButton('button_exchange', _('Swap desserts'), 'onExchange');
+                            if (this.isOpeningABuffetOn) {
+                                this.addActionButton('button_openBuffet', _('Open a buffet'), 'onOpenBuffet');
+                            }
                             break;
                         case "serveSecondGuest":
                             this.addActionButton('button_serve_second_guest', _('Serve another guest'), 'onServeSecondGuest');
@@ -261,8 +275,12 @@ define([
                         case "playerDiscardGuest":
                             this.addActionButton('button_discard', _('Discard until there is only one guest from each suite'), 'onDiscardGuests');
                             break;
+                        case "allPlayersDiscardGuest":
+                            this.addActionButton('button_discardWonGuest', _('Give back a satisfied guest'), 'onDiscardWonGuest');
+                            break;
                     }
                 }
+
             },
 
             ///////////////////////////////////////////////////
@@ -446,6 +464,57 @@ define([
 
             },
 
+            onOpenBuffet: function (evt) {
+                console.log('onOpenBuffet');
+
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+                this.checkAction('openBuffet');
+
+                var selectedDesserts = this.playerHand.getSelectedItems();
+                if (selectedDesserts.length == 4) {
+                    this.ajaxcall('/justdesserts/justdesserts/openBuffetAction.html',
+                        {
+                            lock: true,
+                            cards_id: selectedDesserts.map(i => i.id).join(";"),
+                        },
+                        this,
+                        function (result) {
+                            selectedDesserts.forEach(removed => {
+                                this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
+                                this.playerHand.removeFromStockById(removed.id);
+                            });
+                        }
+                    );
+                } else {
+                    this.showMessage(_('You have to select four aces to open a buffet'), 'error');
+                }
+            },
+
+            onDiscardWonGuest: function (evt) {
+                console.log('onDiscardWonGuest');
+
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+                this.checkAction('discardWonGuest');
+
+                var selectedGuests = this.wonStocksByPlayerId[this.player_id].getSelectedItems();
+                if (selectedGuests.length == 1) {
+                    this.ajaxcall('/justdesserts/justdesserts/discardWonGuestAction.html',
+                        {
+                            lock: true,
+                            guest_id: selectedGuests[0].id,
+                        },
+                        this,
+                        function (result) { this.wonStocksByPlayerId[this.player_id].removeFromStockById(selectedGuests[0].id); }
+                    );
+                } else {
+                    this.showMessage(_('You have to select one of your satisfied guests'), 'error');
+                }
+            },
+
+
+
             /* Example:
             
             onMyMethodToCall1: function( evt )
@@ -542,7 +611,14 @@ define([
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
                     //console.log("notif_newRiver card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
-                    this.guestsOnTable.addToStockWithId(card.type_arg, card.id, 'guest_draw');
+                    $from = 'guest_draw';
+                    if (notif.args.from_player_id) {
+                        $from = "guest_" + notif.args.from_player_id;
+                    }
+                    this.guestsOnTable.addToStockWithId(card.type_arg, card.id, $from);
+                    if (notif.args.from_player_id) {
+                        this.wonStocksByPlayerId[notif.args.from_player_id].removeFromStockById(card.id);
+                    }
                     this.addCardToolTip(this.guestsOnTable, card.id);
                 }
             },

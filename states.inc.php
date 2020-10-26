@@ -56,6 +56,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_NEXT_PLAYER", 23);
     define("STATE_DISCARD", 24);
     define("STATE_SERVE_SECOND_GUEST", 25);
+    define("STATE_BUFFET_DISCARD", 26);
     define("STATE_END_GAME", 99);
 
     define("TRANSITION_DRAWN", "drawn");
@@ -67,6 +68,9 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("TRANSITION_GUESTS_DISCARDED", "guestsDiscarded");
     define("TRANSITION_PASSED", "passed");
     define("TRANSITION_END_GAME", "endGame");
+    define("TRANSITION_BUFFET_OPENED", "buffetOpened");
+    define("TRANSITION_BUFFET_GUEST_DISCARDED", "buffetGuestDiscarded");
+    define("TRANSITION_BUFFET_SERVE", "buffetServe");
 }
 
 $machinestates = array(
@@ -87,7 +91,7 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} must serve guests, draw a dessert or swap desserts'),
         "descriptionmyturn" => clienttranslate('${you} must choose 1 action'),
         "type" => "activeplayer",
-        "possibleactions" => array("draw", "serve", "swap"),
+        "possibleactions" => array("draw", "serve", "swap", "openBuffet"),
         "args" => "argNbrCardsInHand",
         "transitions" => array(
             TRANSITION_DRAWN => STATE_NEXT_PLAYER,
@@ -95,7 +99,9 @@ $machinestates = array(
             TRANSITION_SECOND_GUEST_SERVED => STATE_NEXT_PLAYER,
             TRANSITION_SWAPPED => STATE_NEXT_PLAYER,
             TRANSITION_DISCARD_GUEST_NEEDED => STATE_DISCARD,
-            TRANSITION_END_GAME => STATE_END_GAME
+            TRANSITION_END_GAME => STATE_END_GAME,
+            TRANSITION_BUFFET_OPENED => STATE_BUFFET_DISCARD,
+            TRANSITION_BUFFET_SERVE => STATE_SERVE_SECOND_GUEST,
         )
     ),
 
@@ -116,6 +122,16 @@ $machinestates = array(
         "type" => "activeplayer",
         "possibleactions" => array("discardGuests"),
         "transitions" => array(TRANSITION_GUESTS_DISCARDED => STATE_NEXT_PLAYER)
+    ),
+
+    STATE_BUFFET_DISCARD => array(
+        "name" => "allPlayersDiscardGuest",
+        "description" => clienttranslate('Others must discard one satisfied guest'),
+        "descriptionmyturn" => clienttranslate('${you}  must discard one of your satisfied guests'),
+        "type" => "multipleactiveplayer",
+        "action" => "stMakeOtherActive",
+        "possibleactions" => array("discardWonGuest"),
+        "transitions" => array(TRANSITION_BUFFET_GUEST_DISCARDED => STATE_SERVE_SECOND_GUEST)
     ),
 
     STATE_SERVE_SECOND_GUEST => array(
