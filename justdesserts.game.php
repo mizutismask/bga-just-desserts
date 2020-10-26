@@ -42,6 +42,9 @@ if (!defined('DECK_LOC_DECK')) {
     define('OPENING_BUFFET', 101);
     define('ACTIVATED', 1);
     define('DEACTIVATED', 0);
+
+    define('GS_LAST_DISCARDED_GUEST_ID', "last_discarded_guest_id");
+    define('GS_OPENING_BUFFET_PLAYER', "opening_buffet_player");
 }
 
 class JustDesserts extends Table
@@ -57,8 +60,8 @@ class JustDesserts extends Table
         parent::__construct();
 
         self::initGameStateLabels(array(
-            "last_discarded_guest_id" => 10,
-            "opening_buffet_player" => 11,
+            GS_LAST_DISCARDED_GUEST_ID => 10,
+            GS_OPENING_BUFFET_PLAYER => 11,
             "type_of_rules" => TYPE_OF_RULES,
             "opening_a_buffet" => OPENING_BUFFET,
             //    "my_first_global_variable" => 10,
@@ -117,8 +120,8 @@ class JustDesserts extends Table
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        self::setGameStateInitialValue('last_discarded_guest_id', 0);
-        self::setGameStateInitialValue('opening_buffet_player', 0);
+        self::setGameStateInitialValue(GS_LAST_DISCARDED_GUEST_ID, 0);
+        self::setGameStateInitialValue(GS_OPENING_BUFFET_PLAYER, 0);
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -245,7 +248,7 @@ class JustDesserts extends Table
     /** Reset the last discarded guest on top of discard. */
     function deckAutoReshuffle()
     {
-        $card_id = self::getGameStateValue('last_discarded_guest_id');
+        $card_id = self::getGameStateValue(GS_LAST_DISCARDED_GUEST_ID);
         if ($card_id) {
             $card = $this->guestcards->getCard($card_id);
             //if card was not won since
@@ -519,7 +522,7 @@ class JustDesserts extends Table
             $this->guestcards->playCard($card_id);
             $last_card_id =  $card_id;
         }
-        self::setGameStateValue('last_discarded_guest_id', $last_card_id);
+        self::setGameStateValue(GS_LAST_DISCARDED_GUEST_ID, $last_card_id);
     }
 
     function playDessertCards($cards_id)
@@ -752,7 +755,7 @@ class JustDesserts extends Table
             }
         }
 
-        self::setGameStateValue("opening_buffet_player", $player_id);
+        self::setGameStateValue(GS_OPENING_BUFFET_PLAYER, $player_id);
         $this->playDessertCards($cards_id);
         $new_cards = $this->dessertcards->pickCards(3, DECK_LOC_DECK, $player_id);
         // Notify player about his cards
@@ -768,7 +771,7 @@ class JustDesserts extends Table
 
         ));
 
-        $other_players = $this->getOtherPlayers();
+        $other_players = $this->getOtherPlayersHavingWonCards();
         if (count($other_players) > 0) {
             $this->gamestate->nextState(TRANSITION_BUFFET_OPENED);
         } else {
@@ -895,7 +898,7 @@ class JustDesserts extends Table
 
     function getOtherPlayers()
     {
-        $player_id = self::getGameStateValue("opening_buffet_player");
+        $player_id = self::getGameStateValue(GS_OPENING_BUFFET_PLAYER);
         $other_players = self::getObjectListFromDB("SELECT distinct card_location_arg id FROM guestcard WHERE card_location_arg !=" . $player_id . " and card_location='" . DECK_LOC_WON . "' group by card_location_arg having count(card_type_arg)>0", true);
         return $other_players;
     }

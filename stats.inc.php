@@ -93,7 +93,7 @@ $stats_type = array(
         ),
 
         "opened_buffets_number" => array(
-            "id" => 13,
+            "id" => 14,
             "name" => totranslate("Opened buffets"),
             "type" => "int"
         ),
