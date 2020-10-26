@@ -478,7 +478,8 @@ class JustDesserts extends Table
         foreach ($players as $player_id => $player) {
             $score = 0;
             if ($player_id == $winner_id) {
-                $score = 100;
+                $nbCards = $this->guestcards->countCardInLocation(DECK_LOC_WON, $winner_id);
+                $score = 100 + $nbCards;
             }
             $this->updateScore($player_id, $score);
         }
