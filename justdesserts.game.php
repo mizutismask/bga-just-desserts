@@ -127,6 +127,7 @@ class JustDesserts extends Table
         self::initStat('player', 'turns_number', 0);
         self::initStat('player', 'player_tips_number', 0);
         self::initStat('player', 'player_swaps_number', 0);
+        self::initStat('player', 'opened_buffets_number', 0);
 
         self::setupGuestsDeck($players);
         self::setupDessertsDeck($players);

@@ -126,7 +126,7 @@ $machinestates = array(
 
     STATE_BUFFET_DISCARD => array(
         "name" => "allPlayersDiscardGuest",
-        "description" => clienttranslate('${actplayer} must discard one satisfied guest'),
+        "description" => clienttranslate('Others must discard one satisfied guest'),
         "descriptionmyturn" => clienttranslate('${you}  must discard one of your satisfied guests'),
         "type" => "multipleactiveplayer",
         "action" => "stMakeOtherActive",
