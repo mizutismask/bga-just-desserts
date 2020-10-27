@@ -36,13 +36,6 @@ if (!defined('DECK_LOC_DECK')) {
     define("NOTIF_NEW_HAND", "newHand");
     define("NOTIF_NEW_GUEST_WON", "newGuestWon");
 
-    define('TYPE_OF_RULES', 100);
-    define('BASIC_RULES', 1);
-    define('ADVANCED_RULES', 2);
-    define('OPENING_BUFFET', 101);
-    define('ACTIVATED', 1);
-    define('DEACTIVATED', 0);
-
     define('GS_LAST_DISCARDED_GUEST_ID', "last_discarded_guest_id");
     define('GS_OPENING_BUFFET_PLAYER', "opening_buffet_player");
 }
@@ -64,6 +57,7 @@ class JustDesserts extends Table
             GS_OPENING_BUFFET_PLAYER => 11,
             "type_of_rules" => TYPE_OF_RULES,
             "opening_a_buffet" => OPENING_BUFFET,
+            "poaching" => POACHING,
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
             //      ...
@@ -131,6 +125,8 @@ class JustDesserts extends Table
         self::initStat('player', 'player_tips_number', 0);
         self::initStat('player', 'player_swaps_number', 0);
         self::initStat('player', 'opened_buffets_number', 0);
+        self::initStat('player', 'poaching_number', 0);
+        self::initStat('player', 'blocking_number', 0);
 
         self::setupGuestsDeck($players);
         self::setupDessertsDeck($players);
@@ -176,6 +172,7 @@ class JustDesserts extends Table
         $result['discardedDesserts'] = $this->dessertcards->getCardsInLocation(DECK_LOC_DISCARD);
         $result['counters'] = $this->argNbrCardsInHand();
         $result['isOpeningABuffetOn'] = $this->isOpeningABuffetOn();
+        $result['isPoachingOn'] = $this->isPoachingOn();
         return $result;
     }
 
@@ -592,6 +589,11 @@ class JustDesserts extends Table
     function isOpeningABuffetOn()
     {
         return self::getGameStateValue('opening_a_buffet') == ACTIVATED;
+    }
+
+    function isPoachingOn()
+    {
+        return self::getGameStateValue('poaching') == ACTIVATED;
     }
 
     //////////////////////////////////////////////////////////////////////////////

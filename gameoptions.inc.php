@@ -27,7 +27,10 @@ if (!defined('TYPE_OF_RULES')) {
     define('TYPE_OF_RULES', 100);
     define('BASIC_RULES', 1);
     define('ADVANCED_RULES', 2);
+
     define('OPENING_BUFFET', 101);
+    define('POACHING', 101);
+
     define('ACTIVATED', 1);
     define('DEACTIVATED', 0);
 }
@@ -45,6 +48,22 @@ $game_options = array(
     ),
     OPENING_BUFFET => array(
         'name' => totranslate('Opening a buffet'),
+        'values' => array(
+
+            // A simple value for this option:
+            ACTIVATED => array('name' => totranslate('Yes')),
+            DEACTIVATED => array('name' => totranslate('No')),
+        ),
+        'displaycondition' => [
+            [
+                'type' => 'otheroption',
+                'id' => TYPE_OF_RULES,
+                'value' => ADVANCED_RULES,
+            ],
+        ],
+    ),
+    POACHING => array(
+        'name' => totranslate('Poaching and blocking'),
         'values' => array(
 
             // A simple value for this option:
