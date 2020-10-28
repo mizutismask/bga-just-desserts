@@ -893,7 +893,7 @@ class JustDesserts extends Table
      */
     function stMakeOtherActive()
     {
-        $other_players = $this->getOtherPlayers();
+        $other_players = $this->getOtherPlayersHavingWonCards();
         $this->gamestate->setPlayersMultiactive($other_players, TRANSITION_BUFFET_GUEST_DISCARDED, true);
     }
 
