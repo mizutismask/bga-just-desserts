@@ -897,7 +897,7 @@ class JustDesserts extends Table
         $this->gamestate->setPlayersMultiactive($other_players, TRANSITION_BUFFET_GUEST_DISCARDED, true);
     }
 
-    function getOtherPlayers()
+    function getOtherPlayersHavingWonCards()
     {
         $player_id = self::getGameStateValue(GS_OPENING_BUFFET_PLAYER);
         $other_players = self::getObjectListFromDB("SELECT distinct card_location_arg id FROM guestcard WHERE card_location_arg !=" . $player_id . " and card_location='" . DECK_LOC_WON . "' group by card_location_arg having count(card_type_arg)>0", true);
