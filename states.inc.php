@@ -57,6 +57,9 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_DISCARD", 24);
     define("STATE_SERVE_SECOND_GUEST", 25);
     define("STATE_BUFFET_DISCARD", 26);
+    define("STATE_POACHING_REACTION", 27);
+    define("STATE_POACHING_RESOLVED", 28);
+
     define("STATE_END_GAME", 99);
 
     define("TRANSITION_DRAWN", "drawn");
@@ -71,6 +74,9 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("TRANSITION_BUFFET_OPENED", "buffetOpened");
     define("TRANSITION_BUFFET_GUEST_DISCARDED", "buffetGuestDiscarded");
     define("TRANSITION_BUFFET_SERVE", "buffetServe");
+    define("TRANSITION_POACHING_ATTEMPT", "poachingAttempt");
+    define("TRANSITION_POACHING_BLOCKED", "poachingBlocked");
+    define("TRANSITION_POACHING_RESOLVED", "poachingUnblockable");
 }
 
 $machinestates = array(
@@ -91,8 +97,8 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} must serve guests, draw a dessert or swap desserts'),
         "descriptionmyturn" => clienttranslate('${you} must choose 1 action'),
         "type" => "activeplayer",
-        "possibleactions" => array("draw", "serve", "swap", "openBuffet"),
-        "args" => "argNbrCardsInHand",
+        "possibleactions" => array("draw", "serve", "swap", "openBuffet", "poach"),
+        "args" => "argUpdateCountersAndActions",
         "transitions" => array(
             TRANSITION_DRAWN => STATE_NEXT_PLAYER,
             TRANSITION_SERVED => STATE_SERVE_SECOND_GUEST,
@@ -102,6 +108,8 @@ $machinestates = array(
             TRANSITION_END_GAME => STATE_END_GAME,
             TRANSITION_BUFFET_OPENED => STATE_BUFFET_DISCARD,
             TRANSITION_BUFFET_SERVE => STATE_SERVE_SECOND_GUEST,
+            TRANSITION_POACHING_ATTEMPT => STATE_POACHING_REACTION,
+            TRANSITION_POACHING_RESOLVED => STATE_POACHING_RESOLVED,
         )
     ),
 
@@ -140,9 +148,33 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must serve another guest or pass'),
         "type" => "activeplayer",
         "possibleactions" => array("pass", "serveSecondGuest"),
+        "args" => "argUpdateCountersAndActions",
+        "updateGameProgression" => true,
+        "transitions" => array(TRANSITION_PASSED => STATE_NEXT_PLAYER, TRANSITION_SECOND_GUEST_SERVED => STATE_NEXT_PLAYER, TRANSITION_DISCARD_GUEST_NEEDED => STATE_DISCARD, TRANSITION_END_GAME => STATE_END_GAME)
+    ),
+
+    STATE_POACHING_REACTION => array(
+        "name" => "poachingReaction",
+        "description" => clienttranslate('${actplayer} can block poaching attempt'),
+        "descriptionmyturn" => clienttranslate('${you} must decide to block poaching attempt or not'),
+        "type" => "multipleactiveplayer",
+        "action" => "stActivatePoached",
+        "possibleactions" => array("blockPoaching", "letPoaching"),
         "args" => "argNbrCardsInHand",
         "updateGameProgression" => true,
-        "transitions" => array(TRANSITION_PASSED => STATE_NEXT_PLAYER, TRANSITION_SECOND_GUEST_SERVED => STATE_NEXT_PLAYER, TRANSITION_DISCARD_GUEST_NEEDED => STATE_DISCARD, TRANSITION_END_GAME => 99)
+        "transitions" => array(TRANSITION_SERVED => STATE_POACHING_RESOLVED,  TRANSITION_POACHING_BLOCKED => STATE_POACHING_RESOLVED)
+    ),
+
+    STATE_POACHING_RESOLVED => array(
+        "name" => "poachingResolved",
+        "type" => "game",
+        "action" => "stPoachingResolved",
+        "args" => "argNbrCardsInHand",
+        "updateGameProgression" => true,
+        "transitions" => array(
+            TRANSITION_SERVED => STATE_SERVE_SECOND_GUEST, TRANSITION_SECOND_GUEST_SERVED => STATE_NEXT_PLAYER,
+            TRANSITION_DISCARD_GUEST_NEEDED => STATE_DISCARD, TRANSITION_END_GAME => STATE_END_GAME, TRANSITION_PLAYER_TURN => STATE_PLAYER_TURN
+        )
     ),
 
 
