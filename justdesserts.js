@@ -734,7 +734,14 @@ define([
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
                     //console.log("notif_newHand card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
-                    this.playerHand.addToStockWithId(card.type_arg, card.id, 'guest_draw');
+                    var from = 'guest_draw';
+                    if (notif.args.fromDiscard) {
+                        from = "desserts_discarded_cards";
+                    }
+                    this.playerHand.addToStockWithId(card.type_arg, card.id, from);
+                    if (notif.args.fromDiscard) {
+                        this.discardedDesserts.removeFromStockById(card.id);
+                    }
                 }
             },
 

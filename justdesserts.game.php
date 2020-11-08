@@ -404,7 +404,7 @@ class JustDesserts extends Table
             self::notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $new_cards));
             self::incStat(1, "player_tips_number", $player_id);
             //notify other that he got one tip
-            self::notifyAllPlayers('serve', clienttranslate('${player_name} gets a new dessert card as a tip'), array('player_name' => self::getActivePlayerName()));
+            self::notifyAllPlayers('serve', clienttranslate('${player_name} gets a new dessert card as a tip'), array('player_name' => $this->getPlayerName($player_id)));
         }
     }
 
@@ -662,6 +662,12 @@ class JustDesserts extends Table
         return self::getGameStateValue(GS_ALREADY_POACHED_THIS_TURN) == 0 && $this->guestcards->countCardInLocation(DECK_LOC_WON) > 0;
     }
 
+    function getPlayerName($player_id)
+    {
+        $sql = "select player_name from player where player_id=" . $player_id;
+        return self::getUniqueValueFromDB($sql);
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
     //////////// 
@@ -828,7 +834,7 @@ class JustDesserts extends Table
 
         $other_players = $this->getOtherPlayersHavingWonCards();
         if (count($other_players) > 0) {
-            $this->goToDiscardIfNeededOrGoTo(TRANSITION_BUFFET_OPENED);
+            $this->gamestate->nextState(TRANSITION_BUFFET_OPENED);
         } else {
             $this->goToDiscardIfNeededOrGoTo(TRANSITION_BUFFET_SERVE);
         }
@@ -967,13 +973,15 @@ class JustDesserts extends Table
         $dessert_cards = $this->dessertcards->getCardsInLocation(DECK_LOC_BLOCK, $poaching_player_id);
         $dessert_cards_id = $this->concatenateFieldValues($dessert_cards, "id");
         $this->dessertcards->moveCards($dessert_cards_id, DECK_LOC_HAND, $poaching_player_id);
-        self::notifyPlayer($poaching_player_id, NOTIF_NEW_HAND, '', array('cards' => $dessert_cards));
+        self::notifyPlayer($poaching_player_id, NOTIF_NEW_HAND, '', array('cards' => $dessert_cards, 'fromDiscard' => true));
 
         self::notifyAllPlayers(NOTIF_POACHING_BLOCKED,  clienttranslate('${poached_player_name} blocks poaching'), array(
             'poached_player_name' => self::getCurrentPlayerName(),
             'player_id' => $poached_player_id,
             'discardedDesserts' => $discardedDesserts,
         ));
+
+        $this->giveTipIfNeeded($dessertsFromMaterial, $guestFromMaterial, $poached_player_id);
 
         //$this->goToCorrectServeState();
         $this->gamestate->nextState(TRANSITION_POACHING_BLOCKED);
@@ -1101,11 +1109,11 @@ class JustDesserts extends Table
      */
     function stMakeOtherActive()
     {
-        $other_players = $this->getOtherPlayers();
+        $other_players = $this->getOtherPlayersHavingWonCards();
         $this->gamestate->setPlayersMultiactive($other_players, TRANSITION_BUFFET_GUEST_DISCARDED, true);
     }
 
-    function getOtherPlayers()
+    function getOtherPlayersHavingWonCards()
     {
         $player_id = self::getGameStateValue(GS_OPENING_BUFFET_PLAYER);
         $other_players = self::getObjectListFromDB("SELECT distinct card_location_arg id FROM guestcard WHERE card_location_arg !=" . $player_id . " and card_location='" . DECK_LOC_WON . "' group by card_location_arg having count(card_type_arg)>0", true);
