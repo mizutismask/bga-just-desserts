@@ -160,7 +160,7 @@ $machinestates = array(
         "type" => "multipleactiveplayer",
         "action" => "stActivatePoached",
         "possibleactions" => array("blockPoaching", "letPoaching"),
-        "args" => "argNbrCardsInHand",
+        "args" => "argGetPoachedGuest",
         "updateGameProgression" => true,
         "transitions" => array(TRANSITION_SERVED => STATE_POACHING_RESOLVED,  TRANSITION_POACHING_BLOCKED => STATE_POACHING_RESOLVED)
     ),

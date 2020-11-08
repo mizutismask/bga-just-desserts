@@ -1036,6 +1036,13 @@ class JustDesserts extends Table
         );
     }
 
+    function argGetPoachedGuest()
+    {
+        return array(
+            'poached_guest_id' => self::getGameStateValue(GS_POACHED_GUEST_ID),
+            'poached_player_id' => self::getGameStateValue(GS_POACHED_PLAYER)
+        );
+    }
 
     //////////////////////////////////////////////////////////////////////////////
     //////////// Game state actions

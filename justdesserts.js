@@ -237,6 +237,11 @@ define([
                         this.wonStocksByPlayerId[this.player_id].setSelectionMode(1);
                         //this.updateCounters(args.args);
                         break;
+                    case 'poachingReaction':
+                        var guestId = args.args.poached_guest_id;
+                        this.poachedDiv = this.wonStocksByPlayerId[args.args.poached_player_id].getItemDivId(guestId);
+                        dojo.addClass(this.poachedDiv, "jd_poached");
+                        break;
                     default:
                         this.guestsOnTable.setSelectionMode(2);
 
@@ -270,6 +275,9 @@ define([
                     case "playerTurn":
                     case "serveSecondGuest":
                         this.activateSelectionOnWonCards(false, null);
+                        break;
+                    case 'poachingReaction':
+                        dojo.removeClass(this.poachedDiv, "jd_poached");
                         break;
                 }
             },
@@ -757,7 +765,6 @@ define([
             },
 
             notif_discardedDesserts: function (notif) {
-                console.log("notif_discardedDesserts : ", notif);
                 //the active player display has already been refreshed
                 if (this.player_id != notif.args.player_id) {
                     for (var i in notif.args.discardedDesserts) {
@@ -765,8 +772,6 @@ define([
                         // console.log("notif_discardedDesserts card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                         this.discardedDesserts.addToStockWithId(card.type_arg, card.id, 'overall_player_board_' + notif.args.player_id);
                     }
-                } else {
-                    console.log("done by me, no update");
                 }
             },
 
