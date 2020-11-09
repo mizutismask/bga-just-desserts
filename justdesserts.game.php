@@ -19,9 +19,10 @@
 
 
 require_once(APP_GAMEMODULE_PATH . 'module/table/table.game.php');
+require_once("modules/php/constants.inc.php");
 
-// define contants for deck locations
 if (!defined('DECK_LOC_DECK')) {
+    // constants for deck locations
     define("DECK_LOC_DECK", "deck");
     define("DECK_LOC_RIVER", "river");
     define("DECK_LOC_DISCARD", "discard");
@@ -29,6 +30,7 @@ if (!defined('DECK_LOC_DECK')) {
     define("DECK_LOC_WON", 'won');
     define("DECK_LOC_BLOCK", 'block');
 
+    // constants for notifications
     define("NOTIF_DISCARDED_GUESTS", "discardedGuests");
     define("NOTIF_DISCARDED_DESSERTS", "discardedDesserts");
     define("NOTIF_PLAYER_TURN", "playerTurn");
@@ -40,6 +42,7 @@ if (!defined('DECK_LOC_DECK')) {
     define("NOTIF_POACHING_BLOCKED", "poachingBlocked");
     define("NOTIF_UPDATE_CARDS_NB", "updateCardsNb");
 
+    // constants for game states
     define('GS_LAST_DISCARDED_GUEST_ID', "last_discarded_guest_id");
     define('GS_OPENING_BUFFET_PLAYER', "opening_buffet_player");
     define('GS_POACHING_PLAYER', "poaching_player");
@@ -47,18 +50,6 @@ if (!defined('DECK_LOC_DECK')) {
     define('GS_ALREADY_POACHED_THIS_TURN', "already_poached_this_turn");
     define('GS_GUESTS_SERVED_THIS_TURN', "guests_served_this_turn");
     define('GS_POACHED_GUEST_ID', "guest_poached_id");
-}
-
-if (!defined('TYPE_OF_RULES')) {
-    define('TYPE_OF_RULES', 100);
-    define('BASIC_RULES', 1);
-    define('ADVANCED_RULES', 2);
-
-    define('OPENING_BUFFET', 101);
-    define('POACHING', 101);
-
-    define('ACTIVATED', 1);
-    define('DEACTIVATED', 0);
 }
 
 class JustDesserts extends Table

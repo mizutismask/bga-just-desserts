@@ -23,7 +23,7 @@
  * !! It is not a good idea to modify this file when a game is running !!
  *
  */
-
+require_once("modules/php/constants.inc.php");
 
 $game_options = array(
 
@@ -39,8 +39,6 @@ $game_options = array(
     OPENING_BUFFET => array(
         'name' => totranslate('Opening a buffet'),
         'values' => array(
-
-            // A simple value for this option:
             ACTIVATED => array('name' => totranslate('Yes')),
             DEACTIVATED => array('name' => totranslate('No')),
         ),
@@ -55,8 +53,6 @@ $game_options = array(
     POACHING => array(
         'name' => totranslate('Poaching and blocking'),
         'values' => array(
-
-            // A simple value for this option:
             ACTIVATED => array('name' => totranslate('Yes')),
             DEACTIVATED => array('name' => totranslate('No')),
         ),
