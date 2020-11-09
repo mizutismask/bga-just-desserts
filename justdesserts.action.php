@@ -131,6 +131,36 @@ class action_justdesserts extends APP_GameAction
     self::ajaxResponse();
   }
 
+  public function poachAction()
+  {
+    self::setAjaxMode();
+    $guest_id = self::getArg("guest_id", AT_posint, true);
+    $poached_player_id = self::getArg("poached_player_id", AT_posint, true);
+    $desserts_ids = self::getArg("desserts_ids", AT_numberlist, true);
+    $desserts_ids = $this->convertStringToArray($desserts_ids);
+    $this->game->poachGuestFrom($guest_id, $poached_player_id, $desserts_ids);
+
+    self::ajaxResponse();
+  }
+
+  public function blockPoachingAction()
+  {
+    self::setAjaxMode();
+    $desserts_ids = self::getArg("desserts_ids", AT_numberlist, true);
+    $desserts_ids = $this->convertStringToArray($desserts_ids);
+    $this->game->blockPoaching($desserts_ids);
+
+    self::ajaxResponse();
+  }
+
+  public function letPoachingAction()
+  {
+    self::setAjaxMode();
+    $this->game->letPoaching();
+    self::ajaxResponse();
+  }
+
+
   function convertStringToArray($card_ids_raw)
   {
     // Removing last ';' if exists

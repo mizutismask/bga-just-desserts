@@ -23,14 +23,7 @@
  * !! It is not a good idea to modify this file when a game is running !!
  *
  */
-if (!defined('TYPE_OF_RULES')) {
-    define('TYPE_OF_RULES', 100);
-    define('BASIC_RULES', 1);
-    define('ADVANCED_RULES', 2);
-    define('OPENING_BUFFET', 101);
-    define('ACTIVATED', 1);
-    define('DEACTIVATED', 0);
-}
+require_once("modules/php/constants.inc.php");
 
 $game_options = array(
 
@@ -46,8 +39,20 @@ $game_options = array(
     OPENING_BUFFET => array(
         'name' => totranslate('Opening a buffet'),
         'values' => array(
-
-            // A simple value for this option:
+            ACTIVATED => array('name' => totranslate('Yes')),
+            DEACTIVATED => array('name' => totranslate('No')),
+        ),
+        'displaycondition' => [
+            [
+                'type' => 'otheroption',
+                'id' => TYPE_OF_RULES,
+                'value' => ADVANCED_RULES,
+            ],
+        ],
+    ),
+    POACHING => array(
+        'name' => totranslate('Poaching and blocking'),
+        'values' => array(
             ACTIVATED => array('name' => totranslate('Yes')),
             DEACTIVATED => array('name' => totranslate('No')),
         ),

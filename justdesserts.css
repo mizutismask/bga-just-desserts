@@ -164,6 +164,10 @@
     background: url("img/guests250x388.jpg");
 }
 
+.jd_poached{
+    box-shadow: 0 0 14pt 6pt deeppink
+}
+
 @media only screen and (min-width: 1100px) {
 
     .jd_piles {

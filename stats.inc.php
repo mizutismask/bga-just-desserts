@@ -98,6 +98,17 @@ $stats_type = array(
             "type" => "int"
         ),
 
+        "poaching_number" => array(
+            "id" => 15,
+            "name" => totranslate("Poaching"),
+            "type" => "int"
+        ),
+
+        "blocking_number" => array(
+            "id" => 16,
+            "name" => totranslate("Poaching blocked"),
+            "type" => "int"
+        ),
 
         /*
         Examples:    

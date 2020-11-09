@@ -59,10 +59,11 @@ define([
 
             setup: function (gamedatas) {
                 //console.log("Starting game setup");
-                console.log(gamedatas);
+                console.log("gamedatas ", gamedatas);
 
                 // TODO: Set up your game interface here, according to "gamedatas"
                 this.isOpeningABuffetOn = gamedatas.isOpeningABuffetOn;
+                this.isPoachingOn = gamedatas.isPoachingOn;
 
                 //---------- Player hand setup
                 this.playerHand = new ebg.stock(); // new stock object for hand
@@ -126,7 +127,13 @@ define([
 
                     var playerWonCards = new ebg.stock();
                     playerWonCards.setSelectionMode(0);
-                    playerWonCards.setOverlap(16, 0);
+                    if (!this.isPoachingOn) {
+                        playerWonCards.setOverlap(16, 0);
+
+                    } else {
+                        var div = 'guest_' + player_id;
+                        dojo.style(div, "min-width", "100%");
+                    }
                     playerWonCards.create(this, $('guestscards_' + player_id), this.cardwidth, this.cardheight);
                     playerWonCards.image_items_per_row = this.image_items_per_row;
 
@@ -156,7 +163,6 @@ define([
                     var el = 'cards_icon_' + player_id;
                     this.addTooltipHtml(el, _('Number of cards in hand'));
                 }
-                this.updateCounters(this.gamedatas.counters);
 
                 //discarded desserts list
                 this.discardedDesserts = new ebg.stock(); // new stock object for hand
@@ -176,6 +182,8 @@ define([
                     this.discardedDesserts.addToStockWithId(card.type_arg, card.id);
                 }
 
+                this.updateCounters(this.gamedatas.counters);
+
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
@@ -190,25 +198,19 @@ define([
             //                  You can use this method to perform some user interface changes at this moment.
             //
             onEnteringState: function (stateName, args) {
-                console.log('Entering state: ' + stateName);
+                console.log('Entering state: ' + stateName, args);
                 switch (stateName) {
-
-                    /* Example:
-                    
-                    case 'myGameState':
-                    
-                        // Show some HTML block at this game state
-                        dojo.style( 'my_html_block_id', 'display', 'block' );
-                        
-                        break;
-                   */
                     case 'playerTurn':
-                        this.updateCounters(args.args);
                         this.guestsOnTable.setSelectionMode(1);
+                        if (args.args.possibleActions["poachAction"]) {
+                            this.activateSelectionOnWonCards(true, this.player_id);
+                        }
                         break;
                     case 'serveSecondGuest':
-                        this.updateCounters(args.args);
                         this.guestsOnTable.setSelectionMode(1);
+                        if (args.args.possibleActions["poachAction"]) {
+                            this.activateSelectionOnWonCards(true, this.player_id);
+                        }
                         break;
                     case 'nextPlayer':
                         this.updateCounters(args.args);
@@ -219,6 +221,12 @@ define([
                         this.playerHand.setSelectionMode(0);
                         this.wonStocksByPlayerId[this.player_id].setSelectionMode(1);
                         this.updateCounters(args.args);
+                        break;
+                    case 'poachingReaction':
+                        this.updateCounters(args.args.counters);
+                        var guestId = args.args.poached_guest_id;
+                        this.poachedDiv = this.wonStocksByPlayerId[args.args.poached_player_id].getItemDivId(guestId);
+                        dojo.addClass(this.poachedDiv, "jd_poached");
                         break;
                     default:
                         this.guestsOnTable.setSelectionMode(2);
@@ -233,21 +241,19 @@ define([
                 console.log('Leaving state: ' + stateName);
 
                 switch (stateName) {
-
-                    /* Example:
-                    
-                    case 'myGameState':
-                    
-                        // Hide the HTML block we are displaying only during this game state
-                        dojo.style( 'my_html_block_id', 'display', 'none' );
-                        
-                        break;
-                   */
                     case 'allPlayersDiscardGuest':
                         this.guestsOnTable.setSelectionMode(1);
                         this.guestsDiscard.setSelectionMode(1);
                         this.wonStocksByPlayerId[this.player_id].setSelectionMode(0);
                         this.playerHand.setSelectionMode(2);
+                        break;
+
+                    case "playerTurn":
+                    case "serveSecondGuest":
+                        this.activateSelectionOnWonCards(false, null);
+                        break;
+                    case 'poachingReaction':
+                        dojo.removeClass(this.poachedDiv, "jd_poached");
                         break;
                 }
             },
@@ -256,7 +262,7 @@ define([
             //                        action status bar (ie: the HTML links in the status bar).
             //        
             onUpdateActionButtons: function (stateName, args) {
-                console.log('onUpdateActionButtons: ' + stateName);
+                console.log('onUpdateActionButtons: ' + stateName, args);
 
                 if (this.isCurrentPlayerActive()) {
                     switch (stateName) {
@@ -266,6 +272,9 @@ define([
                             this.addActionButton('button_exchange', _('Swap desserts'), 'onExchange');
                             if (this.isOpeningABuffetOn) {
                                 this.addActionButton('button_openBuffet', _('Open a buffet'), 'onOpenBuffet');
+                            }
+                            if (this.isPoachingOn && args.possibleActions["poachAction"]) {
+                                this.addActionButton('button_poach', _('Poach a guest'), 'onPoach');
                             }
                             break;
                         case "serveSecondGuest":
@@ -277,6 +286,10 @@ define([
                             break;
                         case "allPlayersDiscardGuest":
                             this.addActionButton('button_discardWonGuest', _('Give back a satisfied guest'), 'onDiscardWonGuest');
+                            break;
+                        case "poachingReaction":
+                            this.addActionButton('button_block', _('Block poaching'), 'onBlockPoaching');
+                            this.addActionButton('button_let_poaching', _('Pass'), 'onLetPoaching');
                             break;
                     }
                 }
@@ -297,18 +310,31 @@ define([
                 }), delay);
 
             },
+
+            activateSelectionOnWonCards: function (activate, exceptForPlayer) {
+                for (var playerId in this.wonStocksByPlayerId) {
+                    if (playerId != exceptForPlayer) {
+                        stock = this.wonStocksByPlayerId[playerId];
+                        if (activate) {
+                            stock.setSelectionMode(1);
+                        } else {
+                            stock.setSelectionMode(0);
+                        }
+                    }
+                }
+            },
             ///////////////////////////////////////////////////
             //// Player's action
 
             /*
-            
+             
                 Here, you are defining methods to handle player's action (ex: results of mouse click on 
                 game objects).
                 
                 Most of the time, these methods:
                 _ check the action is possible at this game state.
                 _ make a call to the game server
-            
+             
             */
 
             onDraw: function (evt) {
@@ -513,21 +539,100 @@ define([
                 }
             },
 
+            onPoach: function (evt) {
+                console.log('onPoach');
 
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+                this.checkAction('poach');
+
+                var selectedDesserts = this.playerHand.getSelectedItems();
+                var playersWithSelection = Object.entries(this.wonStocksByPlayerId).filter(([playerId, ws]) => ws.getSelectedItems().length > 0).map(item => item[0]);
+
+                if (playersWithSelection.length == 1 && this.wonStocksByPlayerId[playersWithSelection[0]].getSelectedItems().length == 1) {
+                    if (selectedDesserts.length > 0) {
+                        var selectedGuests = this.wonStocksByPlayerId[playersWithSelection[0]].getSelectedItems();
+                        this.ajaxcall('/justdesserts/justdesserts/poachAction.html',
+                            {
+                                lock: true,
+                                poached_player_id: playersWithSelection[0],
+                                guest_id: selectedGuests[0].id,
+                                desserts_ids: selectedDesserts.map(i => i.id).join(";"),
+                            },
+                            this,
+                            function (result) {
+                                selectedDesserts.forEach(removed => {
+                                    this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
+                                    this.playerHand.removeFromStockById(removed.id);
+                                });
+                            }
+                        );
+                    } else {
+                        this.showMessage(_('You have to select desserts to satisfy the guest'), 'error');
+                    }
+                } else {
+                    this.showMessage(_('You have to select one satisfied guest from another player'), 'error');
+                }
+            },
+
+            onLetPoaching: function (evt) {
+                console.log('onLetPoaching');
+
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+                this.checkAction('letPoaching');
+                this.ajaxcall('/justdesserts/justdesserts/letPoachingAction.html',
+                    {
+                        lock: true,
+                    },
+                    this,
+                    function (result) { }
+                );
+
+            },
+
+            onBlockPoaching: function (evt) {
+                console.log('onBlockPoaching');
+
+                // Preventing default browser reaction
+                dojo.stopEvent(evt);
+
+                var selectedDesserts = this.playerHand.getSelectedItems();
+                if (selectedDesserts.length > 0) {
+                    if (this.checkAction('blockPoaching')) {
+                        this.ajaxcall('/justdesserts/justdesserts/blockPoachingAction.html',
+                            {
+                                lock: true,
+                                desserts_ids: selectedDesserts.map(i => i.id).join(";"),
+                            },
+                            this,
+                            function (result) {
+                                selectedDesserts.forEach(removed => {
+                                    this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
+                                    this.playerHand.removeFromStockById(removed.id);
+                                });
+
+                            });
+                    }
+                }
+                else {
+                    this.showMessage(_('You have to select one or several desserts first'), 'error');
+                }
+            },
 
             /* Example:
-            
+             
             onMyMethodToCall1: function( evt )
             {
                 console.log( 'onMyMethodToCall1' );
                 
                 // Preventing default browser reaction
                 dojo.stopEvent( evt );
-         
+             
                 // Check that this action is possible (see "possibleactions" in states.inc.php)
                 if( ! this.checkAction( 'myAction' ) )
                 {   return; }
-         
+             
                 this.ajaxcall( "/justdesserts/justdesserts/myAction.html", { 
                                                                         lock: true, 
                                                                         myArgument1: arg1, 
@@ -540,13 +645,13 @@ define([
                                 // (most of the time: nothing)
                                 
                              }, function( is_error) {
-         
+             
                                 // What to do after the server call in anyway (success or failure)
                                 // (most of the time: nothing)
-         
+             
                              } );        
             },        
-            
+             
             */
 
 
@@ -560,7 +665,7 @@ define([
                 
                 Note: game notification names correspond to "notifyAllPlayers" and "notifyPlayer" calls in
                       your justdesserts.game.php file.
-            
+             
             */
             setupNotifications: function () {
                 // TODO: here, associate your game notifications with local methods
@@ -580,13 +685,16 @@ define([
                 dojo.subscribe('newGuestWon', this, "notif_newGuestWon");
                 dojo.subscribe('updateScore', this, "notif_updateScore");
                 dojo.subscribe('discardedDesserts', this, "notif_discardedDesserts");
+                dojo.subscribe('guestPoached', this, "notif_guestPoached");
+                dojo.subscribe('poachingBlocked', this, "notif_poachBlocked");
+                dojo.subscribe('updateCardsNb', this, "notif_updateCardsNb");
             },
 
             // TODO: from this point and below, you can write your game notifications handling methods
 
             /*
             Example:
-            
+             
             notif_cardPlayed: function( notif )
             {
                 console.log( 'notif_cardPlayed' );
@@ -596,14 +704,21 @@ define([
                 
                 // TODO: play the card in the user interface.
             },    
-            
+             
             */
             notif_newHand: function (notif) {
 
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
                     //console.log("notif_newHand card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
-                    this.playerHand.addToStockWithId(card.type_arg, card.id, 'guest_draw');
+                    var from = 'guest_draw';
+                    if (notif.args.fromDiscard) {
+                        from = "desserts_discarded_cards";
+                    }
+                    this.playerHand.addToStockWithId(card.type_arg, card.id, from);
+                    if (notif.args.fromDiscard) {
+                        this.discardedDesserts.removeFromStockById(card.id);
+                    }
                 }
             },
 
@@ -635,12 +750,15 @@ define([
 
             notif_discardedDesserts: function (notif) {
                 //the active player display has already been refreshed
-                if (this.playerID != notif.args.player_id) {
+                if (this.player_id != notif.args.player_id) {
                     for (var i in notif.args.discardedDesserts) {
                         var card = notif.args.discardedDesserts[i];
                         // console.log("notif_discardedDesserts card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                         this.discardedDesserts.addToStockWithId(card.type_arg, card.id, 'overall_player_board_' + notif.args.player_id);
                     }
+                }
+                if (notif.args.counters) {
+                    this.updateCounters(notif.args.counters);
                 }
             },
 
@@ -682,10 +800,32 @@ define([
                 // Adjust the score for all the players
                 for (var player_id in notif.args.players) {
                     var player = notif.args.players[player_id];
-                    var playerID = player['player_id'];
-
-                    this.scoreCtrl[playerID].setValue(player['player_score']);
+                    var player_to_update_id = player['player_id'];
+                    this.scoreCtrl[player_to_update_id].setValue(player['player_score']);
                 }
+            },
+
+            notif_guestPoached: function (notif) {
+                console.log("notif_guestPoached : ", notif);
+                this.notif_discardedDesserts(notif);
+                var card = notif.args.guest;
+                $from = "guest_" + notif.args.poached_player_id;
+
+                var guestDiv = this.wonStocksByPlayerId[notif.args.poached_player_id].getItemDivId(card.id);
+                this.wonStocksByPlayerId[notif.args.player_id].addToStockWithId(card.type_arg, card.id, guestDiv);
+                this.wonStocksByPlayerId[notif.args.poached_player_id].removeFromStockById(card.id);
+
+                this.addCardToolTip(this.wonStocksByPlayerId[notif.args.player_id], card.id);
+            },
+
+            notif_poachBlocked: function (notif) {
+                console.log("notif_poachBlocked : ", notif);
+                this.notif_discardedDesserts(notif);
+            },
+
+            notif_updateCardsNb: function (notif) {
+                console.log("notif_updateCardsNb : ", notif);
+                this.updateCounters(notif.args.counters);
             },
         });
     });
