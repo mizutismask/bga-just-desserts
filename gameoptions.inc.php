@@ -31,15 +31,15 @@ $game_options = array(
     TYPE_OF_RULES => array(
         'name' => totranslate('Rules'),
         'values' => array(
-            BASIC_RULES => array('name' => totranslate('Basic rules')),
-            ADVANCED_RULES => array('name' => totranslate('Advanced rules')),
+            BASIC_RULES => array('name' => totranslate('Basic rules'), 'tmdisplay' => totranslate('Basic rules'), 'description' => totranslate('A simple version to learn the game')),
+            ADVANCED_RULES => array('name' => totranslate('Advanced rules'), 'tmdisplay' => totranslate('Advanced rules'), 'description' => totranslate('More strategic rules')),
         ),
         'default' => BASIC_RULES
     ),
     OPENING_BUFFET => array(
         'name' => totranslate('Opening a buffet'),
         'values' => array(
-            ACTIVATED => array('name' => totranslate('Yes')),
+            ACTIVATED => array('name' => totranslate('Yes'), 'tmdisplay' => totranslate('Opening a buffet'), 'description' => totranslate('Make opponents give back their guests')),
             DEACTIVATED => array('name' => totranslate('No')),
         ),
         'displaycondition' => [
@@ -53,7 +53,7 @@ $game_options = array(
     POACHING => array(
         'name' => totranslate('Poaching and blocking'),
         'values' => array(
-            ACTIVATED => array('name' => totranslate('Yes')),
+            ACTIVATED => array('name' => totranslate('Yes'), 'tmdisplay' => totranslate('Poaching and blocking'), 'description' => totranslate('Steal your opponents guests')),
             DEACTIVATED => array('name' => totranslate('No')),
         ),
         'displaycondition' => [
