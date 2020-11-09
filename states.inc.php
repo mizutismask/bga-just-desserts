@@ -98,7 +98,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must choose 1 action'),
         "type" => "activeplayer",
         "possibleactions" => array("draw", "serve", "swap", "openBuffet", "poach"),
-        "args" => "argUpdateCountersAndActions",
+        "args" => "argGetPossibleMoves",
         "transitions" => array(
             TRANSITION_DRAWN => STATE_NEXT_PLAYER,
             TRANSITION_SERVED => STATE_SERVE_SECOND_GUEST,
@@ -148,7 +148,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must serve another guest or pass'),
         "type" => "activeplayer",
         "possibleactions" => array("pass", "serveSecondGuest"),
-        "args" => "argUpdateCountersAndActions",
+        "args" => "argGetPossibleMoves",
         "updateGameProgression" => true,
         "transitions" => array(TRANSITION_PASSED => STATE_NEXT_PLAYER, TRANSITION_SECOND_GUEST_SERVED => STATE_NEXT_PLAYER, TRANSITION_DISCARD_GUEST_NEEDED => STATE_DISCARD, TRANSITION_END_GAME => STATE_END_GAME)
     ),

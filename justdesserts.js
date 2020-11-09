@@ -59,7 +59,7 @@ define([
 
             setup: function (gamedatas) {
                 //console.log("Starting game setup");
-                console.log(gamedatas);
+                console.log("gamedatas ", gamedatas);
 
                 // TODO: Set up your game interface here, according to "gamedatas"
                 this.isOpeningABuffetOn = gamedatas.isOpeningABuffetOn;
@@ -132,7 +132,6 @@ define([
 
                     } else {
                         var div = 'guest_' + player_id;
-                        console.log("div ", div);
                         dojo.style(div, "min-width", "100%");
                     }
                     playerWonCards.create(this, $('guestscards_' + player_id), this.cardwidth, this.cardheight);
@@ -165,10 +164,6 @@ define([
                     this.addTooltipHtml(el, _('Number of cards in hand'));
                 }
 
-                console.log("counters: ", gamedatas.countersAndActions.counters);
-                //to fix
-                //this.updateCounters(gamedatas.countersAndActions.counters);
-
                 //discarded desserts list
                 this.discardedDesserts = new ebg.stock(); // new stock object for hand
                 this.discardedDesserts.create(this, $('desserts_discarded_cards'), this.smallCardwidth, this.smallCardheight);
@@ -187,6 +182,8 @@ define([
                     this.discardedDesserts.addToStockWithId(card.type_arg, card.id);
                 }
 
+                this.updateCounters(this.gamedatas.counters);
+
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
@@ -203,41 +200,30 @@ define([
             onEnteringState: function (stateName, args) {
                 console.log('Entering state: ' + stateName, args);
                 switch (stateName) {
-
-                    /* Example:
-                    
-                    case 'myGameState':
-                    
-                        // Show some HTML block at this game state
-                        dojo.style( 'my_html_block_id', 'display', 'block' );
-                        
-                        break;
-                   */
                     case 'playerTurn':
-                        this.updateCounters(args.counters);
                         this.guestsOnTable.setSelectionMode(1);
                         if (args.args.possibleActions["poachAction"]) {
                             this.activateSelectionOnWonCards(true, this.player_id);
                         }
                         break;
                     case 'serveSecondGuest':
-                        this.updateCounters(args.counters);
                         this.guestsOnTable.setSelectionMode(1);
                         if (args.args.possibleActions["poachAction"]) {
                             this.activateSelectionOnWonCards(true, this.player_id);
                         }
                         break;
                     case 'nextPlayer':
-                        //this.updateCounters(args.args);
+                        this.updateCounters(args.args);
                         break;
                     case 'allPlayersDiscardGuest':
                         this.guestsOnTable.setSelectionMode(0);
                         this.guestsDiscard.setSelectionMode(0);
                         this.playerHand.setSelectionMode(0);
                         this.wonStocksByPlayerId[this.player_id].setSelectionMode(1);
-                        //this.updateCounters(args.args);
+                        this.updateCounters(args.args);
                         break;
                     case 'poachingReaction':
+                        this.updateCounters(args.args.counters);
                         var guestId = args.args.poached_guest_id;
                         this.poachedDiv = this.wonStocksByPlayerId[args.args.poached_player_id].getItemDivId(guestId);
                         dojo.addClass(this.poachedDiv, "jd_poached");
@@ -255,16 +241,6 @@ define([
                 console.log('Leaving state: ' + stateName);
 
                 switch (stateName) {
-
-                    /* Example:
-                    
-                    case 'myGameState':
-                    
-                        // Hide the HTML block we are displaying only during this game state
-                        dojo.style( 'my_html_block_id', 'display', 'none' );
-                        
-                        break;
-                   */
                     case 'allPlayersDiscardGuest':
                         this.guestsOnTable.setSelectionMode(1);
                         this.guestsDiscard.setSelectionMode(1);
@@ -710,7 +686,8 @@ define([
                 dojo.subscribe('updateScore', this, "notif_updateScore");
                 dojo.subscribe('discardedDesserts', this, "notif_discardedDesserts");
                 dojo.subscribe('guestPoached', this, "notif_guestPoached");
-                dojo.subscribe('poachBlocked', this, "notif_poachBlocked");
+                dojo.subscribe('poachingBlocked', this, "notif_poachBlocked");
+                dojo.subscribe('updateCardsNb', this, "notif_updateCardsNb");
             },
 
             // TODO: from this point and below, you can write your game notifications handling methods
@@ -780,6 +757,9 @@ define([
                         this.discardedDesserts.addToStockWithId(card.type_arg, card.id, 'overall_player_board_' + notif.args.player_id);
                     }
                 }
+                if (notif.args.counters) {
+                    this.updateCounters(notif.args.counters);
+                }
             },
 
             notif_newGuestWon: function (notif) {
@@ -839,8 +819,13 @@ define([
             },
 
             notif_poachBlocked: function (notif) {
-                console.log("notif_poachBlocked : " + notif);
+                console.log("notif_poachBlocked : ", notif);
                 this.notif_discardedDesserts(notif);
+            },
+
+            notif_updateCardsNb: function (notif) {
+                console.log("notif_updateCardsNb : ", notif);
+                this.updateCounters(notif.args.counters);
             },
         });
     });
