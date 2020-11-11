@@ -74,4 +74,14 @@ $game_options = array(
             DEACTIVATED => array('name' => totranslate('No')),
         ),
     ),
+    EXPANSION_COFFEE => array(
+        'name' => totranslate('Just coffee'),
+        'values' => array(
+            ACTIVATED => array(
+                'name' => totranslate('Yes'), 'tmdisplay' => totranslate('Just coffee'),
+                'description' => totranslate('New cards and a new flavor : coffee'), 'premium' => true
+            ),
+            DEACTIVATED => array('name' => totranslate('No')),
+        ),
+    ),
 );

@@ -38,7 +38,8 @@ $RED = "red";
 $PURPLE = "purple";
 $ORANGE = "orange";
 $YELLOW = "yellow";
-$BURGUNDY="burgundy";
+$BURGUNDY = "burgundy";
+$ROSE = "rose";
 
 $CHOCOLATE = "chocolate";
 $COOOKIE = "cookie";
@@ -54,6 +55,7 @@ $VEGGIES = "veggies";
 $PUDDING = "pudding";
 
 $BACON = "BACON";//do NOT change the case here
+$COFFEE = "COFFEE";//do NOT change the case here
 
 $this->desserts = array(
   1 => array(
@@ -550,6 +552,44 @@ $this->desserts = array(
     'nametr' => self::_('Chocolate bacon cupcakes'),
     'tastes' => array($CHOCOLATE, $BACON, $CAKE),
   ),
+
+   /*******************Coffee expansion******************/
+   83 => array(
+    'nameId' => 'CUP_OF_COFFEE',
+    'name' => clienttranslate('Cup of coffee'),
+    'nametr' => self::_('Cup of coffee'),
+    'tastes' => array($COFFEE),
+  ),
+  84 => array(
+    'nameId' => 'TIRAMISU',
+    'name' => clienttranslate('Tiramisu'),
+    'nametr' => self::_('Tiramisu'),
+    'tastes' => array($COFFEE, $CAKE, $CHOCOLATE),
+  ),
+  85 => array(
+    'nameId' => 'COFFEE_WITH_A_DONUT',
+    'name' => clienttranslate('Coffee with a donut'),
+    'nametr' => self::_('Coffee with a donut'),
+    'tastes' => array($COFFEE, $PASTRY),
+  ),
+  86 => array(
+    'nameId' => 'MOKA_CHEESECAKE',
+    'name' => clienttranslate('Moka cheesecake'),
+    'nametr' => self::_('Moka cheesecake'),
+    'tastes' => array($COFFEE, $PIE, $CHOCOLATE),
+  ),
+  87 => array(
+    'nameId' => 'COFFEE_ICE_CREAM',
+    'name' => clienttranslate('Coffee ice cream'),
+    'nametr' => self::_('Coffee ice cream'),
+    'tastes' => array($COFFEE, $ICE_CREAM),
+  ),
+  88 => array(
+    'nameId' => 'CHOCOLATE_ESPRESSO_BEANS',
+    'name' => clienttranslate('Chocolate espresso beans'),
+    'nametr' => self::_('Chocolate espresso beans'),
+    'tastes' => array($CHOCOLATE, $COFFEE),
+  ),
 );
 
 $this->guests = array(
@@ -835,6 +875,48 @@ $this->guests = array(
     'dislike2' => $MARSHMALLOW,
     'color' => $BURGUNDY,
     'favourite1' => "CHOCOLATE_DIPPED_STRAWBERRIES",
+    'favourite2' => null,
+  ),
+
+  /*******************Coffee expansion******************/
+  29 => array(
+    'nameId' => 'DOCTOR_COFFEE',
+    'name' => clienttranslate('Doctor Coffee'),
+    'nametr' => self::_('Doctor Coffee'),
+    'tastes' => array($COFFEE),
+    'dislike1' => null,
+    'color' => $ROSE,
+    'favourite1' => "ANYTHING_WITH_COFFEE",
+    'favourite2' => null,
+  ),
+  30 => array(
+    'nameId' => 'THE_MOVIE_STAR',
+    'name' => clienttranslate('the movie star'),
+    'nametr' => self::_('the movie star'),
+    'tastes' => array($COFFEE, $CAKE, $CHOCOLATE),
+    'dislike1' => null,
+    'color' => $ROSE,
+    'favourite1' => "TIRAMISU",
+    'favourite2' => null,
+  ),
+  31 => array(
+    'nameId' => 'CONCEPTUAL_ARTIST',
+    'name' => clienttranslate('the conceptual artist'),
+    'nametr' => self::_('the conceptual artist'),
+    'tastes' => array($CAKE, $SPICES, $NUTS),
+    'dislike1' => null,
+    'color' => $ROSE,
+    'favourite1' => "COFFEE_CAKE",
+    'favourite2' => null,
+  ),
+  32 => array(
+    'nameId' => 'MS_JITTERS',
+    'name' => clienttranslate('Mr. Jitters'),
+    'nametr' => self::_('Mr. Jitters'),
+    'tastes' => array($COFFEE, $CHOCOLATE),
+    'dislike1' => $FRUIT,
+    'color' => $ROSE,
+    'favourite1' => "CHOCOLATE_ESPRESSO_BEANS",
     'favourite2' => null,
   ),
 );

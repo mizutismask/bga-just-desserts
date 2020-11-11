@@ -77,6 +77,7 @@ class JustDesserts extends Table
             "opening_a_buffet" => OPENING_BUFFET,
             "poaching" => POACHING,
             "expansion_bacon" => EXPANSION_BACON,
+            "expansion_coffee" => EXPANSION_COFFEE,
         ));
 
         $this->dessertcards = self::getNew("module.common.deck");
@@ -188,13 +189,20 @@ class JustDesserts extends Table
         $result['isOpeningABuffetOn'] = $this->isOpeningABuffetOn();
         $result['isPoachingOn'] = $this->isPoachingOn();
         $result['isExpansionBaconOn'] = $this->isExpansionBaconOn();
-        $result['cardsAvailable']["desserts"] = array(
+        $result['cardsAvailable'] = $this->getCardsAvailable();
+        return $result;
+    }
+
+    function getCardsAvailable()
+    {
+        $cardsAvailable = array();
+        $cardsAvailable["desserts"] = array(
             array(
                 "from" => 1,
                 "to" => 76,
             ),
         );
-        $result['cardsAvailable']["guests"] = array(
+        $cardsAvailable["guests"] = array(
             array(
                 "from" => 1,
                 "to" => 24,
@@ -202,16 +210,27 @@ class JustDesserts extends Table
         );
 
         if ($this->isExpansionBaconOn()) {
-            $result['cardsAvailable']["desserts"][] = array(
+            $cardsAvailable["desserts"][] = array(
                 "from" => 77,
                 "to" => 82,
             );
-            $result['cardsAvailable']["guests"][] = array(
+            $cardsAvailable["guests"][] = array(
                 "from" => 25,
                 "to" => 28,
             );
         }
-        return $result;
+
+        if ($this->isExpansionCoffeeOn()) {
+            $cardsAvailable["desserts"][] = array(
+                "from" => 83,
+                "to" => 88,
+            );
+            $cardsAvailable["guests"][] = array(
+                "from" => 29,
+                "to" => 32,
+            );
+        }
+        return $cardsAvailable;
     }
 
     /*
@@ -254,10 +273,12 @@ class JustDesserts extends Table
     function setupGuestsDeck($players)
     {
         $cards = array();
-        $i = 1;
-        foreach ($this->guests as $guest) {
-            $cards[] = array('type' => $guest["nameId"], 'type_arg' => $i, 'nbr' => 1);
-            $i++;
+        foreach ($this->getCardsAvailable()["guests"] as $range) {
+            for ($i = $range["from"]; $i < $range["to"]; $i++) {
+                $guest = $this->guests[$i];
+                $cards[] = array('type' => $guest["nameId"], 'type_arg' => $i, 'nbr' => 1);
+                $i++;
+            }
         }
         $this->guestcards->createCards($cards, DECK_LOC_DECK);
         $this->guestcards->shuffle(DECK_LOC_DECK);
@@ -267,10 +288,12 @@ class JustDesserts extends Table
     function setupDessertsDeck($players)
     {
         $cards = array();
-        $j = 1;
-        foreach ($this->desserts as $dessert) {
-            $cards[] = array('type' => $dessert["nameId"], 'type_arg' => $j, 'nbr' => 1);
-            $j++;
+        foreach ($this->getCardsAvailable()["desserts"] as $range) {
+            for ($i = $range["from"]; $i < $range["to"]; $i++) {
+                $dessert = $this->desserts[$i];
+                $cards[] = array('type' => $dessert["nameId"], 'type_arg' => $i, 'nbr' => 1);
+                $i++;
+            }
         }
         $this->dessertcards->createCards($cards, DECK_LOC_DECK);
         $this->dessertcards->shuffle(DECK_LOC_DECK);
@@ -676,6 +699,11 @@ class JustDesserts extends Table
     function isExpansionBaconOn()
     {
         return self::getGameStateValue('expansion_bacon') == ACTIVATED;
+    }
+
+    function isExpansionCoffeeOn()
+    {
+        return self::getGameStateValue('expansion_coffee') == ACTIVATED;
     }
 
     function checkGuestAcceptsTheseDesserts($dessertsFromMaterial, $guestFromMaterial)
