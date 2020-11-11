@@ -64,6 +64,14 @@ $game_options = array(
             ],
         ],
     ),
-
-
+    EXPANSION_BACON => array(
+        'name' => totranslate('Better with bacon'),
+        'values' => array(
+            ACTIVATED => array(
+                'name' => totranslate('Yes'), 'tmdisplay' => totranslate('Better with bacon'),
+                'description' => totranslate('New cards and a new flavor : bacon'), 'premium' => true
+            ),
+            DEACTIVATED => array('name' => totranslate('No')),
+        ),
+    ),
 );

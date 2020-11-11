@@ -9,6 +9,7 @@ if (!defined('TYPE_OF_RULES')) {
 
     define('OPENING_BUFFET', 101);
     define('POACHING', 102);
+    define('EXPANSION_BACON', 103);
 
     define('ACTIVATED', 1);
     define('DEACTIVATED', 0);

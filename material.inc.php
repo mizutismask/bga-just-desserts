@@ -1,8 +1,8 @@
 <?php
 
 /**
- *------
- * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+     *------
+     * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
  * JustDesserts implementation : © Séverine Kamycki severinek@gmail.com
  * 
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
@@ -38,7 +38,7 @@ $RED = "red";
 $PURPLE = "purple";
 $ORANGE = "orange";
 $YELLOW = "yellow";
-$this->colors = [$BLUE, $GREEN, $RED, $PURPLE, $ORANGE, $YELLOW];
+$BURGUNDY="burgundy";
 
 $CHOCOLATE = "chocolate";
 $COOOKIE = "cookie";
@@ -52,7 +52,8 @@ $MARSHMALLOW = "marshmallow";
 $PASTRY = "pastry";
 $VEGGIES = "veggies";
 $PUDDING = "pudding";
-$this->flavours = [$CHOCOLATE, $COOOKIE, $NUTS, $PIE, $SPICES, $ICE_CREAM, $FRUIT, $CAKE, $MARSHMALLOW, $PASTRY, $VEGGIES, $PUDDING];
+
+$BACON = "BACON";//do NOT change the case here
 
 $this->desserts = array(
   1 => array(
@@ -510,7 +511,45 @@ $this->desserts = array(
     'name' => clienttranslate('Belgian waffles'),
     'nametr' => self::_('Belgian waffles'),
     'tastes' => array($FRUIT, $PASTRY),
-  )
+  ),
+
+  /*******************Bacon expansion******************/
+  77 => array(
+    'nameId' => 'CANDIED_BACON',
+    'name' => clienttranslate('Candied bacon'),
+    'nametr' => self::_('Candied bacon'),
+    'tastes' => array($BACON),
+  ),
+  78 => array(
+    'nameId' => 'MAPLE_BACON_DONUT',
+    'name' => clienttranslate('Maple bacon donut'),
+    'nametr' => self::_('Maple bacon donut'),
+    'tastes' => array($BACON, $PASTRY),
+  ),
+  79 => array(
+    'nameId' => 'BACON_CHIP_COOKIES',
+    'name' => clienttranslate('Bacon chip cookies'),
+    'nametr' => self::_('Bacon chip cookies'),
+    'tastes' => array($CHOCOLATE, $BACON, $COOOKIE),
+  ),
+  80 => array(
+    'nameId' => 'BACON_ICE_CREAM',
+    'name' => clienttranslate('Bacon ice cream'),
+    'nametr' => self::_('Bacon ice cream'),
+    'tastes' => array($BACON, $ICE_CREAM),
+  ),
+  81 => array(
+    'nameId' => 'CHOCOLATE_DIPPED_BACON',
+    'name' => clienttranslate('Chocolate dipped bacon'),
+    'nametr' => self::_('Chocolate dipped bacon'),
+    'tastes' => array($CHOCOLATE, $BACON),
+  ),
+  82 => array(
+    'nameId' => 'CHOCOLATE_BACON_CUPCAKES',
+    'name' => clienttranslate('Chocolate bacon cupcakes'),
+    'nametr' => self::_('Chocolate bacon cupcakes'),
+    'tastes' => array($CHOCOLATE, $BACON, $CAKE),
+  ),
 );
 
 $this->guests = array(
@@ -754,5 +793,48 @@ $this->guests = array(
     'color' => $BLUE,
     'favourite1' => "STRAWBERRY_SHORTCAKE",
     'favourite2' => "PINEAPPLE_UPSIDE_DOWN_CAKE",
+  ),
+
+  /*******************Bacon expansion******************/
+  25 => array(
+    'nameId' => 'KEVIN',
+    'name' => clienttranslate('Kevin'),
+    'nametr' => self::_('Kevin'),
+    'tastes' => array($CHOCOLATE, $BACON, $CAKE),
+    'dislike1' => null,
+    'color' => $BURGUNDY,
+    'favourite1' => "CHOCOLATE_BACON_CUPCAKES",
+    'favourite2' => null,
+  ),
+  26 => array(
+    'nameId' => 'ABRAHAM_BACON',
+    'name' => clienttranslate('Abraham Bacon'),
+    'nametr' => self::_('Abraham Bacon'),
+    'tastes' => array($BACON),
+    'dislike1' => null,
+    'color' => $BURGUNDY,
+    'favourite1' => "ANYTHING_WITH_BACON",
+    'favourite2' => null,
+  ),
+  27 => array(
+    'nameId' => 'THE_FARMER',
+    'name' => clienttranslate('the farmer'),
+    'nametr' => self::_('the farmer'),
+    'tastes' => array($COOOKIE, $CHOCOLATE, $BACON),
+    'dislike1' => null,
+    'color' => $BURGUNDY,
+    'favourite1' => "BACON_CHIP_COOKIES",
+    'favourite2' => null,
+  ),
+  28 => array(
+    'nameId' => 'THE_VEGETARIAN',
+    'name' => clienttranslate('the vegetarian'),
+    'nametr' => self::_('the vegetarian'),
+    'tastes' => array($FRUIT, $CHOCOLATE),
+    'dislike1' => $BACON,
+    'dislike2' => $MARSHMALLOW,
+    'color' => $BURGUNDY,
+    'favourite1' => "CHOCOLATE_DIPPED_STRAWBERRIES",
+    'favourite2' => null,
   ),
 );

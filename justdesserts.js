@@ -36,12 +36,10 @@ define([
                 // Example:
                 // this.myGlobalValue = 0;
                 this.image_items_per_row = 10;
-                this.dessert_cards_nb = 76;
-                this.guest_cards_nb = 24;
-                this.desserts_img = 'img/desserts150.jpg';
-                this.small_desserts_img = 'img/desserts90x140.jpg';
-                this.guest_img = 'img/guests150x233.jpg';
-                this.big_guest_img = 'img/guests250x388.jpg';
+                this.desserts_img = 'img/cards/desserts150x233.jpg';
+                this.small_desserts_img = 'img/cards/desserts90x140.jpg';
+                this.guest_img = 'img/cards/guests150x233.jpg';
+                this.big_guest_img = 'img/cards/guests250x388.jpg';
             },
 
             /*
@@ -65,16 +63,20 @@ define([
                 this.isOpeningABuffetOn = gamedatas.isOpeningABuffetOn;
                 this.isPoachingOn = gamedatas.isPoachingOn;
 
+                this.cardsAvailable = gamedatas.cardsAvailable;
+
                 //---------- Player hand setup
                 this.playerHand = new ebg.stock(); // new stock object for hand
                 this.playerHand.create(this, $('myhand'), this.cardwidth, this.cardheight);//myhand is the div where the card is going
                 this.playerHand.image_items_per_row = this.image_items_per_row;
 
                 // Create cards types:
-                for (var card_id = 1; card_id <= this.dessert_cards_nb; card_id++) {
-                    // Build card type id
-                    this.playerHand.addItemType(card_id, 0, g_gamethemeurl + this.desserts_img, card_id);
-                }
+                this.cardsAvailable.desserts.forEach(range => {
+                    for (var card_id = range.from; card_id <= range.to; card_id++) {
+                        // Build card type id
+                        this.playerHand.addItemType(card_id, 0, g_gamethemeurl + this.desserts_img, card_id);
+                    }
+                });
 
                 for (var card_id in gamedatas.hand) {
                     var card = gamedatas.hand[card_id];
@@ -90,10 +92,12 @@ define([
                 this.guestsOnTable.centerItems = true;
 
                 // Create cards types:
-                for (var card_id = 1; card_id <= this.guest_cards_nb; card_id++) {
-                    // Build card type id
-                    this.guestsOnTable.addItemType(card_id, 0, g_gamethemeurl + this.guest_img, card_id);
-                }
+                this.cardsAvailable.guests.forEach(range => {
+                    for (var card_id = range.from; card_id <= range.to; card_id++) {
+                        // Build card type id
+                        this.guestsOnTable.addItemType(card_id, 0, g_gamethemeurl + this.guest_img, card_id);
+                    }
+                });
 
                 for (var card_id in gamedatas.guestsOnTable) {
                     var card = gamedatas.guestsOnTable[card_id];
@@ -108,10 +112,12 @@ define([
                 this.guestsDiscard.image_items_per_row = this.image_items_per_row;
 
                 // Create cards types:
-                for (var card_id = 1; card_id <= this.guest_cards_nb; card_id++) {
-                    // Build card type id
-                    this.guestsDiscard.addItemType(card_id, card_id, g_gamethemeurl + this.guest_img, card_id);
-                }
+                this.cardsAvailable.guests.forEach(range => {
+                    for (var card_id = range.from; card_id <= range.to; card_id++) {
+                        // Build card type id
+                        this.guestsDiscard.addItemType(card_id, card_id, g_gamethemeurl + this.guest_img, card_id);
+                    }
+                });
 
                 var lastDiscardedGuest = gamedatas.lastDiscardedGuest;
                 if (lastDiscardedGuest) {
@@ -138,10 +144,12 @@ define([
                     playerWonCards.image_items_per_row = this.image_items_per_row;
 
                     // Create cards types:
-                    for (var card_id = 1; card_id <= this.guest_cards_nb; card_id++) {
-                        // Build card type id
-                        playerWonCards.addItemType(card_id, 0, g_gamethemeurl + this.guest_img, card_id);
-                    }
+                    this.cardsAvailable.guests.forEach(range => {
+                        for (var card_id = range.from; card_id <= range.to; card_id++) {
+                            // Build card type id
+                            playerWonCards.addItemType(card_id, 0, g_gamethemeurl + this.guest_img, card_id);
+                        }
+                    });
 
                     //adds already won cards
                     var cards = gamedatas.won[player_id];
@@ -171,10 +179,12 @@ define([
                 this.discardedDesserts.setSelectionMode(0);
 
                 // Create cards types:
-                for (var card_id = 1; card_id <= this.dessert_cards_nb; card_id++) {
-                    // Build card type id
-                    this.discardedDesserts.addItemType(card_id, 0, g_gamethemeurl + this.small_desserts_img, card_id);
-                }
+                this.cardsAvailable.desserts.forEach(range => {
+                    for (var card_id = range.from; card_id <= range.to; card_id++) {
+                        // Build card type id
+                        this.discardedDesserts.addItemType(card_id, 0, g_gamethemeurl + this.small_desserts_img, card_id);
+                    }
+                });
 
                 for (var card_id in gamedatas.discardedDesserts) {
                     var card = gamedatas.discardedDesserts[card_id];

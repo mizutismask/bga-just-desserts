@@ -112,7 +112,7 @@
 }
 
 .jd_guest_pile {
-    background-image: url('img/guests150.jpg');
+    background-image: url('img/cards/guests150x233.jpg');
 }
 
 .jd_piles {
@@ -161,7 +161,7 @@
 .jd_card-tooltip-image{
     width: 250px;
     height: 388px;
-    background: url("img/guests250x388.jpg");
+    background: url("img/cards/guests250x388.jpg");
 }
 
 .jd_poached{

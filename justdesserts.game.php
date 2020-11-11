@@ -76,6 +76,7 @@ class JustDesserts extends Table
             "type_of_rules" => TYPE_OF_RULES,
             "opening_a_buffet" => OPENING_BUFFET,
             "poaching" => POACHING,
+            "expansion_bacon" => EXPANSION_BACON,
         ));
 
         $this->dessertcards = self::getNew("module.common.deck");
@@ -186,6 +187,30 @@ class JustDesserts extends Table
         $result['counters'] = $this->argNbrCardsInHand();
         $result['isOpeningABuffetOn'] = $this->isOpeningABuffetOn();
         $result['isPoachingOn'] = $this->isPoachingOn();
+        $result['isExpansionBaconOn'] = $this->isExpansionBaconOn();
+        $result['cardsAvailable']["desserts"] = array(
+            array(
+                "from" => 1,
+                "to" => 76,
+            ),
+        );
+        $result['cardsAvailable']["guests"] = array(
+            array(
+                "from" => 1,
+                "to" => 24,
+            ),
+        );
+
+        if ($this->isExpansionBaconOn()) {
+            $result['cardsAvailable']["desserts"][] = array(
+                "from" => 77,
+                "to" => 82,
+            );
+            $result['cardsAvailable']["guests"][] = array(
+                "from" => 25,
+                "to" => 28,
+            );
+        }
         return $result;
     }
 
@@ -312,13 +337,21 @@ class JustDesserts extends Table
 
     function isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)
     {
-        $allDessertNames = array();
-        foreach ($dessertsFromMaterial as $dessert) {
-            $allDessertNames[] = $dessert["nameId"];
-        }
+        if ($this->startsWith($guestFromMaterial["favourite1"], "ANYTHING_WITH_")) {
+            $splitted = explode("_", $guestFromMaterial["favourite1"]);
+            $flavour = $splitted[count($splitted) - 1];
 
-        return in_array($guestFromMaterial["favourite1"], $allDessertNames)
-            || $guestFromMaterial["favourite2"] && in_array($guestFromMaterial["favourite2"], $allDessertNames);
+            foreach ($dessertsFromMaterial as $dessert) {
+                if (in_array($flavour, $dessert["tastes"])) {
+                    return true;
+                }
+            }
+        } else {
+            $allDessertNames = $this->concatenateFieldValues($dessertsFromMaterial, "nameId");
+
+            return in_array($guestFromMaterial["favourite1"], $allDessertNames)
+                || $guestFromMaterial["favourite2"] && in_array($guestFromMaterial["favourite2"], $allDessertNames);
+        }
     }
 
     /**
@@ -414,6 +447,11 @@ class JustDesserts extends Table
             $concatenated[] = $element[$field];
         }
         return $concatenated;
+    }
+
+    function startsWith($haystack, $needle)
+    {
+        return (strpos($haystack, $needle) === 0);
     }
 
     function countCardsForObjective5Differents($woncards)
@@ -633,6 +671,11 @@ class JustDesserts extends Table
     function isPoachingOn()
     {
         return self::getGameStateValue('poaching') == ACTIVATED;
+    }
+
+    function isExpansionBaconOn()
+    {
+        return self::getGameStateValue('expansion_bacon') == ACTIVATED;
     }
 
     function checkGuestAcceptsTheseDesserts($dessertsFromMaterial, $guestFromMaterial)
