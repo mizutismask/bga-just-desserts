@@ -147,10 +147,13 @@ $machinestates = array(
         "description" => clienttranslate('${actplayer} can serve another guest'),
         "descriptionmyturn" => clienttranslate('${you} must serve another guest or pass'),
         "type" => "activeplayer",
-        "possibleactions" => array("pass", "serveSecondGuest"),
+        "possibleactions" => array("pass", "serveSecondGuest", "poach"),
         "args" => "argGetPossibleMoves",
         "updateGameProgression" => true,
-        "transitions" => array(TRANSITION_PASSED => STATE_NEXT_PLAYER, TRANSITION_SECOND_GUEST_SERVED => STATE_NEXT_PLAYER, TRANSITION_DISCARD_GUEST_NEEDED => STATE_DISCARD, TRANSITION_END_GAME => STATE_END_GAME)
+        "transitions" => array(
+            TRANSITION_PASSED => STATE_NEXT_PLAYER, TRANSITION_SECOND_GUEST_SERVED => STATE_NEXT_PLAYER, TRANSITION_DISCARD_GUEST_NEEDED => STATE_DISCARD, TRANSITION_POACHING_ATTEMPT => STATE_POACHING_REACTION,
+            TRANSITION_POACHING_RESOLVED => STATE_POACHING_RESOLVED, TRANSITION_END_GAME => STATE_END_GAME
+        )
     ),
 
     STATE_POACHING_REACTION => array(

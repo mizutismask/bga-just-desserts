@@ -290,6 +290,9 @@ define([
                         case "serveSecondGuest":
                             this.addActionButton('button_serve_second_guest', _('Serve another guest'), 'onServeSecondGuest');
                             this.addActionButton('button_pass', _('Pass'), 'onPass');
+                            if (this.isPoachingOn && args.possibleActions["poachAction"]) {
+                                this.addActionButton('button_poach', _('Poach a guest'), 'onPoach');
+                            }
                             break;
                         case "playerDiscardGuest":
                             this.addActionButton('button_discard', _('Discard until there is only one guest from each suite'), 'onDiscardGuests');

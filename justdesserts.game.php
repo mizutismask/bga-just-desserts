@@ -50,6 +50,9 @@ if (!defined('DECK_LOC_DECK')) {
     define('GS_ALREADY_POACHED_THIS_TURN', "already_poached_this_turn");
     define('GS_GUESTS_SERVED_THIS_TURN', "guests_served_this_turn");
     define('GS_POACHED_GUEST_ID', "guest_poached_id");
+
+    //others
+    define("ANYTHING_WITH", "ANYTHING_WITH_");
 }
 
 class JustDesserts extends Table
@@ -360,7 +363,7 @@ class JustDesserts extends Table
 
     function isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)
     {
-        if ($this->startsWith($guestFromMaterial["favourite1"], "ANYTHING_WITH_")) {
+        if ($this->startsWith($guestFromMaterial["favourite1"], ANYTHING_WITH)) {
             $splitted = explode("_", $guestFromMaterial["favourite1"]);
             $flavour = $splitted[count($splitted) - 1];
 
@@ -946,11 +949,12 @@ class JustDesserts extends Table
 
         $this->dessertcards->moveCards($desserts_ids, DECK_LOC_BLOCK, $player_id);
 
-        //self::incGameStateValue(GS_GUESTS_SERVED_THIS_TURN);
-
-
         //blocking impossible
-        if ($this->isGuestGivenHisFavourite($this->getDessertsFromMaterialByIds($desserts_ids), $guestFromMaterial) && !$guestFromMaterial["favourite2"]) {
+        if (
+            $this->isGuestGivenHisFavourite($this->getDessertsFromMaterialByIds($desserts_ids), $guestFromMaterial)
+            && !$guestFromMaterial["favourite2"]
+            && !$this->startsWith($guestFromMaterial["favourite1"], ANYTHING_WITH)
+        ) {
             $this->doSuccessfullPoachingActions();
             $this->gamestate->nextState(TRANSITION_POACHING_RESOLVED);
         } else {
