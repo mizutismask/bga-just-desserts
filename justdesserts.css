@@ -168,6 +168,55 @@
     box-shadow: 0 0 14pt 6pt deeppink
 }
 
+.jd_won_cards_panel{
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.jd_circle {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+}
+
+.jd_won_cards_icon_blue{
+    background: #215b5f;
+}
+
+.jd_won_cards_icon_purple{
+    background: #713f72;
+}
+
+.jd_won_cards_icon_rose{
+    background: #c45790;
+}
+
+.jd_won_cards_icon_orange{
+    background: #e46538;
+}
+
+.jd_won_cards_icon_red{
+    background: #b0342c;
+}
+
+.jd_won_cards_icon_yellow{
+    background: #f1ad42;
+}
+
+.jd_won_cards_icon_green{
+    background: #8e9547;
+}
+
+.jd_won_cards_icon_burgundy{
+    background: #7e301c;
+}
+
+.jd_won_cards_count{
+    padding: 0px 8px 0px 1px
+}
+
 @media only screen and (min-width: 1100px) {
 
     .jd_piles {

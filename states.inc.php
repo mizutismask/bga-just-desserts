@@ -118,7 +118,7 @@ $machinestates = array(
         "description" => '',
         "type" => "game",
         "action" => "stNextPlayer",
-        "args" => "argNbrCardsInHand",
+        "args" => "argCardsCounters",
         "updateGameProgression" => true,
         "transitions" => array(TRANSITION_PLAYER_TURN => STATE_PLAYER_TURN)
     ),
@@ -172,7 +172,7 @@ $machinestates = array(
         "name" => "poachingResolved",
         "type" => "game",
         "action" => "stPoachingResolved",
-        "args" => "argNbrCardsInHand",
+        "args" => "argCardsCounters",
         "updateGameProgression" => true,
         "transitions" => array(
             TRANSITION_SERVED => STATE_SERVE_SECOND_GUEST, TRANSITION_SECOND_GUEST_SERVED => STATE_NEXT_PLAYER,

@@ -184,11 +184,12 @@ class JustDesserts extends Table
         }
 
         // Gather all information about current game situation (visible by player $current_player_id).
+        $result['usefulColors'] = $this->getUsefulColors();
         $result['hand'] = $this->dessertcards->getCardsInLocation(DECK_LOC_HAND, $current_player_id);
         $result['guestsOnTable'] = $this->guestcards->getCardsInLocation(DECK_LOC_RIVER);
         $result['lastDiscardedGuest'] = $this->guestcards->getCardOnTop(DECK_LOC_DISCARD);
         $result['discardedDesserts'] = $this->dessertcards->getCardsInLocation(DECK_LOC_DISCARD);
-        $result['counters'] = $this->argNbrCardsInHand();
+        $result['counters'] = $this->argCardsCounters();
         $result['isOpeningABuffetOn'] = $this->isOpeningABuffetOn();
         $result['isPoachingOn'] = $this->isPoachingOn();
         $result['isExpansionBaconOn'] = $this->isExpansionBaconOn();
@@ -335,7 +336,7 @@ class JustDesserts extends Table
         self::notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $cards));
 
         self::notifyAllPlayers(NOTIF_UPDATE_CARDS_NB, "", array(
-            'counters' => $this->argNbrCardsInHand(),
+            'counters' => $this->argCardsCounters(),
         ));
     }
 
@@ -390,6 +391,19 @@ class JustDesserts extends Table
         return count($allSuits) != count(array_unique($allSuits));
     }
 
+    function getUsefulColors()
+    {
+        $colors = $this->colors;
+        if (!$this->isExpansionBaconOn()) {
+            $colors = array_diff($colors, [BURGUNDY]);
+        }
+
+        if (!$this->isExpansionCoffeeOn()) {
+            $colors = array_diff($colors, [ROSE]);
+        }
+        return $colors;
+    }
+
     /*
      When the guest is satisfied, it goes to the won pile of the player and used desserts are discarded.
      The player can have a tip.
@@ -411,7 +425,7 @@ class JustDesserts extends Table
             'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop(DECK_LOC_DISCARD),
             'fromDiscard' => $fromDiscard,
             'discardedDesserts' => $this->getDessertCardsFromIds($dessert_cards_id),
-            'counters' => $this->argNbrCardsInHand(),
+            'counters' => $this->argCardsCounters(),
         ));
         $this->giveTipIfNeeded($dessertsFromMaterial, $guestFromMaterial, $player_id);
         $this->checkIfEndOfGame($player_id);
@@ -451,7 +465,7 @@ class JustDesserts extends Table
             //notify other that he got one tip
             self::notifyAllPlayers(NOTIF_UPDATE_CARDS_NB, clienttranslate('${player_name} gets a new dessert card as a tip'), array(
                 'player_name' => $this->getPlayerName($player_id),
-                'counters' => $this->argNbrCardsInHand(),
+                'counters' => $this->argCardsCounters(),
             ));
         }
     }
@@ -729,6 +743,19 @@ class JustDesserts extends Table
         return self::getUniqueValueFromDB($sql);
     }
 
+    function countWonCardsByPlayerAndColor()
+    {
+        $cards_count = array();
+        $players = self::loadPlayersBasicInfos();
+        foreach ($players as $player_id => $player) {
+            $cards = $this->guestcards->getCardsInLocation(DECK_LOC_WON, $player_id);
+            $allSuits = $this->concatenateColorsFromCards($cards);
+            $valuesOccurrences = array_count_values($allSuits);
+            $cards_count[$player_id] = $valuesOccurrences;
+        }
+        return $cards_count;
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
     //////////// 
@@ -750,7 +777,7 @@ class JustDesserts extends Table
             clienttranslate('${player_name} draws a dessert'),
             array(
                 'player_name' => self::getActivePlayerName(),
-                'counters' => $this->argNbrCardsInHand(),
+                'counters' => $this->argCardsCounters(),
             )
         );
         $this->goToDiscardIfNeededOrGoTo(TRANSITION_DRAWN);
@@ -896,7 +923,7 @@ class JustDesserts extends Table
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
             'discardedDesserts' => $discardedDesserts,
-            'counters' => $this->argNbrCardsInHand(),
+            'counters' => $this->argCardsCounters(),
 
         ));
 
@@ -963,7 +990,7 @@ class JustDesserts extends Table
                 'poaching_player_name' => self::getActivePlayerName(),
                 'poached_player_name' => $players[$poached_player_id]["player_name"],
                 'guest_name' => $guestFromMaterial["name"],
-                'counters' => $this->argNbrCardsInHand(),
+                'counters' => $this->argCardsCounters(),
             ));
 
             $this->gamestate->nextState(TRANSITION_POACHING_ATTEMPT);
@@ -1010,7 +1037,7 @@ class JustDesserts extends Table
             'poached_player_name' => $players[$poached_player_id]["player_name"],
             'guest_name' => $guestFromMaterial["name"],
             'discardedDesserts' => $dessert_cards,
-            'counters' => $this->argNbrCardsInHand(),
+            'counters' => $this->argCardsCounters(),
         ));
 
         $this->giveTipIfNeeded($dessertsFromMaterial, $guestFromMaterial, $poaching_player_id);
@@ -1042,7 +1069,7 @@ class JustDesserts extends Table
             'poached_player_name' => self::getCurrentPlayerName(),
             'player_id' => $poached_player_id,
             'discardedDesserts' => $discardedDesserts,
-            'counters' => $this->argNbrCardsInHand(),
+            'counters' => $this->argCardsCounters(),
         ));
 
         $this->giveTipIfNeeded($dessertsFromMaterial, $guestFromMaterial, $poached_player_id);
@@ -1066,16 +1093,26 @@ class JustDesserts extends Table
         These methods function is to return some additional information that is specific to the current
         game state.
     */
-    function argNbrCardsInHand()
+    function argCardsCounters()
     {
         $players = self::getObjectListFromDB("SELECT player_id id FROM player", true);
         $counters = array();
         for ($i = 0; $i < ($this->getPlayersNumber()); $i++) {
             $counters['cards_count_' . $players[$i]] = array('counter_name' => 'cards_count_' . $players[$i], 'counter_value' => 0);
+            foreach ($this->getUsefulColors() as $color) {
+                $counters['won_cards_count_' . $players[$i] . "_" . $color] = array('counter_name' => 'won_cards_count_' . $players[$i] . "_" . $color, 'counter_value' => 0);
+            }
         }
         $cards_in_hand = $this->dessertcards->countCardsByLocationArgs(DECK_LOC_HAND);
         foreach ($cards_in_hand as $player_id => $cards_nbr) {
             $counters['cards_count_' . $player_id]['counter_value'] = $cards_nbr;
+        }
+
+        $won_cards = $this->countWonCardsByPlayerAndColor();
+        foreach ($won_cards as $player_id => $cards_nbr_by_color) {
+            foreach ($cards_nbr_by_color as $color => $count) {
+                $counters['won_cards_count_' . $player_id . "_" . $color]['counter_value'] = $count;
+            }
         }
         return $counters;
     }

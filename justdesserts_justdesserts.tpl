@@ -74,6 +74,10 @@
     var jstpl_cards_icon = '<div id= "cards_panel_${id}"> \
     <div id="cards_icon_${id}" class="jd_cards_icon"></div><span id="cards_count_${id}" class="cards_count"></span></div>';
 
+    var jstpl_won_cards_icons = '<div id="won_cards_panel_${id}" class="jd_won_cards_panel"></div>';
+
+    var jstpl_won_cards_icon = '<div id="won_cards_icon_${id}_${color}" class="jd_circle jd_won_cards_icon_${color}"></div><span id="won_cards_count_${id}_${color}" class="jd_won_cards_count"></span>';
+
     // template for guest card tooltip
     var jstpl_card_tooltip = '<div id="tooltipGuestBig"><div class="jd_card-tooltip-image" style="background-position: ${backpos}"></div></div>';
 

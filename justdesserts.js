@@ -162,9 +162,25 @@ define([
                     this.wonStocksByPlayerId[player_id] = playerWonCards;
                 }
 
-                //cards number
+                //cards counts
                 for (var player_id in gamedatas.players) {
                     var player_board_div = $('player_board_' + player_id);
+
+                    dojo.place(this.format_block('jstpl_won_cards_icons', {
+                        id: player_id,
+                    }), player_board_div);
+                    var el = 'won_cards_icon_' + player_id;
+                    this.addTooltipHtml(el, _('Number of won guests of each suit'));
+
+                    var won_cards_div = $('won_cards_panel_' + player_id);
+                    gamedatas.usefulColors.forEach(color => {
+                        dojo.place(this.format_block('jstpl_won_cards_icon', {
+                            id: player_id,
+                            color: color,
+                        }), won_cards_div);
+
+                    });
+
                     dojo.place(this.format_block('jstpl_cards_icon', {
                         id: player_id,
                     }), player_board_div);
