@@ -35,37 +35,36 @@
             </div>
             <div id="guest_discard" class="jd_pile jd_discard jd_guest_pile jd_empty"></div>
         </div>
-    </div>
-    <div id="guests_on_table_wrapper" class="whiteblock">
-        <div id="guests_on_table"></div>
-    </div>
-</div>
-
-<div id="myhand_wrap" class="whiteblock">
-    <h3>{MY_HAND}</h3>
-    <div id="myhand">
-    </div>
-</div>
-
-<div id="guests_wrapper">
-
-    <!-- BEGIN player -->
-    <div id="guest_{PLAYER_ID}" class="whiteblock jd_guestsWon">
-        <div class="guestsname" style="color:#{PLAYER_COLOR}">
-            <h3>{PLAYER_NAME_WON_CARDS_TITLE}</h3>
-        </div>
-        <div class="guestscard" id="guestscards_{PLAYER_ID}" class="jd_guests">
+        <div id="guests_on_table_wrapper" class="whiteblock">
+            <div id="guests_on_table"></div>
         </div>
     </div>
-    <!-- END player -->
 
-</div>
-
-<div id="desserts_discarded_block" class="whiteblock">
-    <h3>{DISCARDED_DESSERTS}</h3>
-    <div id="desserts_discarded_cards">
+    <div id="myhand_wrap" class="whiteblock">
+        <h3>{MY_HAND}</h3>
+        <div id="myhand">
+        </div>
     </div>
-</div>
+
+    <div id="guests_wrapper">
+
+        <!-- BEGIN player -->
+        <div id="guest_{PLAYER_ID}" class="whiteblock jd_guestsWon">
+            <div class="guestsname" style="color:#{PLAYER_COLOR}">
+                <h3>{PLAYER_NAME_WON_CARDS_TITLE}</h3>
+            </div>
+            <div class="guestscard" id="guestscards_{PLAYER_ID}" class="jd_guests">
+            </div>
+        </div>
+        <!-- END player -->
+
+    </div>
+
+    <div id="desserts_discarded_block" class="whiteblock">
+        <h3>{DISCARDED_DESSERTS}</h3>
+        <div id="desserts_discarded_cards">
+        </div>
+    </div>
 </div>
 
 <script type="text/javascript">

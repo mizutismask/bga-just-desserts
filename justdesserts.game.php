@@ -234,7 +234,6 @@ class JustDesserts extends Table
                 "to" => 32,
             );
         }
-        self::dump("***************CardsAvailable()", $cardsAvailable);
         return $cardsAvailable;
     }
 
@@ -998,7 +997,6 @@ class JustDesserts extends Table
 
     function goToCorrectServeState()
     {
-        self::dump("*******************GS_GUESTS_SERVED_THIS_TURN", self::getGameStateValue(GS_GUESTS_SERVED_THIS_TURN));
         if (self::getGameStateValue(GS_GUESTS_SERVED_THIS_TURN) == 0) {
             $this->gamestate->nextState(TRANSITION_PLAYER_TURN);
         } else if (self::getGameStateValue(GS_GUESTS_SERVED_THIS_TURN) == 1) {
