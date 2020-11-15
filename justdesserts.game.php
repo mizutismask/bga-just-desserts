@@ -234,6 +234,7 @@ class JustDesserts extends Table
                 "to" => 32,
             );
         }
+        self::dump("***************CardsAvailable()", $cardsAvailable);
         return $cardsAvailable;
     }
 
@@ -278,10 +279,9 @@ class JustDesserts extends Table
     {
         $cards = array();
         foreach ($this->getCardsAvailable()["guests"] as $range) {
-            for ($i = $range["from"]; $i < $range["to"]; $i++) {
+            for ($i = $range["from"]; $i <= $range["to"]; $i++) {
                 $guest = $this->guests[$i];
                 $cards[] = array('type' => $guest["nameId"], 'type_arg' => $i, 'nbr' => 1);
-                $i++;
             }
         }
         $this->guestcards->createCards($cards, DECK_LOC_DECK);
@@ -293,10 +293,9 @@ class JustDesserts extends Table
     {
         $cards = array();
         foreach ($this->getCardsAvailable()["desserts"] as $range) {
-            for ($i = $range["from"]; $i < $range["to"]; $i++) {
+            for ($i = $range["from"]; $i <= $range["to"]; $i++) {
                 $dessert = $this->desserts[$i];
                 $cards[] = array('type' => $dessert["nameId"], 'type_arg' => $i, 'nbr' => 1);
-                $i++;
             }
         }
         $this->dessertcards->createCards($cards, DECK_LOC_DECK);
@@ -1114,6 +1113,8 @@ class JustDesserts extends Table
                 $counters['won_cards_count_' . $player_id . "_" . $color]['counter_value'] = $count;
             }
         }
+
+        $counters['guest_draw_count'] = array('counter_name' => 'guest_draw_count', 'counter_value' => $this->guestcards->countCardInLocation(DECK_LOC_DECK));
         return $counters;
     }
 
