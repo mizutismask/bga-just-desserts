@@ -716,6 +716,8 @@ define([
                 dojo.subscribe('guestPoached', this, "notif_guestPoached");
                 dojo.subscribe('poachingBlocked', this, "notif_poachBlocked");
                 dojo.subscribe('updateCardsNb', this, "notif_updateCardsNb");
+                dojo.subscribe('clearLocation', this, "notif_clearLocation");
+
             },
 
             // TODO: from this point and below, you can write your game notifications handling methods
@@ -855,5 +857,16 @@ define([
                 console.log("notif_updateCardsNb : ", notif);
                 this.updateCounters(notif.args.counters);
             },
+
+            notif_clearLocation: function (notif) {
+                console.log("notif_clearLocation : ", notif);
+                switch (notif.args.location) {
+                    case "dessertDiscard":
+                        this.discardedDesserts.removeAll();
+                        break;
+                    default:
+                }
+            },
+
         });
     });

@@ -41,6 +41,7 @@ if (!defined('DECK_LOC_DECK')) {
     define("NOTIF_GUEST_POACHED", "guestPoached");
     define("NOTIF_POACHING_BLOCKED", "poachingBlocked");
     define("NOTIF_UPDATE_CARDS_NB", "updateCardsNb");
+    define("NOTIF_CLEAR_LOCATION", "clearLocation");
 
     // constants for game states
     define('GS_LAST_DISCARDED_GUEST_ID', "last_discarded_guest_id");
@@ -86,7 +87,7 @@ class JustDesserts extends Table
         $this->dessertcards = self::getNew("module.common.deck");
         $this->dessertcards->init("dessertcard");
         $this->dessertcards->autoreshuffle = true;
-
+        $this->dessertcards->autoreshuffle_trigger = array('obj' => $this, 'method' => 'dessertDeckAutoReshuffle');
 
         $this->guestcards = self::getNew("module.common.deck");
         $this->guestcards->init("guestcard");
@@ -316,6 +317,11 @@ class JustDesserts extends Table
                 $this->playGuestCards([$card_id]);
             }
         }
+    }
+
+    function dessertDeckAutoReshuffle()
+    {
+        self::notifyAllPlayers(NOTIF_CLEAR_LOCATION, '', array('location' => 'dessertDiscard'));
     }
 
     function pickGuestCardsAndNotifyPlayers($nb, $players)
@@ -582,6 +588,22 @@ class JustDesserts extends Table
                 }
             }
             $i++;
+        }
+    }
+
+    function db_discardDesserts($nb)
+    {
+        $discardNb = $nb;
+        $cards = $this->dessertcards->getCardsInLocation(DECK_LOC_DECK);
+        if (!$nb) {
+            $discardNb = count($cards);
+        }
+        $i = 0;
+        foreach ($cards as $card) {
+            if ($i < $discardNb) {
+                $cards = $this->dessertcards->moveCard($card["id"], DECK_LOC_DISCARD);
+                $i++;
+            }
         }
     }
 
