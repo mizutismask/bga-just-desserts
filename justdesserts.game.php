@@ -926,6 +926,9 @@ class JustDesserts extends Table
 
         ));
 
+        //we simulate a poach to disable poaching when a buffet has been opened
+        self::setGameStateValue(GS_ALREADY_POACHED_THIS_TURN, 1);
+
         $other_players = $this->getOtherPlayersHavingWonCards();
         if (count($other_players) > 0) {
             $this->gamestate->nextState(TRANSITION_BUFFET_OPENED);
