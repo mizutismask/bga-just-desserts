@@ -26,14 +26,21 @@
 -->
 <div id="container">
     <div id="guest_line">
-        <div class="whiteblock jd_piles">
-            <div id="guest_draw" class="jd_pile jd_draw jd_guest_pile">
-                <div id="jd_draw_count">
-                    <span style="margin-right:-8px">x</span>
-                    <span id="guest_draw_count"></span>
+        <div class="whiteblock pilesAndCounters">
+            <div id="piles" class="jd_piles">
+                <div id="guest_draw" class="jd_pile jd_draw jd_guest_pile">
+                    <div id="jd_guest_draw_count">
+                        <span style="margin-right:-8px">x</span>
+                        <span id="guest_draw_count"></span>
+                    </div>
                 </div>
+                <div id="guest_discard" class="jd_pile jd_discard jd_guest_pile jd_empty"></div>
             </div>
-            <div id="guest_discard" class="jd_pile jd_discard jd_guest_pile jd_empty"></div>
+            <div id="jd_dessert_draw_count">
+                <img src="{GAMETHEMEURL}/img/cards/dessertBack.jpg" style="vertical-align: text-top;" /> <span
+                    style="margin-right:-6px">x</span>
+                <span id="dessert_draw_count"></span>
+            </div>
         </div>
         <div id="guests_on_table_wrapper" class="whiteblock">
             <div id="guests_on_table"></div>

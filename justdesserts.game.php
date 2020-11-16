@@ -1117,6 +1117,7 @@ class JustDesserts extends Table
         }
 
         $counters['guest_draw_count'] = array('counter_name' => 'guest_draw_count', 'counter_value' => $this->guestcards->countCardInLocation(DECK_LOC_DECK));
+        $counters['dessert_draw_count'] = array('counter_name' => 'dessert_draw_count', 'counter_value' => $this->dessertcards->countCardInLocation(DECK_LOC_DECK));
         return $counters;
     }
 

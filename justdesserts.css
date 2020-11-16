@@ -217,7 +217,7 @@
     padding: 0px 8px 0px 1px
 }
 
-#jd_draw_count{
+#jd_guest_draw_count{
     position: absolute;
     font-weight: bold;
     font-size: 28px;
@@ -226,15 +226,32 @@
     top: 206px;
     left: 28px;
 }
+
+#jd_dessert_draw_count{
+    font-weight: bold;
+    font-size: 18px;
+    color: #0096a5;
+    margin: 6px 0px 0px 0px;
+    align-self: auto;
+}
+
+.pilesAndCounters{
+    display: flex;
+    flex-direction: column;
+    margin-right: 10px;
+}
 @media only screen and (min-width: 1100px) {
 
     .jd_piles {
-        margin-right: 10px;
         display: inline-flex;
         flex-direction: row;
     }
 
     #guest_draw {
         margin-right: 8px;
+    }
+
+    #jd_dessert_draw_count{
+        align-self: center;
     }
   }

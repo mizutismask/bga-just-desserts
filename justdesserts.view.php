@@ -83,6 +83,7 @@ class view_justdesserts_justdesserts extends game_view
 
     // this will make our My Hand text translatable
     $this->tpl['MY_HAND'] = self::_("My hand");
+    $this->tpl['REMAINING_DESSERTS'] = self::_("Dessert draw remaining cards");
 
     // this will inflate our player block with actual players data
     $this->page->begin_block($template, "player");
