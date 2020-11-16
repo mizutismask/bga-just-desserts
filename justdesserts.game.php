@@ -357,7 +357,8 @@ class JustDesserts extends Table
         }
         $allTastes = array_unique($allTastes);
 
-        return !in_array($guestFromMaterial["dislike1"], $allTastes) || array_key_exists("dislike2", $guestFromMaterial) && !in_array($guestFromMaterial["dislike2"], $allTastes);
+        return in_array($guestFromMaterial["dislike1"], $allTastes)
+            || (array_key_exists("dislike2", $guestFromMaterial) && in_array($guestFromMaterial["dislike2"], $allTastes));
     }
 
     function isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)
@@ -726,7 +727,7 @@ class JustDesserts extends Table
         if (!self::dessertsAreEnoughForGuest($dessertsFromMaterial, $guestFromMaterial))
             throw new BgaUserException(self::_("This guest is not satisfied with your desserts"));
 
-        if (!self::guestDislikesSomething($dessertsFromMaterial, $guestFromMaterial))
+        if (self::guestDislikesSomething($dessertsFromMaterial, $guestFromMaterial))
             throw new BgaUserException(self::_("This guest refuses to eat one of the ingredients you provided"));
     }
 
