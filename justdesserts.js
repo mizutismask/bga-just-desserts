@@ -173,12 +173,11 @@ define([
                     this.addTooltipHtml(el, _('Number of won guests of each suit'));
 
                     var won_cards_div = $('won_cards_panel_' + player_id);
-                    for (var color in gamedatas.usefulColors) {
+                    for (var colorIndex in gamedatas.usefulColors) {
                         dojo.place(this.format_block('jstpl_won_cards_icon', {
                             id: player_id,
-                            color: color,
+                            color: gamedatas.usefulColors[colorIndex],
                         }), won_cards_div);
-
                     };
 
                     dojo.place(this.format_block('jstpl_cards_icon', {
@@ -295,7 +294,7 @@ define([
                         case "playerTurn":
                             this.addActionButton('button_serve', _('Serve a guest'), 'onServeGuest');
                             this.addActionButton('button_draw', _('Draw a dessert'), 'onDraw');
-                            this.addActionButton('button_exchange', _('Swap desserts'), 'onExchange');
+                            this.addActionButton('button_exchange', _('Dump desserts'), 'onExchange');
                             if (this.isOpeningABuffetOn) {
                                 this.addActionButton('button_openBuffet', _('Open a buffet'), 'onOpenBuffet');
                             }
@@ -311,7 +310,7 @@ define([
                             }
                             break;
                         case "playerDiscardGuest":
-                            this.addActionButton('button_discard', _('Discard until there is only one guest from each suite'), 'onDiscardGuests');
+                            this.addActionButton('button_discard', _('Discard until there is only one guest from each suit'), 'onDiscardGuests');
                             break;
                         case "allPlayersDiscardGuest":
                             this.addActionButton('button_discardWonGuest', _('Give back a satisfied guest'), 'onDiscardWonGuest');

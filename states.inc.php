@@ -94,10 +94,10 @@ $machinestates = array(
 
     STATE_PLAYER_TURN => array(
         "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must serve guests, draw a dessert or swap desserts'),
+        "description" => clienttranslate('${actplayer} must serve guests, draw a dessert or dump desserts'),
         "descriptionmyturn" => clienttranslate('${you} must choose 1 action'),
         "type" => "activeplayer",
-        "possibleactions" => array("draw", "serve", "swap", "openBuffet", "poach"),
+        "possibleactions" => array("draw", "serve", "swap", "openBuffet", "poach"), //swap is the same as dump
         "args" => "argGetPossibleMoves",
         "transitions" => array(
             TRANSITION_DRAWN => STATE_NEXT_PLAYER,

@@ -255,11 +255,11 @@ class JustDesserts extends Table
         foreach ($players as $player_id => $player) {
             $cards = $this->guestcards->getCardsInLocation(DECK_LOC_WON, $player_id);
             $differentColors = $this->countCardsForObjective5Differents($cards);
-            $suite = $this->countCardsForObjective3OfAKind($cards);
+            $suit = $this->countCardsForObjective3OfAKind($cards);
 
             $prog = $differentColors * 100 / 5;
-            if ($suite == 2) {
-                $prog = max($suite * 100 / 3, $prog);
+            if ($suit == 2) {
+                $prog = max($suit * 100 / 3, $prog);
             }
             $progressionByPlayerId[$player_id] = $prog;
         }
@@ -848,7 +848,7 @@ class JustDesserts extends Table
             );
             $this->gamestate->nextState(TRANSITION_GUESTS_DISCARDED);
         } else {
-            throw new BgaUserException(self::_("Dicard only guests needed to keep one of each suite at most"));
+            throw new BgaUserException(self::_("Dicard only guests needed to keep one of each suit at most"));
         }
     }
 
