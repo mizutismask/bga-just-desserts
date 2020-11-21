@@ -122,14 +122,13 @@ $machinestates = array(
         "updateGameProgression" => true,
         "transitions" => array(TRANSITION_PLAYER_TURN => STATE_PLAYER_TURN)
     ),
-
     STATE_DISCARD => array(
         "name" => "playerDiscardGuest",
-        "description" => clienttranslate('${actplayer} must discard guests to keep only one of each suit'),
-        "descriptionmyturn" => clienttranslate('${you} must discard guests to keep only one of each suit'),
+        "description" => clienttranslate('${actplayer} must discard guests until there is only one left from each suit'),
+        "descriptionmyturn" => clienttranslate('${you} must discard guests until there is only one left from each suit'),
         "type" => "activeplayer",
-        "possibleactions" => array("discardGuests"),
-        "transitions" => array(TRANSITION_GUESTS_DISCARDED => STATE_NEXT_PLAYER)
+        "possibleactions" => array("discardGuest"),
+        "transitions" => array(TRANSITION_GUESTS_DISCARDED => STATE_NEXT_PLAYER, TRANSITION_DISCARD_GUEST_NEEDED => STATE_DISCARD)
     ),
 
     STATE_BUFFET_DISCARD => array(

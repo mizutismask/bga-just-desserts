@@ -827,51 +827,51 @@ class JustDesserts extends Table
         $this->goToDiscardIfNeededOrGoTo(TRANSITION_SWAPPED);
     }
 
-    function discardGuests($cards_id)
+    /**
+     * Checks that the discarded guest really was one of a not unique color before discarding it.
+     */
+    function discardGuest($guest_id)
     {
-        $cards_nb = sizeof($cards_id);
-
-        self::checkAction('discardGuests');
+        self::checkAction('discardGuest');
 
         $cards = $this->guestcards->getCardsInLocation(DECK_LOC_RIVER);
         $guests_in_river = $this->getGuestsFromMaterialByCards($cards);
 
-        $guests_to_remove = $this->guestcards->getCards($cards_id);
-        $guests_to_remove_from_material = $this->getGuestsFromMaterialByIds($cards_id);
+        $guest_to_remove = $this->guestcards->getCard($guest_id);
+        $guest_to_remove_from_material = $this->getGuestFromMaterial($guest_id);
 
-        foreach ($guests_in_river as $guest) {
-            $allSuits[] = $guest["color"];
-        }
-
+        //which color is not unique ?
+        $allSuits = $this->concatenateFieldValues($guests_in_river, "color");
         $valuesOccurrences = array_count_values($allSuits);
         $pbOccurrences = array_filter($valuesOccurrences, function ($occurrences) {
             return $occurrences > 1;
         });
 
-        $cardsFromOtherColors = false;
-        foreach ($guests_to_remove_from_material as $guest_to_remove) {
-            $color = $guest_to_remove['color'];
-            $valuesOccurrences[$color] += -1;
-            if (!array_key_exists($color, $pbOccurrences)) {
-                $cardsFromOtherColors = true;
-            }
-        }
-        //there is only one card of each and no extra card is discarded
-        if (!$cardsFromOtherColors && max($valuesOccurrences) == 1 && min($valuesOccurrences) >= 0) {
-            $this->playGuestCards($cards_id);
+        $color = $guest_to_remove_from_material['color'];
+
+        //the discarded guest belongs to a problematic color
+        if (array_key_exists($color, $pbOccurrences)) {
+            $this->playGuestCards([$guest_id]);
+            $guestName = $this->getGuestFromMaterial($guest_id)["name"];
             self::notifyAllPlayers(
                 NOTIF_DISCARDED_GUESTS,
-                clienttranslate('${player_name} discards ${cards_nb} guest(s)'),
+                clienttranslate('${player_name} discards ${card_name}'),
                 array(
                     'player_name' => self::getActivePlayerName(),
-                    'cards_nb' => $cards_nb,
-                    'cards' => $guests_to_remove,
+                    'cards' => [$guest_to_remove],
+                    'card_name' => $guestName,
                     'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop(DECK_LOC_DISCARD)
                 )
             );
-            $this->gamestate->nextState(TRANSITION_GUESTS_DISCARDED);
+
+            //another discard might still be needed
+            if ($this->guestsNeedsToBeDiscarded()) {
+                $this->gamestate->nextState(TRANSITION_DISCARD_GUEST_NEEDED);
+            } else {
+                $this->gamestate->nextState(TRANSITION_GUESTS_DISCARDED);
+            }
         } else {
-            throw new BgaUserException(self::_("Dicard only guests needed to keep one of each suit at most"));
+            throw new BgaUserException(self::_("This suit already has one unique guest"));
         }
     }
 

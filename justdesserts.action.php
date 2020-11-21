@@ -80,12 +80,11 @@ class action_justdesserts extends APP_GameAction
     self::ajaxResponse();
   }
 
-  public function discardGuestsAction()
+  public function discardGuestAction()
   {
     self::setAjaxMode();
-    $cards_id = self::getArg("cards_id", AT_numberlist, true);
-    $cards_id = $this->convertStringToArray($cards_id);
-    $this->game->discardGuests($cards_id);
+    $guest_id = self::getArg("guest_id", AT_posint, true);
+    $this->game->discardGuest($guest_id);
 
     self::ajaxResponse();
   }

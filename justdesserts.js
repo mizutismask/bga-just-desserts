@@ -253,6 +253,9 @@ define([
                         this.poachedDiv = this.wonStocksByPlayerId[args.args.poached_player_id].getItemDivId(guestId);
                         dojo.addClass(this.poachedDiv, "jd_poached");
                         break;
+                    case 'playerDiscardGuest':
+                        this.guestsOnTable.setSelectionMode(1);
+                        break;
                     default:
                         this.guestsOnTable.setSelectionMode(2);
 
@@ -310,7 +313,7 @@ define([
                             }
                             break;
                         case "playerDiscardGuest":
-                            this.addActionButton('button_discard', _('Discard until there is only one guest from each suit'), 'onDiscardGuests');
+                            this.addActionButton('button_discard', _('Discard'), 'onDiscardGuest');
                             break;
                         case "allPlayersDiscardGuest":
                             this.addActionButton('button_discardWonGuest', _('Give back a satisfied guest'), 'onDiscardWonGuest');
@@ -476,26 +479,26 @@ define([
                 }
             },
 
-            onDiscardGuests: function (evt) {
-                //console.log('onDiscardGuests');
+            onDiscardGuest: function (evt) {
+                //console.log('onDiscardGuest');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
 
                 var selectedGuests = this.guestsOnTable.getSelectedItems();
-                if (selectedGuests.length > 0) {
-                    if (this.checkAction('discardGuests')) {
-                        this.ajaxcall('/justdesserts/justdesserts/discardGuestsAction.html',
+                if (selectedGuests.length == 1) {
+                    if (this.checkAction('discardGuest')) {
+                        this.ajaxcall('/justdesserts/justdesserts/discardGuestAction.html',
                             {
                                 lock: true,
-                                cards_id: selectedGuests.map(i => i.id).join(";"),
+                                guest_id: selectedGuests[0].id,
                             },
                             this,
                             function (result) { });
                     }
                 }
                 else {
-                    this.showMessage(_('You have to select at least one guest to discard'), 'error');
+                    this.showMessage(_('You have to select one guest to discard'), 'error');
                 }
             },
 
