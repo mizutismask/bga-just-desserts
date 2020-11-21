@@ -1,3 +1,5 @@
 magick montage  `ls -v D:/Users/skamycki/Downloads/looneylabs-9c47b8/JustDessertsAssets_BGA/Cards/*.png` -tile 10 -geometry 150x233+0+0 tiles150.jpg
 
-logging is not visible if written from the constructor or gameSetup,			
+logging is not visible if written from the constructor or gameSetup,	
+
+The rules say there is only one winner and others are loosers. It’s impossible to tell someone did better than others because of the different objectives. So only the winner gets points. 100 points because he won. And some points to reflect how many guests he has satisfied.		
