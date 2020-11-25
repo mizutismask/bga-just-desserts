@@ -441,7 +441,9 @@ define([
                             });
                     }
                 } else {
-                    this.showMessage(_('You have to select one guest and one or several desserts first'), 'error');
+                    this.showMessage(_('You have to select only one guest and one or several desserts first'), 'error');
+                    this.guestsOnTable.unselectAll();
+                    this.guestsDiscard.unselectAll();
                 }
             },
 
@@ -476,6 +478,8 @@ define([
                 }
                 else {
                     this.showMessage(_('You have to select one guest and one or several desserts first'), 'error');
+                    this.guestsOnTable.unselectAll();
+                    this.guestsDiscard.unselectAll();
                 }
             },
 
@@ -499,6 +503,7 @@ define([
                 }
                 else {
                     this.showMessage(_('You have to select one guest to discard'), 'error');
+                    this.guestsOnTable.unselectAll();
                 }
             },
 
@@ -545,6 +550,7 @@ define([
                     );
                 } else {
                     this.showMessage(_('You have to select four aces to open a buffet'), 'error');
+                    this.playerHand.unselectAll();
                 }
             },
 
