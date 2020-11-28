@@ -3,3 +3,14 @@ magick montage  `ls -v D:/Users/skamycki/Downloads/looneylabs-9c47b8/JustDessert
 logging is not visible if written from the constructor or gameSetup,	
 
 The rules say there is only one winner and others are loosers. It’s impossible to tell someone did better than others because of the different objectives. So only the winner gets points. 100 points because he won. And some points to reflect how many guests he has satisfied.		
+
+
+convert -label %f   balloon.gif medical.gif present.gif shading.gif \
+          -mattecolor peru  -frame 10x5+3+0    miff:-  |\
+     montage  -   -tile x1  -frame 5  -geometry '64x56+5+5>' double_frame.jpg
+	 
+	  magick convert -resize 150x233 -quality 100 -density 300 `ls -v ./guests/*.png`  | magick montage -tile 10 -geometry 150x233+0+0 guests150x233.jpg
+   magick montage -tile 10 -geometry 150x233+0+0 `ls -v ./guests/*.png`  miff:- | magick convert miff:- -resize 1500x932 guests150x233.jpg
+   
+   magick montage -tile 10 -geometry 150x233+0+0 `ls -v ./guests/*.png`  miff:- | magick convert miff:- -resize 1500x932 -quality 100 guests150x233.png
+

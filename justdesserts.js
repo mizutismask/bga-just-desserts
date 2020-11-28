@@ -64,6 +64,7 @@ define([
                 this.isPoachingOn = gamedatas.isPoachingOn;
 
                 this.cardsAvailable = gamedatas.cardsAvailable;
+                this.guestDescriptions = gamedatas.cardsDescription;
 
                 //---------- Player hand setup
                 this.playerHand = new ebg.stock(); // new stock object for hand
@@ -103,7 +104,7 @@ define([
                     var card = gamedatas.guestsOnTable[card_id];
                     //console.log("ajout dans les guests de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     this.guestsOnTable.addToStockWithId(card.type_arg, card.id);
-                    this.addCardToolTip(this.guestsOnTable, card.id);
+                    this.addCardToolTip(this.guestsOnTable, card.id, card.type_arg);
                 }
 
                 //-----------guest discard setup
@@ -123,7 +124,7 @@ define([
                 if (lastDiscardedGuest) {
                     //console.log("ajout dans la defausse de la carte id/type/type arg :" + lastDiscardedGuest.id + " " + lastDiscardedGuest.type + " " + lastDiscardedGuest.type_arg);
                     this.guestsDiscard.addToStockWithId(lastDiscardedGuest.type_arg, lastDiscardedGuest.id);
-                    this.addCardToolTip(this.guestsDiscard, lastDiscardedGuest.id);
+                    this.addCardToolTip(this.guestsDiscard, lastDiscardedGuest.id, lastDiscardedGuest.type_arg);
                     dojo.removeClass("guest_discard", "jd_empty");
                 }
 
@@ -157,7 +158,7 @@ define([
                         var card = cards[card_id];
                         //console.log("ajout dans les cartes gagnées de la carte id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                         playerWonCards.addToStockWithId(card.type_arg, card.id);
-                        this.addCardToolTip(playerWonCards, card.id);
+                        this.addCardToolTip(playerWonCards, card.id, card.type_arg);
                     }
                     this.wonStocksByPlayerId[player_id] = playerWonCards;
                 }
@@ -329,7 +330,7 @@ define([
 
             ///////////////////////////////////////////////////
             //// Utility methods
-            addCardToolTip: function (cards, card_id, delay = 200) {
+            addCardToolTip: function (cards, card_id, card_type_arg, delay = 200) {
                 // Get the div of current card
                 curDiv = cards.getItemDivId(card_id);
 
@@ -338,6 +339,7 @@ define([
                 // Add tooltip info
                 this.addTooltipHtml(curDiv, this.format_block('jstpl_card_tooltip', {
                     backpos: backPos,
+                    guestName: this.guestDescriptions[card_type_arg].name,
                 }), delay);
 
             },
@@ -773,7 +775,7 @@ define([
                     if (notif.args.from_player_id) {
                         this.wonStocksByPlayerId[notif.args.from_player_id].removeFromStockById(card.id);
                     }
-                    this.addCardToolTip(this.guestsOnTable, card.id);
+                    this.addCardToolTip(this.guestsOnTable, card.id, card.type_arg);
                 }
             },
 
@@ -808,7 +810,7 @@ define([
                 //console.log("notif_newGuestWon card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
 
                 this.wonStocksByPlayerId[player_id].addToStockWithId(card.type_arg, card.id, from_discard ? 'guest_discard' : 'guests_on_table');
-                this.addCardToolTip(this.wonStocksByPlayerId[player_id], card.id);
+                this.addCardToolTip(this.wonStocksByPlayerId[player_id], card.id, card.type_arg);
 
                 if (from_discard) {
                     this.newGuestOnTopOfDiscard(notif.args.newGuestOnTopOfDiscard, null);
@@ -831,7 +833,7 @@ define([
                     else {
                         this.guestsDiscard.addToStockWithId(card.type_arg, card.id);
                     }
-                    this.addCardToolTip(this.guestsDiscard, card.id);
+                    this.addCardToolTip(this.guestsDiscard, card.id, card.type_arg);
                 }
             },
 
@@ -854,7 +856,7 @@ define([
                 this.wonStocksByPlayerId[notif.args.player_id].addToStockWithId(card.type_arg, card.id, guestDiv);
                 this.wonStocksByPlayerId[notif.args.poached_player_id].removeFromStockById(card.id);
 
-                this.addCardToolTip(this.wonStocksByPlayerId[notif.args.player_id], card.id);
+                this.addCardToolTip(this.wonStocksByPlayerId[notif.args.player_id], card.id, card.type_arg);
             },
 
             notif_poachBlocked: function (notif) {

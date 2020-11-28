@@ -185,6 +185,7 @@ class JustDesserts extends Table
         }
 
         // Gather all information about current game situation (visible by player $current_player_id).
+        $result['cardsDescription'] = $this->getCardsDescription();
         $result['usefulColors'] = $this->getUsefulColors();
         $result['hand'] = $this->dessertcards->getCardsInLocation(DECK_LOC_HAND, $current_player_id);
         $result['guestsOnTable'] = $this->guestcards->getCardsInLocation(DECK_LOC_RIVER);
@@ -407,6 +408,18 @@ class JustDesserts extends Table
             $colors = array_diff($colors, [ROSE]);
         }
         return $colors;
+    }
+
+    function getCardsDescription()
+    {
+        $descs = array();
+        foreach ($this->getCardsAvailable()["guests"] as $range) {
+            for ($i = $range["from"]; $i <= $range["to"]; $i++) {
+                $guest = $this->guests[$i];
+                $descs[$i] = array('name' => $guest["nametr"],);
+            }
+        }
+        return $descs;
     }
 
     /*
