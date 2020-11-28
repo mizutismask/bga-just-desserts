@@ -436,6 +436,12 @@ class JustDesserts extends Table
 
     function getDessertTranslatedName($dessertStringId)
     {
+        if ("ANYTHING_WITH_BACON" === $dessertStringId) {
+            return clienttranslate('Anything with bacon');
+        }
+        if ("ANYTHING_WITH_COFFEE" === $dessertStringId) {
+            return clienttranslate('Anything with coffee');
+        }
         $foundDesserts = array_filter($this->desserts, function ($card) use ($dessertStringId) {
             return $card["nameId"] === $dessertStringId;
         });
