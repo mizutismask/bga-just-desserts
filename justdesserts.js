@@ -64,7 +64,7 @@ define([
                 this.isPoachingOn = gamedatas.isPoachingOn;
 
                 this.cardsAvailable = gamedatas.cardsAvailable;
-                this.guestDescriptions = gamedatas.cardsDescription;
+                this.guestDescriptions = gamedatas.cardsDescription["guests"];
 
                 //---------- Player hand setup
                 this.playerHand = new ebg.stock(); // new stock object for hand
@@ -336,10 +336,18 @@ define([
 
                 // Get the background position information 
                 backPos = dojo.style(curDiv, 'backgroundPosition');
+
+                //choose template according to favourite number
+                var favouriteNumber = 0;
+                if (this.guestDescriptions[card_type_arg].favourite1) favouriteNumber++;
+                if (this.guestDescriptions[card_type_arg].favourite2) favouriteNumber++;
+
                 // Add tooltip info
-                this.addTooltipHtml(curDiv, this.format_block('jstpl_card_tooltip', {
+                this.addTooltipHtml(curDiv, this.format_block('jstpl_card_tooltip_' + favouriteNumber + "_favorite", {
                     backpos: backPos,
                     guestName: this.guestDescriptions[card_type_arg].name,
+                    favourite1: this.guestDescriptions[card_type_arg].favourite1 ? this.guestDescriptions[card_type_arg].favourite1 : _(""),
+                    favourite2: this.guestDescriptions[card_type_arg].favourite2 ? this.guestDescriptions[card_type_arg].favourite2 : _(""),
                 }), delay);
 
             },

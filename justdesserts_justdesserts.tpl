@@ -90,9 +90,36 @@
 
     var jstpl_won_cards_icon = '<div id="won_cards_icon_${id}_${color}" class="jd_circle jd_won_cards_icon_${color}"></div><span id="won_cards_count_${id}_${color}" class="jd_won_cards_count"></span>';
 
-    // template for guest card tooltip
-    var jstpl_card_tooltip = '<div id="tooltipGuestBig">\
-        <div class="jd_card-tooltip-name">${guestName} </div>\
+    // template for guest card tooltip with 2 favorites
+    var jstpl_card_tooltip_2_favorite = '<div id="tooltipGuestBig">\
+        <div class="jd_card-tooltip-desc">\
+            <div class="jd_card-tooltip-name">${guestName} </div>\
+            <hr/>\
+            <span>{MY_FAVORITES}</span>\
+            <div class="jd_card-tooltip-favourite-label">\
+                <div class="jd_card-tooltip-favourite">${favourite1} </div>\
+                <div class="jd_card-tooltip-favourite">${favourite2} </div>\
+            </div>\
+        </div>\
+        <div class="jd_card-tooltip-image" style="background-position: ${backpos}"></div></div>';
+
+    var jstpl_card_tooltip_1_favorite = '<div id="tooltipGuestBig">\
+            <div class="jd_card-tooltip-desc">\
+            <div class="jd_card-tooltip-name">${guestName} </div>\
+            <hr/>\
+            <span>{MY_FAVORITE}</span>\
+            <div class="jd_card-tooltip-favourite-label">\
+                <div class="jd_card-tooltip-favourite">${favourite1} </div>\
+            </div>\
+        </div>\
+        <div class="jd_card-tooltip-image" style="background-position: ${backpos}"></div></div>';
+
+    var jstpl_card_tooltip_0_favorite = '<div id="tooltipGuestBig">\
+            <div class="jd_card-tooltip-desc">\
+            <div class="jd_card-tooltip-name">${guestName} </div>\
+            <hr/>\
+            <span>{NO_FAVORITE}</span>\
+        </div>\
         <div class="jd_card-tooltip-image" style="background-position: ${backpos}"></div></div>';
 
 </script>

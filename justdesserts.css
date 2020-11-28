@@ -244,7 +244,18 @@
 .jd_card-tooltip-name{
     font-weight: bold;
     font-size: large;
-    margin: 5px;
+}
+
+.jd_card-tooltip-desc{
+    padding: 5px;
+}
+
+.jd_card-tooltip-favourite{
+    font-weight: bold; 
+}
+
+.jd_card-tooltip-favourite-label{
+    margin:  5px  0px  5px  0px;
 }
 
 @media only screen and (min-width: 1100px) {

@@ -416,10 +416,30 @@ class JustDesserts extends Table
         foreach ($this->getCardsAvailable()["guests"] as $range) {
             for ($i = $range["from"]; $i <= $range["to"]; $i++) {
                 $guest = $this->guests[$i];
-                $descs[$i] = array('name' => $guest["nametr"],);
+                $descs["guests"][$i] = array(
+                    'name' => $guest["nametr"],
+                    'favourite1' => $this->getDessertTranslatedName($guest["favourite1"]),
+                    'favourite2' => $this->getDessertTranslatedName($guest["favourite2"]),
+                );
             }
         }
+
+        /*   foreach ($this->getCardsAvailable()["desserts"] as $range) {
+            for ($i = $range["from"]; $i <= $range["to"]; $i++) {
+                $dessert = $this->desserts[$i];
+                $descs["desserts"][$i] = array('name' => $dessert["nametr"],);
+            }
+        }*/
+
         return $descs;
+    }
+
+    function getDessertTranslatedName($dessertStringId)
+    {
+        $foundDesserts = array_filter($this->desserts, function ($card) use ($dessertStringId) {
+            return $card["nameId"] === $dessertStringId;
+        });
+        return array_pop($foundDesserts)["nametr"];
     }
 
     /*
