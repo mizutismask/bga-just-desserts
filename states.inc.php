@@ -128,6 +128,7 @@ $machinestates = array(
         "descriptionmyturn" => clienttranslate('${you} must discard guests until there is only one left from each suit'),
         "type" => "activeplayer",
         "possibleactions" => array("discardGuest"),
+        "args" => "argCardsCounters",
         "transitions" => array(TRANSITION_GUESTS_DISCARDED => STATE_NEXT_PLAYER, TRANSITION_DISCARD_GUEST_NEEDED => STATE_DISCARD)
     ),
 

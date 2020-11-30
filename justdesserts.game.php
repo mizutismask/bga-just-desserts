@@ -591,7 +591,7 @@ class JustDesserts extends Table
         $this->reloadScoresAndNotify();
     }
 
-    function goToTie()
+    function dbg_goToTie()
     {
         /*
         $reds = [1, 11, 20, 21];
@@ -630,7 +630,7 @@ class JustDesserts extends Table
         }
     }
 
-    function db_discardDesserts($nb)
+    function dbg_discardDesserts($nb)
     {
         $discardNb = $nb;
         $cards = $this->dessertcards->getCardsInLocation(DECK_LOC_DECK);
@@ -816,6 +816,18 @@ class JustDesserts extends Table
         return $cards_count;
     }
 
+    function keepDessertsStillInDiscardPile($cards)
+    {
+        $stillHere = array();
+        foreach ($cards as $card) {
+            $cardFromDiscard = $this->dessertcards->getCard($card["id"]);
+            if ($cardFromDiscard["location"] == DECK_LOC_DISCARD) {
+                $stillHere[] = $card;
+            }
+        }
+        return $stillHere;
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
     //////////// 
@@ -851,16 +863,17 @@ class JustDesserts extends Table
 
         $this->playDessertCards($cards_id);
         $new_cards = $this->dessertcards->pickCards($cards_nb, DECK_LOC_DECK, $player_id);
+
         // Notify player about his cards
-        self::notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $new_cards));
+        $discardedDesserts = $this->getDessertCardsFromIds($cards_id);
+        self::notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $new_cards, 'discardedDesserts' => $discardedDesserts));
         self::incStat(1, "player_swaps_number", $player_id);
 
-        $discardedDesserts = $this->getDessertCardsFromIds($cards_id);
         self::notifyAllPlayers(NOTIF_DISCARDED_DESSERTS, clienttranslate('${player_name} swaps ${cards_nb} cards'), array(
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
             'cards_nb' => $cards_nb,
-            'discardedDesserts' => $discardedDesserts,
+            'discardedDesserts' => $this->keepDessertsStillInDiscardPile($discardedDesserts),
         ));
 
         $this->goToDiscardIfNeededOrGoTo(TRANSITION_SWAPPED);
@@ -982,7 +995,7 @@ class JustDesserts extends Table
         self::notifyAllPlayers(NOTIF_DISCARDED_DESSERTS, clienttranslate('${player_name} opens a buffet and gets 3 desserts'), array(
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
-            'discardedDesserts' => $discardedDesserts,
+            'discardedDesserts' => $this->keepDessertsStillInDiscardPile($discardedDesserts),
             'counters' => $this->argCardsCounters(),
 
         ));

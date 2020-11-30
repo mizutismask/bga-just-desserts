@@ -24,7 +24,7 @@ define([
     function (dojo, declare) {
         return declare("bgagame.justdesserts", ebg.core.gamegui, {
             constructor: function () {
-                console.log('justdesserts constructor');
+                //console.log('justdesserts constructor');
 
                 this.cardwidth = 150;
                 this.cardheight = 233;
@@ -57,7 +57,7 @@ define([
 
             setup: function (gamedatas) {
                 //console.log("Starting game setup");
-                console.log("gamedatas ", gamedatas);
+                //console.log("gamedatas ", gamedatas);
 
                 // TODO: Set up your game interface here, according to "gamedatas"
                 this.isOpeningABuffetOn = gamedatas.isOpeningABuffetOn;
@@ -411,10 +411,6 @@ define([
                             },
                             this,
                             function (result) {
-                                items.forEach(removed => {
-                                    this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
-                                    this.playerHand.removeFromStockById(removed.id);
-                                });
                             });
                     }
                 }
@@ -758,17 +754,28 @@ define([
             */
             notif_newHand: function (notif) {
 
+                //if it was a swap, cards must be removed before new ones are added
+                if (notif.args.discardedDesserts) {
+                    notif.args.discardedDesserts.forEach(removed => {
+                        this.playerHand.removeFromStockById(removed.id);
+                        //they are added to the discard in the discarded notif because the deck may have been reshuffled, we don’t know for sure at this momment if they go to the discard pile
+                    });
+                }
+
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
-                    //console.log("notif_newHand card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    console.log("notif_newHand card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+
+                    //add new cards
                     var from = 'guest_draw';
-                    if (notif.args.fromDiscard) {
+                    if (notif.args.fromDiscard) {//given back after a blocked poach
                         from = "desserts_discarded_cards";
                     }
                     this.playerHand.addToStockWithId(card.type_arg, card.id, from);
                     if (notif.args.fromDiscard) {
                         this.discardedDesserts.removeFromStockById(card.id);
                     }
+
                 }
             },
 
@@ -799,13 +806,11 @@ define([
             },
 
             notif_discardedDesserts: function (notif) {
-                //the active player display has already been refreshed
-                if (this.player_id != notif.args.player_id) {
-                    for (var i in notif.args.discardedDesserts) {
-                        var card = notif.args.discardedDesserts[i];
-                        // console.log("notif_discardedDesserts card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
-                        this.discardedDesserts.addToStockWithId(card.type_arg, card.id, 'overall_player_board_' + notif.args.player_id);
-                    }
+                var from = 'overall_player_board_' + notif.args.player_id;
+                for (var i in notif.args.discardedDesserts) {
+                    var card = notif.args.discardedDesserts[i];
+                    //console.log("notif_discardedDesserts card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    this.discardedDesserts.addToStockWithId(card.type_arg, card.id, from);
                 }
                 if (notif.args.counters) {
                     this.updateCounters(notif.args.counters);
@@ -856,7 +861,7 @@ define([
             },
 
             notif_guestPoached: function (notif) {
-                console.log("notif_guestPoached : ", notif);
+                //console.log("notif_guestPoached : ", notif);
                 this.notif_discardedDesserts(notif);
                 var card = notif.args.guest;
                 $from = "guest_" + notif.args.poached_player_id;
@@ -869,17 +874,17 @@ define([
             },
 
             notif_poachBlocked: function (notif) {
-                console.log("notif_poachBlocked : ", notif);
+                //console.log("notif_poachBlocked : ", notif);
                 this.notif_discardedDesserts(notif);
             },
 
             notif_updateCardsNb: function (notif) {
-                console.log("notif_updateCardsNb : ", notif);
+                //console.log("notif_updateCardsNb : ", notif);
                 this.updateCounters(notif.args.counters);
             },
 
             notif_clearLocation: function (notif) {
-                console.log("notif_clearLocation : ", notif);
+                // console.log("notif_clearLocation : ", notif);
                 switch (notif.args.location) {
                     case "dessertDiscard":
                         this.discardedDesserts.removeAll();
