@@ -300,7 +300,7 @@ define([
                             this.addActionButton('button_serve', _('Serve a guest'), 'onServeGuest');
                             this.addActionButton('button_draw', _('Draw a dessert'), 'onDraw');
                             this.addActionButton('button_exchange', _('Dump desserts'), 'onExchange');
-                            if (this.isOpeningABuffetOn) {
+                            if (this.isOpeningABuffetOn && args.possibleActions["openBuffetAction"]) {
                                 this.addActionButton('button_openBuffet', _('Open a buffet'), 'onOpenBuffet');
                             }
                             if (this.isPoachingOn && args.possibleActions["poachAction"]) {

@@ -797,6 +797,18 @@ class JustDesserts extends Table
         return self::getGameStateValue(GS_ALREADY_POACHED_THIS_TURN) == 0 && $this->guestcards->countCardInLocation(DECK_LOC_WON) > 0;
     }
 
+    function isOpenBuffetAvailable()
+    {
+        $player_id = self::getActivePlayerId();
+        $hand = $this->dessertcards->getCardsInLocation(DECK_LOC_HAND, $player_id);
+        $cardsFromMaterial = $this->getDessertsFromMaterialByCards($hand);
+        $oneIngredientDesserts = array_filter($cardsFromMaterial, function ($dessert) {
+            return count($dessert["tastes"]) == 1;
+        });
+        return count($oneIngredientDesserts) >= 4;
+    }
+
+
     function getPlayerName($player_id)
     {
         $sql = "select player_name from player where player_id=" . $player_id;
@@ -1200,6 +1212,7 @@ class JustDesserts extends Table
         return array(
             "possibleActions" => array(
                 "poachAction" =>  $this->isPoachingAvailable(),
+                "openBuffetAction" =>  $this->isOpenBuffetAvailable(),
             )
         );
     }
