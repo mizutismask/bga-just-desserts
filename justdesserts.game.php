@@ -417,20 +417,15 @@ class JustDesserts extends Table
             for ($i = $range["from"]; $i <= $range["to"]; $i++) {
                 $guest = $this->guests[$i];
                 $descs["guests"][$i] = array(
-                    'name' => $guest["nametr"],
+                    'name' => $guest["name"],
                     'favourite1' => $this->getDessertTranslatedName($guest["favourite1"]),
                     'favourite2' => $this->getDessertTranslatedName($guest["favourite2"]),
+                    'i18n' => array('name'),
+                    'i18n' => array('favourite1'),
+                    'i18n' => array('favourite2'),
                 );
             }
         }
-
-        /*   foreach ($this->getCardsAvailable()["desserts"] as $range) {
-            for ($i = $range["from"]; $i <= $range["to"]; $i++) {
-                $dessert = $this->desserts[$i];
-                $descs["desserts"][$i] = array('name' => $dessert["nametr"],);
-            }
-        }*/
-
         return $descs;
     }
 
@@ -445,7 +440,7 @@ class JustDesserts extends Table
         $foundDesserts = array_filter($this->desserts, function ($card) use ($dessertStringId) {
             return $card["nameId"] === $dessertStringId;
         });
-        return array_pop($foundDesserts)["nametr"];
+        return array_pop($foundDesserts)["name"];
     }
 
     /*
@@ -916,7 +911,7 @@ class JustDesserts extends Table
         //the discarded guest belongs to a problematic color
         if (array_key_exists($color, $pbOccurrences)) {
             $this->playGuestCards([$guest_id]);
-            $guestName = $this->getGuestFromMaterial($guest_id)["nametr"];
+            $guestName = $this->getGuestFromMaterial($guest_id)["name"];
             self::notifyAllPlayers(
                 NOTIF_DISCARDED_GUESTS,
                 clienttranslate('${player_name} discards ${card_name}'),
@@ -924,7 +919,8 @@ class JustDesserts extends Table
                     'player_name' => self::getActivePlayerName(),
                     'cards' => [$guest_to_remove],
                     'card_name' => $guestName,
-                    'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop(DECK_LOC_DISCARD)
+                    'newGuestOnTopOfDiscard' => $this->guestcards->getCardOnTop(DECK_LOC_DISCARD),
+                    'i18n' => array('card_name'),
                 )
             );
 
@@ -1031,12 +1027,13 @@ class JustDesserts extends Table
         self::checkAction('discardWonGuest');
         $this->guestcards->moveCard($guest_id, DECK_LOC_RIVER);
 
-        $guestName = $this->getGuestFromMaterial($guest_id)["nametr"];
+        $guestName = $this->getGuestFromMaterial($guest_id)["name"];
         self::notifyAllPlayers(NOTIF_NEW_RIVER,  clienttranslate('${player_name} discards ${card_name}'), array(
             'cards' => [$this->guestcards->getCard($guest_id)],
             'from_player_id' => self::getCurrentPlayerId(),
             'player_name' => self::getCurrentPlayerName(),
             'card_name' => $guestName,
+            'i18n' => array('card_name'),
         ));
 
         $this->gamestate->setPlayerNonMultiactive(self::getCurrentPlayerId(), TRANSITION_BUFFET_GUEST_DISCARDED);
@@ -1251,13 +1248,14 @@ class JustDesserts extends Table
             $this->pickDessertCardsAndNotifyPlayer(1, $player_id);
 
             if ($pickedGuests) {
-                $guestName = $this->getGuestFromMaterial($pickedGuests[0]["id"])["nametr"];
+                $guestName = $this->getGuestFromMaterial($pickedGuests[0]["id"])["name"];
                 self::notifyAllPlayers(
                     NOTIF_PLAYER_TURN,
                     clienttranslate('New turn : ${player_name} draws a dessert and ${guestName}'),
                     array(
                         'player_name' => self::getActivePlayerName(),
                         "guestName" => $guestName,
+                        'i18n' => array('guestName'),
                     )
                 );
             } else {
