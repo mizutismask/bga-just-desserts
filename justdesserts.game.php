@@ -417,12 +417,10 @@ class JustDesserts extends Table
             for ($i = $range["from"]; $i <= $range["to"]; $i++) {
                 $guest = $this->guests[$i];
                 $descs["guests"][$i] = array(
-                    'name' => $guest["name"],
+                    'name' => $guest["nametr"],
                     'favourite1' => $this->getDessertTranslatedName($guest["favourite1"]),
                     'favourite2' => $this->getDessertTranslatedName($guest["favourite2"]),
-                    'i18n' => array('name'),
-                    'i18n' => array('favourite1'),
-                    'i18n' => array('favourite2'),
+                    'i18n' => array('name', 'favourite1', 'favourite2'),
                 );
             }
         }
@@ -440,7 +438,7 @@ class JustDesserts extends Table
         $foundDesserts = array_filter($this->desserts, function ($card) use ($dessertStringId) {
             return $card["nameId"] === $dessertStringId;
         });
-        return array_pop($foundDesserts)["name"];
+        return array_pop($foundDesserts)["nametr"];
     }
 
     /*
@@ -465,6 +463,7 @@ class JustDesserts extends Table
             'fromDiscard' => $fromDiscard,
             'discardedDesserts' => $this->getDessertCardsFromIds($dessert_cards_id),
             'counters' => $this->argCardsCounters(),
+            'i18n' => array('guest_name'),
         ));
         $this->giveTipIfNeeded($dessertsFromMaterial, $guestFromMaterial, $player_id);
         $this->checkIfEndOfGame($player_id);
