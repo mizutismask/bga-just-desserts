@@ -84,9 +84,9 @@ class view_justdesserts_justdesserts extends game_view
     // this will make our My Hand text translatable
     $this->tpl['MY_HAND'] = self::_("My hand");
     $this->tpl['REMAINING_DESSERTS'] = self::_("Dessert draw remaining cards");
-    $this->tpl['MY_FAVORITES'] = self::_("I have two favourites:");
-    $this->tpl['MY_FAVORITE'] = self::_("My favourite is:");
-    $this->tpl['NO_FAVORITE'] = self::_("I can’t decide on a favorite!");
+    $this->tpl['MY_FAVORITES'] = clienttranslate("I have two favorites:");
+    $this->tpl['MY_FAVORITE'] = clienttranslate("My favorite is:");
+    $this->tpl['NO_FAVORITE'] = clienttranslate("I can’t decide on a favorite!");
 
 
     // this will inflate our player block with actual players data
