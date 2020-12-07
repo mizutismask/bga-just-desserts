@@ -70,7 +70,8 @@ define([
                 this.playerHand = new ebg.stock(); // new stock object for hand
                 this.playerHand.create(this, $('myhand'), this.cardwidth, this.cardheight);//myhand is the div where the card is going
                 this.playerHand.image_items_per_row = this.image_items_per_row;
-                //this.playerHand.apparenceBorderWidth = '3px';
+                this.playerHand.item_margin = 6;
+                this.playerHand.apparenceBorderWidth = '2px';
 
                 // Create cards types:
                 this.cardsAvailable.desserts.forEach(range => {
