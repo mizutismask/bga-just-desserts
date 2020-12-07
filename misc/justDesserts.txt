@@ -14,3 +14,10 @@ convert -label %f   balloon.gif medical.gif present.gif shading.gif \
    
    magick montage -tile 10 -geometry 150x233+0+0 `ls -v ./guests/*.png`  miff:- | magick convert miff:- -resize 1500x932 -quality 100 guests150x233.png
 
+Sorry if it's not clear, indeed don't hesitate to update the wiki page if needed to clarify.
+_() should never be used in php code for games as it will match the mainsite translation and not the game translations
+_() should be used in javascript code for strings to translate client side (and there are no other strings in javascript so it should be the only case theree)
+self::_() in php code marks the game strings to be translated on the server side (and applies the translation at runtime as mentioned by Tisaac), so strings marked only with self::_() will be only included in the server localization files (gettext .po/.mo files) to translate server side
+clienttranslate() in php code marks the strings to be translated on the client side, so strings marked only with clienttranslate will be only included in the client localization files (js) to translate client side
+
+Coming back to the issue of double translation, can you make a test also without the i18n? This would help narrow down where to look for this issue.
