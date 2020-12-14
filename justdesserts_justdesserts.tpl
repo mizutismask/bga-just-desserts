@@ -88,7 +88,7 @@
 
     var jstpl_won_cards_icons = '<div id="won_cards_panel_${id}" class="jd_won_cards_panel"></div>';
 
-    var jstpl_won_cards_icon = '<div id="won_cards_icon_${id}_${color}" class="jd_circle jd_won_cards_icon_${color}"></div><span id="won_cards_count_${id}_${color}" class="jd_won_cards_count"></span>';
+    var jstpl_won_cards_icon = '<div id="won_cards_icon_${id}_${color}_block"> <div id="won_cards_icon_${id}_${color}" class="jd_circle jd_won_cards_icon_${color}"></div><span id="won_cards_count_${id}_${color}" class="jd_won_cards_count"></span></div>';
 
     // template for guest card tooltip with 2 favorites
     var jstpl_card_tooltip_2_favorite = '<div id="tooltipGuestBig">\

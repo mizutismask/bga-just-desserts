@@ -210,7 +210,7 @@ define([
                     this.discardedDesserts.addToStockWithId(card.type_arg, card.id);
                 }
 
-                this.updateCounters(this.gamedatas.counters);
+                this.updateAndShowOnlyNonZeroCounters(this.gamedatas.counters);
 
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
@@ -241,17 +241,17 @@ define([
                         }
                         break;
                     case 'nextPlayer':
-                        this.updateCounters(args.args);
+                        this.updateAndShowOnlyNonZeroCounters(args.args);
                         break;
                     case 'allPlayersDiscardGuest':
                         this.guestsOnTable.setSelectionMode(0);
                         this.guestsDiscard.setSelectionMode(0);
                         this.playerHand.setSelectionMode(0);
                         this.wonStocksByPlayerId[this.player_id].setSelectionMode(1);
-                        this.updateCounters(args.args);
+                        this.updateAndShowOnlyNonZeroCounters(args.args);
                         break;
                     case 'poachingReaction':
-                        this.updateCounters(args.args.counters);
+                        this.updateAndShowOnlyNonZeroCounters(args.args.counters);
                         var guestId = args.args.poached_guest_id;
                         this.poachedDiv = this.wonStocksByPlayerId[args.args.poached_player_id].getItemDivId(guestId);
                         dojo.addClass(this.poachedDiv, "jd_poached");
@@ -365,6 +365,20 @@ define([
                         }
                     }
                 }
+            },
+
+            updateAndShowOnlyNonZeroCounters(counters) {
+                for (const field in counters) {
+                    if (field.startsWith('won_cards_count_')) {
+                        var colorCounterParentDivId = document.getElementById(counters[field].counter_name).parentElement.id;
+                        if (counters[field].counter_value) {
+                            dojo.style(colorCounterParentDivId, "display", "flex");
+                        } else {
+                            dojo.style(colorCounterParentDivId, "display", "none");
+                        }
+                    }
+                }
+                this.updateCounters(counters);
             },
             ///////////////////////////////////////////////////
             //// Player's action
@@ -814,7 +828,7 @@ define([
                     this.discardedDesserts.addToStockWithId(card.type_arg, card.id, from);
                 }
                 if (notif.args.counters) {
-                    this.updateCounters(notif.args.counters);
+                    this.updateAndShowOnlyNonZeroCounters(notif.args.counters);
                 }
             },
 
