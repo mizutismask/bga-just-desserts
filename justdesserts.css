@@ -232,7 +232,7 @@
     font-size: 18px;
     color: #0096a5;
     margin: 6px 0px 0px 0px;
-    align-self: auto;
+    text-align: center;
 }
 
 .pilesAndCounters{
@@ -258,6 +258,10 @@
     margin:  5px  0px  5px  0px;
 }
 
+.jd_option_info{
+    border: 2px white solid;
+    padding: 0px 3px 0px 3px;
+}
 @media only screen and (min-width: 1100px) {
 
     .jd_piles {

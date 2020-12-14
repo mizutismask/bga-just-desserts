@@ -36,10 +36,15 @@
                 </div>
                 <div id="guest_discard" class="jd_pile jd_discard jd_guest_pile jd_empty"></div>
             </div>
-            <div id="jd_dessert_draw_count">
-                <img src="{GAMETHEMEURL}/img/cards/dessertBack.jpg" style="vertical-align: text-top;" /> <span
-                    style="margin-right:-6px">x</span>
-                <span id="dessert_draw_count"></span>
+            <div id="jd_additional_info">
+                <div id="jd_dessert_draw_count">
+                    <span id="poachingInfo" class="jd_option_info">P</span>
+                    <span id="buffetInfo" class="jd_option_info">B</span>
+                    <img src="{GAMETHEMEURL}/img/cards/dessertBack.jpg" style="vertical-align: text-top;" /> <span
+                        style="margin-right:-6px;margin-left:-6px">x</span>
+                    <span id="dessert_draw_count"></span>
+                </div>
+
             </div>
         </div>
         <div id="guests_on_table_wrapper" class="whiteblock">

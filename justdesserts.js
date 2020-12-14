@@ -212,6 +212,14 @@ define([
 
                 this.updateAndShowOnlyNonZeroCounters(this.gamedatas.counters);
 
+                //activated advanced rules icons
+                document.getElementById("buffetInfo").title = _("Opening a buffet");
+                document.getElementById("poachingInfo").title = _("Blocking and poaching");
+                if (!this.isOpeningABuffetOn)
+                    dojo.style("buffetInfo", "display", "none");
+                if (!this.isPoachingOn)
+                    dojo.style("poachingInfo", "display", "none");
+
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
