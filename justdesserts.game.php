@@ -475,9 +475,10 @@ class JustDesserts extends Table
         $woncards = $this->guestcards->getCardsInLocation(DECK_LOC_WON, $player_id);
 
         //5 different colors or 3 of the same one
-        if ($this->countCardsForObjective5Differents($woncards) == 5 || $this->countCardsForObjective3OfAKind($woncards) == 3) {
+        $is5 = $this->countCardsForObjective5Differents($woncards) == 5;
+        if ($is5 || $this->countCardsForObjective3OfAKind($woncards) == 3) {
             //victory
-            $this->updateScores($player_id);
+            $this->updateScores($player_id, $is5 ? 5 : 3);
             $this->gamestate->nextState(TRANSITION_END_GAME);
         } else if ($this->gameCanNotBeFinished()) {
             $this->updateScoresWithAlternativeEnd();
@@ -640,14 +641,13 @@ class JustDesserts extends Table
         }
     }
 
-    function updateScores($winner_id)
+    function updateScores($winner_id, $objective)
     {
         $players = self::loadPlayersBasicInfos();
         foreach ($players as $player_id => $player) {
             $score = 0;
             if ($player_id == $winner_id) {
-                $nbCards = $this->guestcards->countCardInLocation(DECK_LOC_WON, $winner_id);
-                $score = 100 + $nbCards;
+                $score = 100 + $objective;
             }
             $this->updateScore($player_id, $score);
         }
