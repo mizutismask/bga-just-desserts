@@ -478,7 +478,7 @@ class JustDesserts extends Table
         $is5 = $this->countCardsForObjective5Differents($woncards) == 5;
         if ($is5 || $this->countCardsForObjective3OfAKind($woncards) == 3) {
             //victory
-            $this->updateScores($player_id, $is5 ? 5 : 3);
+            $this->updateScores($player_id);
             $this->gamestate->nextState(TRANSITION_END_GAME);
         } else if ($this->gameCanNotBeFinished()) {
             $this->updateScoresWithAlternativeEnd();
@@ -641,13 +641,13 @@ class JustDesserts extends Table
         }
     }
 
-    function updateScores($winner_id, $objective)
+    function updateScores($winner_id)
     {
         $players = self::loadPlayersBasicInfos();
         foreach ($players as $player_id => $player) {
             $score = 0;
             if ($player_id == $winner_id) {
-                $score = 100 + $objective;
+                $score = 1;
             }
             $this->updateScore($player_id, $score);
         }

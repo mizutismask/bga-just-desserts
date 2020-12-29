@@ -381,6 +381,7 @@ define([
                         var colorCounterParentDivId = document.getElementById(counters[field].counter_name).parentElement.id;
                         if (counters[field].counter_value) {
                             dojo.style(colorCounterParentDivId, "display", "flex");
+                            dojo.style(colorCounterParentDivId, "align-items", "flex-end");
                         } else {
                             dojo.style(colorCounterParentDivId, "display", "none");
                         }
