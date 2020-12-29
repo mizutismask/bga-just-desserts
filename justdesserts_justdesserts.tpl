@@ -100,7 +100,7 @@
         <div class="jd_card-tooltip-desc">\
             <div class="jd_card-tooltip-name">${guestName} </div>\
             <hr/>\
-            <span>{MY_FAVORITES}</span>\
+             {MY_FAVORITES}\
             <div class="jd_card-tooltip-favourite-label">\
                 <div class="jd_card-tooltip-favourite">${favourite1} </div>\
                 <div class="jd_card-tooltip-favourite">${favourite2} </div>\
@@ -112,7 +112,7 @@
             <div class="jd_card-tooltip-desc">\
             <div class="jd_card-tooltip-name">${guestName} </div>\
             <hr/>\
-            <span>{MY_FAVORITE}</span>\
+             {MY_FAVORITE}\
             <div class="jd_card-tooltip-favourite-label">\
                 <div class="jd_card-tooltip-favourite">${favourite1} </div>\
             </div>\
@@ -123,7 +123,7 @@
             <div class="jd_card-tooltip-desc">\
             <div class="jd_card-tooltip-name">${guestName} </div>\
             <hr/>\
-            <span>{NO_FAVORITE}</span>\
+             {NO_FAVORITE}\
         </div>\
         <div class="jd_card-tooltip-image" style="background-position: ${backpos}"></div></div>';
 
