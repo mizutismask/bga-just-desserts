@@ -1088,7 +1088,11 @@ class JustDesserts extends Table
         } else if (self::getGameStateValue(GS_GUESTS_SERVED_THIS_TURN) == 1) {
             $this->gamestate->nextState(TRANSITION_SERVED);
         } else {
-            $this->gamestate->nextState(TRANSITION_SECOND_GUEST_SERVED);
+            if ($this->guestsNeedsToBeDiscarded()) {
+                $this->gamestate->nextState(TRANSITION_DISCARD_GUEST_NEEDED);
+            } else {
+                $this->gamestate->nextState(TRANSITION_SECOND_GUEST_SERVED);
+            }
         }
     }
 
