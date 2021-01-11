@@ -48,6 +48,7 @@ if (!defined('DECK_LOC_DECK')) {
     define('GS_OPENING_BUFFET_PLAYER', "opening_buffet_player");
     define('GS_POACHING_PLAYER', "poaching_player");
     define('GS_POACHED_PLAYER', "poached_player");
+    define('GS_POACH_ONLY_FAVOURITE_ID_ACCEPTED', "poached_with_favourite");
     define('GS_ALREADY_POACHED_THIS_TURN', "already_poached_this_turn");
     define('GS_GUESTS_SERVED_THIS_TURN', "guests_served_this_turn");
     define('GS_POACHED_GUEST_ID', "guest_poached_id");
@@ -76,6 +77,7 @@ class JustDesserts extends Table
             GS_GUESTS_SERVED_THIS_TURN => 14,
             GS_POACHED_PLAYER => 15,
             GS_POACHED_GUEST_ID => 16,
+            GS_POACH_ONLY_FAVOURITE_ID_ACCEPTED => 17,
 
             "type_of_rules" => TYPE_OF_RULES,
             "opening_a_buffet" => OPENING_BUFFET,
@@ -139,6 +141,7 @@ class JustDesserts extends Table
         self::setGameStateInitialValue(GS_GUESTS_SERVED_THIS_TURN, 0);
         self::setGameStateInitialValue(GS_POACHED_PLAYER, 0);
         self::setGameStateInitialValue(GS_POACHED_GUEST_ID, 0);
+        self::setGameStateInitialValue(GS_POACH_ONLY_FAVOURITE_ID_ACCEPTED, 0);
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -586,6 +589,12 @@ class JustDesserts extends Table
         $this->reloadScoresAndNotify();
     }
 
+    function findDessertIdFromTypeArg($type_arg)
+    {
+        $sql = "SELECT card_id id FROM dessertcard where card_type_arg = " . $type_arg;
+        return self::getUniqueValueFromDB($sql);
+    }
+
     function dbg_goToTie()
     {
         /*
@@ -834,6 +843,35 @@ class JustDesserts extends Table
         return $stillHere;
     }
 
+    function getOtherFavorite($guestFromMaterial, $not_in_these_desserts_ids)
+    {
+        $favourite1Index = $this->findDessertIndexInMaterial($guestFromMaterial["favourite1"]);
+        $favourite2Index = $this->findDessertIndexInMaterial($guestFromMaterial["favourite2"]);
+
+        $favourite1Id = $this->findDessertIdFromTypeArg($favourite1Index);
+        $favourite2Id = $this->findDessertIdFromTypeArg($favourite2Index);
+
+        $otherFavorite = in_array($favourite1Id, $not_in_these_desserts_ids) ? $favourite2Id : $favourite1Id;
+        return $otherFavorite;
+    }
+
+    function playerHasOtherFavoriteCardInHand($player_id, $guestFromMaterial, $not_in_these_desserts_ids)
+    {
+        $otherFavorite = $this->getOtherFavorite($guestFromMaterial, $not_in_these_desserts_ids);
+        $otherFavoriteCard = $this->dessertcards->getCard($otherFavorite);
+        return $otherFavoriteCard["location"] == DECK_LOC_HAND && $otherFavoriteCard["location_arg"] == $player_id;
+    }
+
+    function findDessertIndexInMaterial($card_nameId)
+    {
+        $searched_cards = array_filter($this->desserts, function ($card) use ($card_nameId) {
+            return $card['nameId'] == $card_nameId;
+        });
+        $card_numbers = array_keys($searched_cards);
+        $card_number = array_pop($card_numbers);
+        return $card_number;
+    }
+
     //////////////////////////////////////////////////////////////////////////////
     //////////// Player actions
     //////////// 
@@ -1052,29 +1090,37 @@ class JustDesserts extends Table
             throw new BgaUserException("This card can not be poached");
         }
         $this->checkGuestAcceptsTheseDesserts($dessertsFromMaterial, $guestFromMaterial);
+        $isGivenHisFavourite = $this->isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial);
+        $favouriteIdAccepted = $isGivenHisFavourite && $guestFromMaterial["favourite2"] ? $this->getOtherFavorite($guestFromMaterial, $desserts_ids) : 0;
 
         self::setGameStateValue(GS_ALREADY_POACHED_THIS_TURN, 1);
         self::setGameStateValue(GS_POACHING_PLAYER, $player_id);
         self::setGameStateValue(GS_POACHED_PLAYER, $poached_player_id);
         self::setGameStateValue(GS_POACHED_GUEST_ID, $guest_id);
+        self::setGameStateValue(GS_POACH_ONLY_FAVOURITE_ID_ACCEPTED, $favouriteIdAccepted);
 
         $this->dessertcards->moveCards($desserts_ids, DECK_LOC_BLOCK, $player_id);
 
         //blocking impossible
         if (
-            $this->isGuestGivenHisFavourite($this->getDessertsFromMaterialByIds($desserts_ids), $guestFromMaterial)
-            && !$guestFromMaterial["favourite2"]
-            && !$this->startsWith($guestFromMaterial["favourite1"], ANYTHING_WITH)
+            ($isGivenHisFavourite
+                && !$guestFromMaterial["favourite2"]
+                && !$this->startsWith($guestFromMaterial["favourite1"], ANYTHING_WITH))
+            || ($isGivenHisFavourite
+                && $guestFromMaterial["favourite2"]
+                && !$this->playerHasOtherFavoriteCardInHand($poached_player_id, $guestFromMaterial, $desserts_ids))
         ) {
             $this->doSuccessfullPoachingActions();
             $this->gamestate->nextState(TRANSITION_POACHING_RESOLVED);
         } else {
             $players = self::loadPlayersBasicInfos();
-            self::notifyAllPlayers("msg",  clienttranslate('${poaching_player_name} tries to poach ${guest_name} from ${poached_player_name}'), array(
+            self::notifyAllPlayers("msg",  clienttranslate('${poaching_player_name} tries to poach ${guest_name} from ${poached_player_name} ${with_favorite}'), array(
                 'poaching_player_name' => self::getActivePlayerName(),
                 'poached_player_name' => $players[$poached_player_id]["player_name"],
                 'guest_name' => $guestFromMaterial["name"],
                 'counters' => $this->argCardsCounters(),
+                'with_favorite' => $isGivenHisFavourite ? self::_("with a favorite") : "",
+                'i18n' => array('with_favorite'),
             ));
 
             $this->gamestate->nextState(TRANSITION_POACHING_ATTEMPT);
@@ -1135,10 +1181,14 @@ class JustDesserts extends Table
         $poaching_player_id = self::getGameStateValue(GS_POACHING_PLAYER);
         $poached_player_id = self::getGameStateValue(GS_POACHED_PLAYER);
         $guest_id = self::getGameStateValue(GS_POACHED_GUEST_ID);
+        $block_accepted_id = self::getGameStateValue(GS_POACH_ONLY_FAVOURITE_ID_ACCEPTED);
 
         $dessertsFromMaterial = $this->getDessertsFromMaterialByIds($desserts_ids);
         $guestFromMaterial = $this->getGuestFromMaterial($guest_id);
 
+        if ($block_accepted_id && count($desserts_ids) > 1 && $block_accepted_id != array_pop($desserts_ids)) {
+            throw new BgaUserException(self::_("Poaching with a favorite can only be blocked with another favorite"));
+        }
         $this->checkGuestAcceptsTheseDesserts($dessertsFromMaterial, $guestFromMaterial);
 
         //use cards

@@ -93,6 +93,7 @@ define([
                 this.guestsOnTable.create(this, $('guests_on_table'), this.cardwidth, this.cardheight);
                 this.guestsOnTable.image_items_per_row = this.image_items_per_row;
                 this.guestsOnTable.centerItems = true;
+                this.guestsOnTable.apparenceBorderWidth = '2px';
 
                 // Create cards types:
                 this.cardsAvailable.guests.forEach(range => {
