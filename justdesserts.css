@@ -1,0 +1,279 @@
+/**
+ *------
+ * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+ * JustDesserts implementation : © Séverine Kamycki severinek@gmail.com
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ * justdesserts.css
+ *
+ * JustDesserts stylesheet
+ *
+ */
+
+/*
+    This is the CSS stylesheet of your game User Interface.
+    
+    Styles defined on this file will be applied to the HTML elements you define in your
+    HTML template (justdesserts_justdesserts.tpl), and to HTML elements you create dynamically
+    (in justdesserts.js).
+    
+    Usually, you are using CSS to:
+    
+    1°) define the overall layout of your game
+        (ex: place the board on the top left, place player's hand beside, place the deck on the right, ...).
+
+    2°) create your CSS-sprites:
+        All images of your games should be gathered into a small number of image files. Then, using
+        background-image and background-position CSS properties, you create HTML blocks that can 
+        display these images correctly (see example below).
+    
+    3°) ... anything else:
+        It is really easy to add and remove CSS classes dynamically from your Javascript with
+        dojo.addClass and dojo.removeClass. It is also easy to check if an element has a class
+        (dojo.hasClass) or to get all elements with a specific class (dojo.query). This is why,
+        very often, using CSS classes for the logic of your user interface allow you to do complex
+        thing easily.
+        
+        
+     Note: on the production platform, this file will be compressed and comments will be removed.
+           Consequently, don't hesitate to put as many comments as necessary.
+*/
+
+
+/* Note: you must not use any @import directive */
+
+
+/********* You can start writing your CSS below this line: **********/
+
+
+/*
+    Example of CSS sprites (a black token and a white token, 20x20px each, embedded in the same "tokens.png" 40x20px image):
+
+    .white_token {
+        background-image: url('img/tokens.png');
+        background-position: 0px 0px;
+    }
+    .black_token {
+        background-image: url('img/tokens.png');
+        background-position: -20px 0px;
+    }
+    .token {
+        width: 20px;
+        height: 20px;
+        background-repeat: none;
+    }
+*/
+#guest_line {
+    width: 100%;
+    display: inline-flex;
+    flex-direction: row;
+}
+
+#board {
+   display: inline-block;
+}
+
+#guest_draw {
+    margin-bottom: 8px;
+    margin-right: 0px;
+}
+
+#guests_wrapper {
+    width: 100%;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 1%;
+}
+
+.jd_guestsWon{
+    box-sizing: border-box;
+    min-width: 170px;
+}
+
+.jd_pile, .stockitem  {
+    width: 150px;
+    height: 233px;
+    border-radius: 20px;
+}
+
+.jd_discard {
+    background-image: none !important;
+}
+
+.jd_empty {
+    border-style: dashed;
+    border-color: darkgrey;
+    border-width: 2px;
+    height: 233px !important;
+    box-sizing: border-box;
+}
+
+.jd_guest_pile {
+    background-image: url('img/cards/guests150x233.jpg');
+}
+
+.jd_piles {
+    margin-right: 10px;
+}
+
+.jd_guestsname {
+    font-weight: bold;
+}
+
+.jd_guests {
+    height: 233px;
+    display: inline-block;
+}
+
+#guests_on_table_wrapper {
+    width: 100%;
+    display: inline-block;
+}
+
+#myhand div {
+    display: inline-grid;
+}
+
+.jd_favorite{
+    font-weight: bold;
+}
+
+.jd_cards_icon {
+    width: 30px;
+    height: 23px;
+    background: url("img/player_cards_icon1.png");
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+#desserts_discarded_cards div{
+        border-radius: 10px;
+}
+
+.spectatorMode #myhand_wrap{
+    display: none;
+}
+
+.jd_card-tooltip-image{
+    width: 250px;
+    height: 388px;
+    background: url("img/cards/guests250x388.jpg");
+}
+
+.jd_poached{
+    box-shadow: 0 0 14pt 6pt deeppink
+}
+
+.jd_won_cards_panel{
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.jd_circle {
+    width: 20px;
+    height: 20px;
+    background-image: url('img/suitIcons.png');
+}
+
+.jd_won_cards_icon_blue{
+    background-position: -60px 0px;
+}
+
+.jd_won_cards_icon_purple{
+    background-position: -40px 0px;
+}
+
+.jd_won_cards_icon_rose{
+    background-position: -140px 0px;
+}
+
+.jd_won_cards_icon_orange{
+    background-position: 0px 0px;
+}
+
+.jd_won_cards_icon_red{
+    background-position: -100px 0px;
+}
+
+.jd_won_cards_icon_yellow{
+    background-position: -20px 0px;
+}
+
+.jd_won_cards_icon_green{
+    background-position: -80px 0px;
+}
+
+.jd_won_cards_icon_burgundy{
+    background-position: -120px 0px;
+}
+
+.jd_won_cards_count{
+    padding: 0px 8px 0px 1px
+}
+
+#jd_guest_draw_count{
+    position: absolute;
+    font-weight: bold;
+    font-size: 28px;
+    color: saddlebrown;
+    z-index: 1;
+    top: 206px;
+    left: 28px;
+}
+
+#jd_dessert_draw_count{
+    font-weight: bold;
+    font-size: 18px;
+    color: #0096a5;
+    margin: 6px 0px 0px 0px;
+    text-align: center;
+}
+
+.pilesAndCounters{
+    display: flex;
+    flex-direction: column;
+    margin-right: 10px;
+}
+
+.jd_card-tooltip-name{
+    font-weight: bold;
+    font-size: large;
+}
+
+.jd_card-tooltip-desc{
+    padding: 5px;
+}
+
+.jd_card-tooltip-favourite{
+    font-weight: bold; 
+}
+
+.jd_card-tooltip-favourite-label{
+    margin:  5px  0px  5px  0px;
+}
+
+.jd_option_info{
+    border: 2px white solid;
+    padding: 0px 3px 0px 3px;
+}
+@media only screen and (min-width: 1100px) {
+
+    .jd_piles {
+        display: inline-flex;
+        flex-direction: row;
+    }
+
+    #guest_draw {
+        margin-right: 8px;
+    }
+
+    #jd_dessert_draw_count{
+        align-self: center;
+    }
+  }
