@@ -137,12 +137,10 @@ define([
 
                     var playerWonCards = new ebg.stock();
                     playerWonCards.setSelectionMode(0);
+                    playerWonCards.autowidth = true;
                     if (!this.isPoachingOn) {
                         playerWonCards.setOverlap(16, 0);
 
-                    } else {
-                        var div = 'guest_' + player_id;
-                        dojo.style(div, "min-width", "100%");
                     }
                     playerWonCards.create(this, $('guestscards_' + player_id), this.cardwidth, this.cardheight);
                     playerWonCards.image_items_per_row = this.image_items_per_row;

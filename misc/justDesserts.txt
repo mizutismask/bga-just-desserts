@@ -21,3 +21,13 @@ self::_() in php code marks the game strings to be translated on the server side
 clienttranslate() in php code marks the strings to be translated on the client side, so strings marked only with clienttranslate will be only included in the client localization files (js) to translate client side
 
 Coming back to the issue of double translation, can you make a test also without the i18n? This would help narrow down where to look for this issue.
+
+//todo
+@keyframes flip {
+  0%   { transform: scale(1); }
+  10%  { transform: scale(1.2); }
+  90%  { transform: rotateY(180deg) scale(1.2); }
+  100% { transform: rotateY(180deg) scale(1); }
+}
+
+(don't forget the 'animation-fill-mode: forwards;' on your class)

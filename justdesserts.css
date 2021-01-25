@@ -84,13 +84,13 @@
 #guests_wrapper {
     width: 100%;
     display: inline-flex;
-    flex-flow: row wrap;
+    flex-wrap: wrap;
     gap: 1%;
 }
 
 .jd_guestsWon{
     box-sizing: border-box;
-    min-width: 390px;
+    min-width: 170px;
 }
 
 .jd_pile, .stockitem  {
