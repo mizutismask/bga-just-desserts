@@ -40,8 +40,8 @@
                 <div id="jd_dessert_draw_count">
                     <span id="poachingInfo" class="jd_option_info">P</span>
                     <span id="buffetInfo" class="jd_option_info">B</span>
-                    <img src="{GAMETHEMEURL}/img/cards/dessertBack.jpg" style="vertical-align: text-top;" /> <span
-                        style="margin-right:-6px;margin-left:-6px">x</span>
+                    <img id="dessertCountImg" src="{GAMETHEMEURL}/img/cards/dessertBack.jpg"
+                        style="vertical-align: text-top;" /> <span style="margin-right:-6px;margin-left:-6px">x</span>
                     <span id="dessert_draw_count"></span>
                 </div>
 
