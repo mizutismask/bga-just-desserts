@@ -1114,9 +1114,9 @@ class JustDesserts extends Table
             $this->gamestate->nextState(TRANSITION_POACHING_RESOLVED);
         } else {
             $players = self::loadPlayersBasicInfos();
-            self::notifyAllPlayers("msg",  clienttranslate('${poaching_player_name} tries to poach ${guest_name} from ${poached_player_name} ${with_favorite}'), array(
-                'poaching_player_name' => self::getActivePlayerName(),
-                'poached_player_name' => $players[$poached_player_id]["player_name"],
+            self::notifyAllPlayers("msg",  clienttranslate('${player_name} tries to poach ${guest_name} from ${player_name2} ${with_favorite}'), array(
+                'player_name' => self::getActivePlayerName(),
+                'player_name2' => $players[$poached_player_id]["player_name"],
                 'guest_name' => $guestFromMaterial["name"],
                 'counters' => $this->argCardsCounters(),
                 'with_favorite' => $isGivenHisFavourite ? self::_("with a favorite") : "",
@@ -1157,17 +1157,18 @@ class JustDesserts extends Table
 
         $dessert_cards = $this->dessertcards->getCardsInLocation(DECK_LOC_BLOCK, $poaching_player_id);
         $dessert_cards_id = $this->concatenateFieldValues($dessert_cards, "id");
+        $this->dessertcards->moveAllCardsInLocation(DECK_LOC_BLOCK, DECK_LOC_DISCARD);
 
         $dessertsFromMaterial = $this->getDessertsFromMaterialByIds($dessert_cards_id);
         $guestFromMaterial = $this->getGuestFromMaterial($guest_id);
 
         $players = self::loadPlayersBasicInfos();
-        self::notifyAllPlayers(NOTIF_GUEST_POACHED,  clienttranslate('${poaching_player_name} poaches ${guest_name} from ${poached_player_name}. ${poached_player_name} gets a dessert.'), array(
+        self::notifyAllPlayers(NOTIF_GUEST_POACHED,  clienttranslate('${player_name} poaches ${guest_name} from ${player_name2}. ${player_name2} gets a dessert.'), array(
             'guest' => $this->guestcards->getCard($guest_id),
             'player_id' => $poaching_player_id,
             'poached_player_id' => $poached_player_id,
-            'poaching_player_name' => $players[$poaching_player_id]["player_name"],
-            'poached_player_name' => $players[$poached_player_id]["player_name"],
+            'player_name' => $players[$poaching_player_id]["player_name"],
+            'player_name2' => $players[$poached_player_id]["player_name"],
             'guest_name' => $guestFromMaterial["name"],
             'discardedDesserts' => $dessert_cards,
             'counters' => $this->argCardsCounters(),
@@ -1202,8 +1203,8 @@ class JustDesserts extends Table
         $this->dessertcards->moveCards($dessert_cards_id, DECK_LOC_HAND, $poaching_player_id);
         self::notifyPlayer($poaching_player_id, NOTIF_NEW_HAND, '', array('cards' => $dessert_cards, 'fromDiscard' => true));
 
-        self::notifyAllPlayers(NOTIF_POACHING_BLOCKED,  clienttranslate('${poached_player_name} blocks poaching'), array(
-            'poached_player_name' => self::getCurrentPlayerName(),
+        self::notifyAllPlayers(NOTIF_POACHING_BLOCKED,  clienttranslate('${player_name} blocks poaching'), array(
+            'player_name' => self::getCurrentPlayerName(),
             'player_id' => $poached_player_id,
             'discardedDesserts' => $discardedDesserts,
             'counters' => $this->argCardsCounters(),
