@@ -365,6 +365,9 @@ define([
                     guestName: this.guestDescriptions[card_type_arg].name,
                     favourite1: this.guestDescriptions[card_type_arg].favourite1 ? this.guestDescriptions[card_type_arg].favourite1 : _(""),
                     favourite2: this.guestDescriptions[card_type_arg].favourite2 ? this.guestDescriptions[card_type_arg].favourite2 : _(""),
+                    MY_FAVORITES: _("I have two favorites:"),
+                    MY_FAVORITE: _("My favorite is:"),
+                    NO_FAVORITE: _("I can’t decide on a favorite!"),
                 }), delay);
 
             },
