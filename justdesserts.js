@@ -212,12 +212,20 @@ define([
                 this.updateAndShowOnlyNonZeroCounters(this.gamedatas.counters);
 
                 //activated advanced rules icons
-                document.getElementById("buffetInfo").title = _("Opening a buffet");
-                document.getElementById("poachingInfo").title = _("Blocking and poaching");
                 if (!this.isOpeningABuffetOn)
                     dojo.style("buffetInfo", "display", "none");
                 if (!this.isPoachingOn)
                     dojo.style("poachingInfo", "display", "none");
+
+                //tooltips
+                this.addTooltip('dessertCountImg', _("Remaining desserts"), "");
+                this.addTooltip('guest_draw', _("Remaining guests"), "");
+                this.addTooltip('poachingInfo', _("Poaching on"), "");
+                this.addTooltip('buffetInfo', _("Buffet on"), "");
+                this.addTooltip('guest_discard', _("You can serve the guest on top of the discard"), "");
+
+                this.addTooltipToClass('jd_circle', _("Satisfied guests of this suit"), "");
+
 
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
