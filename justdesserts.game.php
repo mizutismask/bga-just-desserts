@@ -441,7 +441,7 @@ class JustDesserts extends Table
         $foundDesserts = array_filter($this->desserts, function ($card) use ($dessertStringId) {
             return $card["nameId"] === $dessertStringId;
         });
-        return array_pop($foundDesserts)["nametr"];
+        return $foundDesserts ? array_pop($foundDesserts)["nametr"] : "";
     }
 
     /*
