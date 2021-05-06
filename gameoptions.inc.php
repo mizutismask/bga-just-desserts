@@ -34,7 +34,7 @@ $game_options = array(
             BASIC_RULES => array('name' => totranslate('Basic rules'), 'tmdisplay' => totranslate('Basic rules'), 'description' => totranslate('A simple version to learn the game')),
             ADVANCED_RULES => array('name' => totranslate('Advanced rules'), 'tmdisplay' => totranslate('Advanced rules'), 'description' => totranslate('More strategic rules')),
         ),
-        'default' => BASIC_RULES
+        'default' => ADVANCED_RULES
     ),
     OPENING_BUFFET => array(
         'name' => totranslate('Opening a buffet'),
@@ -42,6 +42,7 @@ $game_options = array(
             ACTIVATED => array('name' => totranslate('Yes'), 'tmdisplay' => totranslate('Opening a buffet'), 'description' => totranslate('Make opponents give back their guests')),
             DEACTIVATED => array('name' => totranslate('No')),
         ),
+        'default' => ACTIVATED,
         'displaycondition' => [
             [
                 'type' => 'otheroption',
@@ -56,6 +57,7 @@ $game_options = array(
             ACTIVATED => array('name' => totranslate('Yes'), 'tmdisplay' => totranslate('Poaching and blocking'), 'description' => totranslate('Steal your opponents guests')),
             DEACTIVATED => array('name' => totranslate('No')),
         ),
+        'default' => ACTIVATED,
         'displaycondition' => [
             [
                 'type' => 'otheroption',
@@ -65,7 +67,7 @@ $game_options = array(
         ],
     ),
     EXPANSION_BACON => array(
-        'name' => totranslate('Better with bacon'),
+        'name' => totranslate('Better with bacon expansion'),
         'values' => array(
             ACTIVATED => array(
                 'name' => totranslate('Yes'), 'tmdisplay' => totranslate('Better with bacon'),
@@ -73,9 +75,10 @@ $game_options = array(
             ),
             DEACTIVATED => array('name' => totranslate('No')),
         ),
+        'default' => DEACTIVATED,
     ),
     EXPANSION_COFFEE => array(
-        'name' => totranslate('Just coffee'),
+        'name' => totranslate('Just coffee expansion'),
         'values' => array(
             ACTIVATED => array(
                 'name' => totranslate('Yes'), 'tmdisplay' => totranslate('Just coffee'),
@@ -83,5 +86,6 @@ $game_options = array(
             ),
             DEACTIVATED => array('name' => totranslate('No')),
         ),
+        'default' => DEACTIVATED,
     ),
 );
