@@ -222,7 +222,7 @@ define([
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
-                console.log("Ending game setup");
+                //console.log("Ending game setup");
             },
 
 
@@ -233,7 +233,7 @@ define([
             //                  You can use this method to perform some user interface changes at this moment.
             //
             onEnteringState: function (stateName, args) {
-                console.log('Entering state: ' + stateName, args);
+                //console.log('Entering state: ' + stateName, args);
                 switch (stateName) {
                     case 'playerTurn':
                         this.guestsOnTable.setSelectionMode(1);
@@ -276,7 +276,7 @@ define([
             //                 You can use this method to perform some user interface changes at this moment.
             //
             onLeavingState: function (stateName) {
-                console.log('Leaving state: ' + stateName);
+                //console.log('Leaving state: ' + stateName);
 
                 switch (stateName) {
                     case 'allPlayersDiscardGuest':
@@ -300,7 +300,7 @@ define([
             //                        action status bar (ie: the HTML links in the status bar).
             //        
             onUpdateActionButtons: function (stateName, args) {
-                console.log('onUpdateActionButtons: ' + stateName, args);
+               // console.log('onUpdateActionButtons: ' + stateName, args);
 
                 if (this.isCurrentPlayerActive()) {
                     switch (stateName) {
@@ -560,7 +560,7 @@ define([
             },
 
             onOpenBuffet: function (evt) {
-                console.log('onOpenBuffet');
+                //console.log('onOpenBuffet');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
@@ -588,7 +588,7 @@ define([
             },
 
             onDiscardWonGuest: function (evt) {
-                console.log('onDiscardWonGuest');
+                //console.log('onDiscardWonGuest');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
@@ -610,7 +610,7 @@ define([
             },
 
             onPoach: function (evt) {
-                console.log('onPoach');
+                //console.log('onPoach');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
@@ -646,7 +646,7 @@ define([
             },
 
             onLetPoaching: function (evt) {
-                console.log('onLetPoaching');
+                //console.log('onLetPoaching');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
@@ -662,7 +662,7 @@ define([
             },
 
             onBlockPoaching: function (evt) {
-                console.log('onBlockPoaching');
+                //console.log('onBlockPoaching');
 
                 // Preventing default browser reaction
                 dojo.stopEvent(evt);
@@ -689,40 +689,6 @@ define([
                     this.showMessage(_('You have to select one or several desserts first'), 'error');
                 }
             },
-
-            /* Example:
-             
-            onMyMethodToCall1: function( evt )
-            {
-                console.log( 'onMyMethodToCall1' );
-                
-                // Preventing default browser reaction
-                dojo.stopEvent( evt );
-             
-                // Check that this action is possible (see "possibleactions" in states.inc.php)
-                if( ! this.checkAction( 'myAction' ) )
-                {   return; }
-             
-                this.ajaxcall( "/justdesserts/justdesserts/myAction.html", { 
-                                                                        lock: true, 
-                                                                        myArgument1: arg1, 
-                                                                        myArgument2: arg2,
-                                                                        ...
-                                                                     }, 
-                             this, function( result ) {
-                                
-                                // What to do after the server call if it succeeded
-                                // (most of the time: nothing)
-                                
-                             }, function( is_error) {
-             
-                                // What to do after the server call in anyway (success or failure)
-                                // (most of the time: nothing)
-             
-                             } );        
-            },        
-             
-            */
 
 
             ///////////////////////////////////////////////////
@@ -764,20 +730,6 @@ define([
 
             // TODO: from this point and below, you can write your game notifications handling methods
 
-            /*
-            Example:
-             
-            notif_cardPlayed: function( notif )
-            {
-                console.log( 'notif_cardPlayed' );
-                console.log( notif );
-                
-                // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-                
-                // TODO: play the card in the user interface.
-            },    
-             
-            */
             notif_newHand: function (notif) {
 
                 //if it was a swap, cards must be removed before new ones are added
@@ -790,7 +742,7 @@ define([
 
                 for (var i in notif.args.cards) {
                     var card = notif.args.cards[i];
-                    console.log("notif_newHand card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
+                    //console.log("notif_newHand card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
 
                     //add new cards
                     var from = 'guest_draw';
