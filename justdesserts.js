@@ -98,8 +98,9 @@ define([
                 // Create cards types:
                 this.cardsAvailable.guests.forEach(range => {
                     for (var card_id = range.from; card_id <= range.to; card_id++) {
-                        // Build card type id
-                        this.guestsOnTable.addItemType(card_id, 0, g_gamethemeurl + this.guest_img, card_id);
+                        var cardDesc = this.guestDescriptions[card_id];
+                        var weight=this.getGuestWeight(cardDesc.color);
+                        this.guestsOnTable.addItemType(card_id,weight, g_gamethemeurl + this.guest_img, card_id);
                     }
                 });
 
@@ -148,8 +149,10 @@ define([
                     // Create cards types:
                     this.cardsAvailable.guests.forEach(range => {
                         for (var card_id = range.from; card_id <= range.to; card_id++) {
-                            // Build card type id
-                            playerWonCards.addItemType(card_id, 0, g_gamethemeurl + this.guest_img, card_id);
+                            var cardDesc = this.guestDescriptions[card_id];
+                            var weight=this.getGuestWeight(cardDesc.color);
+                   
+                            playerWonCards.addItemType(card_id, weight, g_gamethemeurl + this.guest_img, card_id);
                         }
                     });
 
@@ -390,6 +393,31 @@ define([
                     }
                 }
                 this.updateCounters(counters);
+            },
+
+            //rainbow order
+            getGuestWeight(guestColor) {
+                switch (guestColor) {
+                    case "purple":
+                    return 1;
+                    case "blue":
+                    return 2;
+                    case "green":
+                    return 3;
+                    case "yellow":
+                    return 4;
+                    case "orange":
+                    return 5;
+                    case "rose":
+                    return 6;
+                    case "red":
+                    return 7;
+                    case "burgundy":
+                        return 8;
+                
+                    default:
+                        return 0;
+                }
             },
             ///////////////////////////////////////////////////
             //// Player's action
