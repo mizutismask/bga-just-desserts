@@ -423,6 +423,7 @@ class JustDesserts extends Table
                     'name' => $guest["nametr"],
                     'favourite1' => $this->getDessertTranslatedName($guest["favourite1"]),
                     'favourite2' => $this->getDessertTranslatedName($guest["favourite2"]),
+                    'color' => $guest["color"],
                     'i18n' => array('name', 'favourite1', 'favourite2'),
                 );
             }
