@@ -115,6 +115,7 @@ define([
                 this.guestsDiscard = new ebg.stock();
                 this.guestsDiscard.create(this, $('guest_discard'), this.cardwidth, this.cardheight);
                 this.guestsDiscard.image_items_per_row = this.image_items_per_row;
+                this.guestsDiscard.apparenceBorderWidth = '2px';
 
                 // Create cards types:
                 this.cardsAvailable.guests.forEach(range => {
@@ -145,6 +146,7 @@ define([
                     }
                     playerWonCards.create(this, $('guestscards_' + player_id), this.cardwidth, this.cardheight);
                     playerWonCards.image_items_per_row = this.image_items_per_row;
+                    playerWonCards.apparenceBorderWidth = '2px';
 
                     // Create cards types:
                     this.cardsAvailable.guests.forEach(range => {
@@ -522,13 +524,7 @@ define([
                                 guest_id: selectedGuests[0].id
                             },
                             this,
-                            function (result) {
-                                selectedDesserts.forEach(removed => {
-                                    this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
-                                    this.playerHand.removeFromStockById(removed.id);
-                                });
-
-                            });
+                            function (result) { });
                     }
                 }
                 else {
@@ -596,13 +592,7 @@ define([
                             cards_id: selectedDesserts.map(i => i.id).join(";"),
                         },
                         this,
-                        function (result) {
-                            selectedDesserts.forEach(removed => {
-                                this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
-                                this.playerHand.removeFromStockById(removed.id);
-                            });
-                        }
-                    );
+                        function (result) { });
                 } else {
                     this.showMessage(_('You have to select four aces to open a buffet'), 'error');
                     this.playerHand.unselectAll();
@@ -652,12 +642,7 @@ define([
                                 desserts_ids: selectedDesserts.map(i => i.id).join(";"),
                             },
                             this,
-                            function (result) {
-                                selectedDesserts.forEach(removed => {
-                                    this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
-                                    this.playerHand.removeFromStockById(removed.id);
-                                });
-                            }
+                            function (result) { }
                         );
                     } else {
                         this.showMessage(_('You have to select desserts to satisfy the guest'), 'error');
@@ -698,13 +683,7 @@ define([
                                 desserts_ids: selectedDesserts.map(i => i.id).join(";"),
                             },
                             this,
-                            function (result) {
-                                selectedDesserts.forEach(removed => {
-                                    this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
-                                    this.playerHand.removeFromStockById(removed.id);
-                                });
-
-                            });
+                            function (result) { });
                     }
                 }
                 else {
@@ -807,7 +786,8 @@ define([
 
             notif_discardedDesserts: function (notif) {
                 var from = 'overall_player_board_' + notif.args.player_id;
-                notif.args.discardedDesserts.forEach(removed => {
+                for (var i in notif.args.discardedDesserts) {
+                    var removed = notif.args.discardedDesserts[i];
                     //console.log("notif_discardedDesserts card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
                     if (notif.args.player_id == this.player_id) {
                         this.discardedDesserts.addToStockWithId(removed.type_arg, removed.id, "myhand");
@@ -815,7 +795,7 @@ define([
                     } else {
                         this.discardedDesserts.addToStockWithId(removed.type_arg, removed.id, from);
                     }
-                });
+                }
 
                 if (notif.args.counters) {
                     this.updateAndShowOnlyNonZeroCounters(notif.args.counters);
@@ -827,7 +807,7 @@ define([
                 var player_id = notif.args.player_id;
                 var from_discard = notif.args.fromDiscard;
                 //console.log("notif_newGuestWon card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
-                
+
                 this.wonStocksByPlayerId[player_id].addToStockWithId(card.type_arg, card.id, from_discard ? 'guest_discard' : 'guests_on_table');
                 this.addCardToolTip(this.wonStocksByPlayerId[player_id], card.id, card.type_arg);
 
