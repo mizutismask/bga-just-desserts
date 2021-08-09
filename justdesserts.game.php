@@ -1133,7 +1133,7 @@ class JustDesserts extends Table
                 'player_name2' => $players[$poached_player_id]["player_name"],
                 'guest_name' => $guestFromMaterial["name"],
                 'counters' => $this->argCardsCounters(),
-                'with_favorite' => $isGivenHisFavourite ? self::_("with a favorite") : "",
+                'with_favorite' => $isGivenHisFavourite ? clienttranslate("with a favorite") : "",
                 'i18n' => array('with_favorite'),
             ));
 
