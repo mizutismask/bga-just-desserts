@@ -26,7 +26,7 @@
 -->
 <div id="container">
     <div id="guest_line">
-        <div class="whiteblock pilesAndCounters">
+        <div class="whiteblock pilesAndCounters jd_panel">
             <div id="piles" class="jd_piles">
                 <div id="guest_draw" class="jd_pile jd_draw jd_guest_pile">
                     <div id="jd_guest_draw_count">
@@ -45,12 +45,12 @@
 
             </div>
         </div>
-        <div id="guests_on_table_wrapper" class="whiteblock">
+        <div id="guests_on_table_wrapper" class="whiteblock jd_panel">
             <div id="guests_on_table"></div>
         </div>
     </div>
 
-    <div id="myhand_wrap" class="whiteblock">
+    <div id="myhand_wrap" class="whiteblock jd_panel">
         <h3>{MY_HAND}</h3>
         <div id="myhand">
         </div>
@@ -59,7 +59,7 @@
     <div id="guests_wrapper">
 
         <!-- BEGIN player -->
-        <div id="guest_{PLAYER_ID}" class="whiteblock jd_guestsWon">
+        <div id="guest_{PLAYER_ID}" class="whiteblock jd_guestsWon jd_panel">
             <div class="guestsname" style="color:#{PLAYER_COLOR}">
                 <h3>{PLAYER_NAME_WON_CARDS_TITLE}</h3>
             </div>
@@ -70,7 +70,7 @@
 
     </div>
 
-    <div id="desserts_discarded_block" class="whiteblock">
+    <div id="desserts_discarded_block" class="whiteblock jd_panel">
         <h3>{DISCARDED_DESSERTS}</h3>
         <div id="desserts_discarded_cards">
         </div>

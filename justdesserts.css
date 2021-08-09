@@ -88,6 +88,10 @@
     gap: 1%;
 }
 
+.jd_panel{
+    border-radius: 10px;
+}
+
 .jd_guestsWon{
     box-sizing: border-box;
     min-width: 170px;
