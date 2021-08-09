@@ -431,6 +431,15 @@ class JustDesserts extends Table
         return $descs;
     }
 
+    function checkCardsAreInPlayerHand($cards_id, $player_id)
+    {
+        $playerHand = $this->concatenateFieldValues($this->dessertcards->getCardsInLocation(DECK_LOC_HAND, $player_id), "id");
+        $inHand = !array_diff($cards_id, $playerHand);
+        if (!$inHand) {
+            throw new BgaUserException(self::_("You're trying to use a card that is not in your hand, refresh your browser (press F5)"));
+        }
+    }
+
     function getDessertTranslatedName($dessertStringId)
     {
         if ("ANYTHING_WITH_BACON" === $dessertStringId) {
@@ -976,6 +985,8 @@ class JustDesserts extends Table
     private function serve($guest_id, $cards_id, $action, $nextState)
     {
         self::checkAction($action);
+        $player_id = self::getActivePlayerId();
+        $this->checkCardsAreInPlayerHand($cards_id, $player_id);
         $guest = $this->guestcards->getCard($guest_id);
         $guestFromMaterial = $this->getGuestFromMaterialFromCard($guest);
         $dessertsFromMaterial = $this->getDessertsFromMaterialByIds($cards_id);
@@ -1021,6 +1032,7 @@ class JustDesserts extends Table
     {
         self::checkAction('openBuffet');
         $player_id = self::getActivePlayerId();
+        $this->checkCardsAreInPlayerHand($cards_id, $player_id);
 
         $dessertsFromMaterial = $this->getDessertsFromMaterialByIds($cards_id);
         foreach ($dessertsFromMaterial as $dessert) {
@@ -1083,6 +1095,7 @@ class JustDesserts extends Table
         self::checkAction('poach');
 
         $player_id = self::getActivePlayerId();
+        $this->checkCardsAreInPlayerHand($desserts_ids, $player_id);
         $guest = $this->guestcards->getCard($guest_id);
         $guestFromMaterial = $this->getGuestFromMaterial($guest_id);
         $dessertsFromMaterial = $this->getDessertsFromMaterialByIds($desserts_ids);
@@ -1120,7 +1133,7 @@ class JustDesserts extends Table
                 'player_name2' => $players[$poached_player_id]["player_name"],
                 'guest_name' => $guestFromMaterial["name"],
                 'counters' => $this->argCardsCounters(),
-                'with_favorite' => $isGivenHisFavourite ? self::_("with a favorite") : "",
+                'with_favorite' => $isGivenHisFavourite ? clienttranslate("with a favorite") : "",
                 'i18n' => array('with_favorite'),
             ));
 
@@ -1184,6 +1197,8 @@ class JustDesserts extends Table
         $poached_player_id = self::getGameStateValue(GS_POACHED_PLAYER);
         $guest_id = self::getGameStateValue(GS_POACHED_GUEST_ID);
         $block_accepted_id = self::getGameStateValue(GS_POACH_ONLY_FAVOURITE_ID_ACCEPTED);
+
+        $this->checkCardsAreInPlayerHand($desserts_ids, $poached_player_id);
 
         $dessertsFromMaterial = $this->getDessertsFromMaterialByIds($desserts_ids);
         $guestFromMaterial = $this->getGuestFromMaterial($guest_id);
