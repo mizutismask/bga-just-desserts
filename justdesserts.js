@@ -99,8 +99,8 @@ define([
                 this.cardsAvailable.guests.forEach(range => {
                     for (var card_id = range.from; card_id <= range.to; card_id++) {
                         var cardDesc = this.guestDescriptions[card_id];
-                        var weight=this.getGuestWeight(cardDesc.color);
-                        this.guestsOnTable.addItemType(card_id,weight, g_gamethemeurl + this.guest_img, card_id);
+                        var weight = this.getGuestWeight(cardDesc.color);
+                        this.guestsOnTable.addItemType(card_id, weight, g_gamethemeurl + this.guest_img, card_id);
                     }
                 });
 
@@ -150,8 +150,8 @@ define([
                     this.cardsAvailable.guests.forEach(range => {
                         for (var card_id = range.from; card_id <= range.to; card_id++) {
                             var cardDesc = this.guestDescriptions[card_id];
-                            var weight=this.getGuestWeight(cardDesc.color);
-                   
+                            var weight = this.getGuestWeight(cardDesc.color);
+
                             playerWonCards.addItemType(card_id, weight, g_gamethemeurl + this.guest_img, card_id);
                         }
                     });
@@ -303,7 +303,7 @@ define([
             //                        action status bar (ie: the HTML links in the status bar).
             //        
             onUpdateActionButtons: function (stateName, args) {
-               // console.log('onUpdateActionButtons: ' + stateName, args);
+                // console.log('onUpdateActionButtons: ' + stateName, args);
 
                 if (this.isCurrentPlayerActive()) {
                     switch (stateName) {
@@ -399,22 +399,22 @@ define([
             getGuestWeight(guestColor) {
                 switch (guestColor) {
                     case "purple":
-                    return 1;
+                        return 1;
                     case "blue":
-                    return 2;
+                        return 2;
                     case "green":
-                    return 3;
+                        return 3;
                     case "yellow":
-                    return 4;
+                        return 4;
                     case "orange":
-                    return 5;
+                        return 5;
                     case "rose":
-                    return 6;
+                        return 6;
                     case "red":
-                    return 7;
+                        return 7;
                     case "burgundy":
                         return 8;
-                
+
                     default:
                         return 0;
                 }
@@ -493,13 +493,7 @@ define([
                                 guest_id: selectedGuests[0].id
                             },
                             this,
-                            function (result) {
-                                selectedDesserts.forEach(removed => {
-                                    this.discardedDesserts.addToStockWithId(removed.type, removed.id, "myhand");
-                                    this.playerHand.removeFromStockById(removed.id);
-                                });
-
-                            });
+                            function (result) { });
                     }
                 } else {
                     this.showMessage(_('You have to select only one guest and one or several desserts first'), 'error');
@@ -813,11 +807,16 @@ define([
 
             notif_discardedDesserts: function (notif) {
                 var from = 'overall_player_board_' + notif.args.player_id;
-                for (var i in notif.args.discardedDesserts) {
-                    var card = notif.args.discardedDesserts[i];
+                notif.args.discardedDesserts.forEach(removed => {
                     //console.log("notif_discardedDesserts card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
-                    this.discardedDesserts.addToStockWithId(card.type_arg, card.id, from);
-                }
+                    if (notif.args.player_id == this.player_id) {
+                        this.discardedDesserts.addToStockWithId(removed.type_arg, removed.id, "myhand");
+                        this.playerHand.removeFromStockById(removed.id);
+                    } else {
+                        this.discardedDesserts.addToStockWithId(removed.type_arg, removed.id, from);
+                    }
+                });
+
                 if (notif.args.counters) {
                     this.updateAndShowOnlyNonZeroCounters(notif.args.counters);
                 }
@@ -828,7 +827,7 @@ define([
                 var player_id = notif.args.player_id;
                 var from_discard = notif.args.fromDiscard;
                 //console.log("notif_newGuestWon card id/type/type arg :" + card.id + " " + card.type + " " + card.type_arg);
-
+                
                 this.wonStocksByPlayerId[player_id].addToStockWithId(card.type_arg, card.id, from_discard ? 'guest_discard' : 'guests_on_table');
                 this.addCardToolTip(this.wonStocksByPlayerId[player_id], card.id, card.type_arg);
 
