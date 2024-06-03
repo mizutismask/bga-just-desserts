@@ -53,6 +53,7 @@
 // define contants for state ids
 if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
     define("STATE_PLAYER_TURN", 2);
+    define("STATE_SOLO_PLAYER_TURN", 3);
     define("STATE_NEXT_PLAYER", 23);
     define("STATE_DISCARD", 24);
     define("STATE_SERVE_SECOND_GUEST", 25);
@@ -68,6 +69,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("TRANSITION_DISCARD_GUEST_NEEDED", "discardGuestNeeded");
     define("TRANSITION_SECOND_GUEST_SERVED", "secondGuestServed");
     define("TRANSITION_PLAYER_TURN", "playerTurn");
+    define("TRANSITION_SOLO_PLAYER_TURN", "soloPlayerTurn");
     define("TRANSITION_GUESTS_DISCARDED", "guestsDiscarded");
     define("TRANSITION_PASSED", "passed");
     define("TRANSITION_END_GAME", "endGame");
@@ -110,6 +112,20 @@ $machinestates = array(
             TRANSITION_BUFFET_SERVE => STATE_SERVE_SECOND_GUEST,
             TRANSITION_POACHING_ATTEMPT => STATE_POACHING_REACTION,
             TRANSITION_POACHING_RESOLVED => STATE_POACHING_RESOLVED,
+        )
+    ),
+
+    STATE_SOLO_PLAYER_TURN => array(
+        "name" => "soloPlayerTurn",
+        "description" => "",
+        "descriptionmyturn" => clienttranslate('${you} can satisfy a guest or discard 3 cards to replace them'),
+        "type" => "activeplayer",
+        "possibleactions" => array("serve", "swap"), 
+        "args" => "argGetPossibleMoves",
+        "transitions" => array(
+            TRANSITION_SERVED => STATE_SOLO_PLAYER_TURN,
+            TRANSITION_SWAPPED => STATE_NEXT_PLAYER,
+            TRANSITION_END_GAME => STATE_END_GAME,
         )
     ),
 
