@@ -42,7 +42,7 @@ $game_options = array(
             ACTIVATED => array('name' => totranslate('Yes'), 'tmdisplay' => totranslate('Opening a buffet'), 'description' => totranslate('Make opponents give back their guests')),
             DEACTIVATED => array('name' => totranslate('No')),
         ),
-        'default' => ACTIVATED,
+        'default' => DEACTIVATED,
         'displaycondition' => [
             [
                 'type' => 'otheroption',
@@ -57,7 +57,7 @@ $game_options = array(
             ACTIVATED => array('name' => totranslate('Yes'), 'tmdisplay' => totranslate('Poaching and blocking'), 'description' => totranslate('Steal your opponents guests')),
             DEACTIVATED => array('name' => totranslate('No')),
         ),
-        'default' => ACTIVATED,
+        'default' => DEACTIVATED,
         'displaycondition' => [
             [
                 'type' => 'otheroption',
