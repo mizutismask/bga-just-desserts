@@ -1,0 +1,40 @@
+{
+    "table": [],
+    "player": {
+        "guests_number": {
+            "id": 10,
+            "name": "Satisfied guests",
+            "type": "int"
+        },
+        "turns_number": {
+            "id": 11,
+            "name": "Turns",
+            "type": "int"
+        },
+        "player_tips_number": {
+            "id": 12,
+            "name": "Tips",
+            "type": "int"
+        },
+        "player_swaps_number": {
+            "id": 13,
+            "name": "Swaps",
+            "type": "int"
+        },
+        "opened_buffets_number": {
+            "id": 14,
+            "name": "Opened buffets",
+            "type": "int"
+        },
+        "poaching_number": {
+            "id": 15,
+            "name": "Poaching",
+            "type": "int"
+        },
+        "blocking_number": {
+            "id": 16,
+            "name": "Poaching blocked",
+            "type": "int"
+        }
+    }
+}
