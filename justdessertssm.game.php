@@ -57,7 +57,7 @@ if (!defined('DECK_LOC_DECK')) {
     define("ANYTHING_WITH", "ANYTHING_WITH_");
 }
 
-class JustDesserts extends Table
+class JustDessertsSM extends Table
 {
     function __construct()
     {

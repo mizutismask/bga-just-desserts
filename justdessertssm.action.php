@@ -23,7 +23,7 @@
  */
 
 
-class action_justdesserts extends APP_GameAction
+class action_justdessertssm extends APP_GameAction
 {
   // Constructor: please do not modify
   public function __default()
@@ -32,7 +32,7 @@ class action_justdesserts extends APP_GameAction
       $this->view = "common_notifwindow";
       $this->viewArgs['table'] = self::getArg("table", AT_posint, true);
     } else {
-      $this->view = "justdesserts_justdesserts";
+      $this->view = "justdessertssm_justdessertssm";
       self::trace("Complete reinitialization of board game");
     }
   }

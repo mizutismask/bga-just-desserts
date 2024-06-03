@@ -27,11 +27,11 @@
 
 require_once(APP_BASE_PATH . "view/common/game.view.php");
 
-class view_justdesserts_justdesserts extends game_view
+class view_justdessertssm_justdessertssm extends game_view
 {
   function getGameName()
   {
-    return "justdesserts";
+    return "justdessertssm";
   }
   function build_page($viewArgs)
   {
