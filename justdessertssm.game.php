@@ -120,7 +120,7 @@ class JustDessertsSM extends Table {
             $color = array_shift($default_colors);
             $values[] = "('" . $player_id . "','$color','" . $player['player_canal'] . "','" . addslashes($player['player_name']) . "','" . addslashes($player['player_avatar']) . "')";
         }
-        $sql .= implode($values, ',');
+        $sql .= implode(',', $values);
         $this->DbQuery($sql);
         $this->reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
         $this->reloadPlayersBasicInfos();
@@ -200,13 +200,15 @@ class JustDessertsSM extends Table {
         return $result;
     }
 
+    function isStudio() {
+        return ($this->getBgaEnvironment() == 'studio');
+    }
+
     function getCardsAvailable() {
         $cardsAvailable = array();
         $cardsAvailable["desserts"] = array(
-            array(
-                "from" => 1,
-                "to" => 76,
-            ),
+            $this->isStudio() ?
+                ["from" => 1, "to" => 10] : ["from" => 1, "to" => 76,],
         );
         $cardsAvailable["guests"] = array(
             array(
@@ -465,14 +467,17 @@ class JustDessertsSM extends Table {
         if ($this->isSoloMode()) {
             $this->pickGuestCardsAndNotifyPlayers(1);
         }
+        $this->notifyAllPlayers(NOTIF_UPDATE_CARDS_NB, "", array(
+            'counters' => $this->argCardsCounters(),
+        ));
         $this->checkIfEndOfGame($player_id);
     }
 
     function checkIfEndOfGame($player_id) {
         if ($this->isSoloMode()) {
-            $remainingGuests = $this->guestcards->countCardInLocation(DECK_LOC_RIVER);
-            if ($remainingGuests == 0) {
-                $this->notifyPlayer($player_id, "msg", $this->getSoloRank($remainingGuests), []);
+            $remainingGuests = $this->guestcards->countCardInLocation(DECK_LOC_RIVER) + $this->guestcards->countCardInLocation(DECK_LOC_DECK);
+            if ($remainingGuests == 0 || !$this->areGuestsPossibleToSatisfy($player_id) && $this->dessertcards->countCardInLocation(DECK_LOC_DECK) == 0) {
+                $this->notifyPlayer($player_id, "importantMsg", $this->getSoloRank($remainingGuests), ["remainingGuests" => $remainingGuests]);
                 $this->updateScore($player_id, $remainingGuests * -1);
                 $this->reloadScoresAndNotify();
                 $this->gamestate->nextState(TRANSITION_END_GAME);
@@ -495,11 +500,11 @@ class JustDessertsSM extends Table {
     }
 
     function getSoloRank($remainingGuestCount) {
-        if ($remainingGuestCount == 0) return clienttranslate('You take the CAKE!');
-        if ($this->isValueInRange($remainingGuestCount, 1, 3)) return clienttranslate('You did BERRY well!');
-        if ($this->isValueInRange($remainingGuestCount, 4, 6)) return clienttranslate('That should be PUDDING a smile on your face');
-        if ($this->isValueInRange($remainingGuestCount, 7, 9)) return clienttranslate('DONUT worry, you can try again!');
-        if ($remainingGuestCount > 9) return clienttranslate('It’s a SHERBET you’ll do better next time!');
+        if ($remainingGuestCount == 0) return clienttranslate('Remaining guests: ${remainingGuests}. You take the CAKE!');
+        if ($this->isValueInRange($remainingGuestCount, 1, 3)) return clienttranslate('Remaining guests: ${remainingGuests}. You did BERRY well!');
+        if ($this->isValueInRange($remainingGuestCount, 4, 6)) return clienttranslate('Remaining guests: ${remainingGuests}. That should be PUDDING a smile on your face');
+        if ($this->isValueInRange($remainingGuestCount, 7, 9)) return clienttranslate('Remaining guests: ${remainingGuests}. DONUT worry, you can try again!');
+        if ($remainingGuestCount > 9) return clienttranslate('Remaining guests: ${remainingGuests}. It’s a SHERBET you’ll do better next time!');
     }
 
     function isValueInRange(int $value, int $minValue, int $maxValue): bool {
@@ -780,6 +785,10 @@ class JustDessertsSM extends Table {
             throw new BgaUserException($this->_("This guest refuses to eat one of the ingredients you provided"));
     }
 
+    function doesGuestAcceptsTheseDesserts($dessertsFromMaterial, $guestFromMaterial) {
+        return $this->dessertsAreEnoughForGuest($dessertsFromMaterial, $guestFromMaterial) && !$this->guestDislikesSomething($dessertsFromMaterial, $guestFromMaterial);
+    }
+
     function isPoachingAvailable() {
         return $this->getGameStateValue(GS_ALREADY_POACHED_THIS_TURN) == 0 && $this->guestcards->countCardInLocation(DECK_LOC_WON) > 0;
     }
@@ -884,9 +893,15 @@ class JustDessertsSM extends Table {
         $cards_nb = sizeof($cards_id);
 
         if ($this->isSoloMode()) {
+            if ($cards_nb > 3) {
+                throw new BgaUserException($this->_("You can discard 3 cards at most"));
+            }
             $cardsCount = intval($this->dessertcards->countCardInLocation(DECK_LOC_HAND, $player_id));
             if ($cardsCount >= 3 && $cards_nb < 3) {
                 throw new BgaUserException($this->_("You have to discard 3 cards if you can"));
+            }
+            if ($this->dessertcards->countCardInLocation(DECK_LOC_DECK) == 0) {
+                throw new BgaUserException($this->_("No more cards in the desserts pile, you can’t discard"));
             }
         }
 
@@ -925,9 +940,14 @@ class JustDessertsSM extends Table {
 
     public function completeDessertsAndCheckRemainder($location, $locationArg, $count, $playerId): array {
         $cards = $this->completeDessertsInLocationUpTo($location, $locationArg, $count, $playerId);
-        $visibleCardsCount = intval($this->dessertcards->countCardInLocation($location, $locationArg));
-        if ($visibleCardsCount <= 4) {
-            return array_merge($cards, $this->pickDessertCardsAndNotifyPlayer($visibleCardsCount, $playerId));
+        $remainingCardsCount = intval($this->dessertcards->countCardInLocation(DECK_LOC_DECK));
+        if ($remainingCardsCount > 0 && $remainingCardsCount <= 4) {
+            $remaining = $this->pickDessertCardsAndNotifyPlayer($remainingCardsCount, $playerId);
+            $this->notifyPlayer($playerId, "msg", clienttranslate('The kitchen is closing: ${player_name} gets the ${cards_nb} remaining desserts in the pile'), array(
+                'player_name' => $this->getActivePlayerName(),
+                'cards_nb' => count($remaining),
+            ));
+            return array_merge($cards, $remaining);
         }
         return $cards;
     }
@@ -1273,6 +1293,26 @@ class JustDessertsSM extends Table {
             'poached_guest_id' => $this->getGameStateValue(GS_POACHED_GUEST_ID),
             'poached_player_id' => $this->getGameStateValue(GS_POACHED_PLAYER)
         );
+    }
+
+    function areGuestsPossibleToSatisfy($playerId) {
+        $guests = $this->guestcards->getCardsInLocation(DECK_LOC_RIVER);
+        $cards_id = array_keys($this->dessertcards->getPlayerHand($playerId));
+        return $this->array_some(array_keys($guests), function ($guest_id) use ($cards_id) {
+            $guest = $this->guestcards->getCard($guest_id);
+            $guestFromMaterial = $this->getGuestFromMaterialFromCard($guest);
+            $dessertsFromMaterial = $this->getDessertsFromMaterialByIds($cards_id);
+            return $this->doesGuestAcceptsTheseDesserts($dessertsFromMaterial, $guestFromMaterial);
+        });
+    }
+
+    function array_some(array $array, callable $fn) {
+        foreach ($array as $value) {
+            if ($fn($value)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //////////////////////////////////////////////////////////////////////////////

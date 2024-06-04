@@ -737,6 +737,7 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 			dojo.subscribe('poachingBlocked', this, 'notif_poachBlocked')
 			dojo.subscribe('updateCardsNb', this, 'notif_updateCardsNb')
 			dojo.subscribe('clearLocation', this, 'notif_clearLocation')
+			dojo.subscribe('importantMsg', this, 'notif_importantMsg')
 		},
 
 		// TODO: from this point and below, you can write your game notifications handling methods
@@ -850,6 +851,10 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 				var player_to_update_id = player['player_id']
 				this.scoreCtrl[player_to_update_id].setValue(player['player_score'])
 			}
+        },
+        
+		notif_importantMsg: function (notif) {
+			this.showMessage(notif.log, "info")
 		},
 
 		notif_guestPoached: function (notif) {

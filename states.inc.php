@@ -118,7 +118,7 @@ $machinestates = array(
     STATE_SOLO_PLAYER_TURN => array(
         "name" => "soloPlayerTurn",
         "description" => "",
-        "descriptionmyturn" => clienttranslate('${you} can satisfy a guest or discard 3 cards to replace them'),
+        "descriptionmyturn" => clienttranslate('${you} can satisfy a guest or discard 3 cards to get new ones'),
         "type" => "activeplayer",
         "possibleactions" => array("serve", "swap"), 
         "args" => "argGetPossibleMoves",
@@ -138,7 +138,7 @@ $machinestates = array(
         "updateGameProgression" => true,
         "transitions" => array(TRANSITION_PLAYER_TURN => STATE_PLAYER_TURN, TRANSITION_SOLO_PLAYER_TURN => STATE_SOLO_PLAYER_TURN)
     ),
-    
+
     STATE_DISCARD => array(
         "name" => "playerDiscardGuest",
         "description" => clienttranslate('${actplayer} must discard guests until there is only one left from each suit'),
