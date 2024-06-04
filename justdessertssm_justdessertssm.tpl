@@ -39,7 +39,7 @@
             <div id="jd_additional_info">
                 <div id="jd_dessert_draw_count">
                     <img id="dessertCountImg" src="{GAMETHEMEURL}/img/cards/dessertBack.jpg"
-                        style="vertical-align: text-top;" /> <span style="margin-right:-6px;margin-left:-6px">x</span>
+                        style="vertical-align: text-top;" /> <span style="margin-right:-4px;margin-left:-4px">x</span>
                     <span id="dessert_draw_count"></span>
                 </div>
 
