@@ -469,19 +469,41 @@ class JustDessertsSM extends Table {
     }
 
     function checkIfEndOfGame($player_id) {
-        //getting data to check if the active player hit a winning requirement
-        $woncards = $this->guestcards->getCardsInLocation(DECK_LOC_WON, $player_id);
+        if ($this->isSoloMode()) {
+            $remainingGuests = $this->guestcards->countCardInLocation(DECK_LOC_RIVER);
+            if ($remainingGuests == 0) {
+                $this->notifyPlayer($player_id, "msg", $this->getSoloRank($remainingGuests), []);
+                $this->updateScore($player_id, $remainingGuests * -1);
+                $this->reloadScoresAndNotify();
+                $this->gamestate->nextState(TRANSITION_END_GAME);
+            }
+        } else {
+            //getting data to check if the active player hit a winning requirement
+            $woncards = $this->guestcards->getCardsInLocation(DECK_LOC_WON, $player_id);
 
-        //5 different colors or 3 of the same one
-        $is5 = $this->countCardsForObjective5Differents($woncards) == 5;
-        if ($is5 || $this->countCardsForObjective3OfAKind($woncards) == 3) {
-            //victory
-            $this->updateScores($player_id);
-            $this->gamestate->nextState(TRANSITION_END_GAME);
-        } else if ($this->gameCanNotBeFinished()) {
-            $this->updateScoresWithAlternativeEnd();
-            $this->gamestate->nextState(TRANSITION_END_GAME);
+            //5 different colors or 3 of the same one
+            $is5 = $this->countCardsForObjective5Differents($woncards) == 5;
+            if ($is5 || $this->countCardsForObjective3OfAKind($woncards) == 3) {
+                //victory
+                $this->updateScores($player_id);
+                $this->gamestate->nextState(TRANSITION_END_GAME);
+            } else if ($this->gameCanNotBeFinished()) {
+                $this->updateScoresWithAlternativeEnd();
+                $this->gamestate->nextState(TRANSITION_END_GAME);
+            }
         }
+    }
+
+    function getSoloRank($remainingGuestCount) {
+        if ($remainingGuestCount == 0) return clienttranslate('You take the CAKE!');
+        if ($this->isValueInRange($remainingGuestCount, 1, 3)) return clienttranslate('You did BERRY well!');
+        if ($this->isValueInRange($remainingGuestCount, 4, 6)) return clienttranslate('That should be PUDDING a smile on your face');
+        if ($this->isValueInRange($remainingGuestCount, 7, 9)) return clienttranslate('DONUT worry, you can try again!');
+        if ($remainingGuestCount > 9) return clienttranslate('It’s a SHERBET you’ll do better next time!');
+    }
+
+    function isValueInRange(int $value, int $minValue, int $maxValue): bool {
+        return $value >= $minValue && $value <= $maxValue;
     }
 
     function gameCanNotBeFinished() {
