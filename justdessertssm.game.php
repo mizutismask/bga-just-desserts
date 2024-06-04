@@ -521,14 +521,16 @@ class JustDessertsSM extends Table {
         //if the guest got his favorite, there’s a tip
         if ($this->isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)) {
             $new_cards = $this->dessertcards->pickCards(1, DECK_LOC_DECK, $player_id);
-            // Notify player about his tip
-            $this->notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $new_cards));
-            $this->incStat(1, "player_tips_number", $player_id);
-            //notify other that he got one tip
-            $this->notifyAllPlayers(NOTIF_UPDATE_CARDS_NB, clienttranslate('${player_name} gets a new dessert card as a tip'), array(
-                'player_name' => $this->getPlayerName($player_id),
-                'counters' => $this->argCardsCounters(),
-            ));
+            if ($new_cards) {//possibly no card in solo mode since the deck is not reshuffled
+                // Notify player about his tip
+                $this->notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $new_cards));
+                $this->incStat(1, "player_tips_number", $player_id);
+                //notify other that he got one tip
+                $this->notifyAllPlayers(NOTIF_UPDATE_CARDS_NB, clienttranslate('${player_name} gets a new dessert card as a tip'), array(
+                    'player_name' => $this->getPlayerName($player_id),
+                    'counters' => $this->argCardsCounters(),
+                ));
+            }
         }
     }
 
@@ -892,7 +894,9 @@ class JustDessertsSM extends Table {
         $player_id = $this->getActivePlayerId();
         $cards_nb = sizeof($cards_id);
 
+        $swapMsg = clienttranslate('${player_name} swaps ${cards_nb} cards');
         if ($this->isSoloMode()) {
+            $swapMsg = clienttranslate('${player_name} discards ${cards_nb} cards');
             if ($cards_nb > 3) {
                 throw new BgaUserException($this->_("You can discard 3 cards at most"));
             }
@@ -906,10 +910,12 @@ class JustDessertsSM extends Table {
         }
 
         $this->playDessertCards($cards_id);
+        $this->notifyAllPlayers("msg", $swapMsg, array(
+            'player_name' => $this->getActivePlayerName(),
+            'cards_nb' => $cards_nb,
+        ));
 
-        $swapMsg = clienttranslate('${player_name} swaps ${cards_nb} cards');
         if ($this->isSoloMode()) {
-            $swapMsg = clienttranslate('${player_name} discards ${cards_nb} cards');
             $new_cards = $this->completeDessertsAndCheckRemainder(DECK_LOC_HAND, $player_id, 5, $player_id);
         } else {
             $new_cards = $this->dessertcards->pickCards($cards_nb, DECK_LOC_DECK, $player_id);
@@ -920,7 +926,7 @@ class JustDessertsSM extends Table {
         $this->notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $new_cards, 'discardedDesserts' => $discardedDesserts));
         $this->incStat(1, "player_swaps_number", $player_id);
 
-        $this->notifyAllPlayers(NOTIF_DISCARDED_DESSERTS, $swapMsg, array(
+        $this->notifyAllPlayers(NOTIF_DISCARDED_DESSERTS, "", array(
             'player_name' => $this->getActivePlayerName(),
             'player_id' => $player_id,
             'cards_nb' => $cards_nb,
