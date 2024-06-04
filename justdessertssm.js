@@ -854,7 +854,7 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
         },
         
 		notif_importantMsg: function (notif) {
-			this.showMessage(notif.log, "info")
+			this.showMessage(this.format_string_recursive(notif.log, notif.args), "info")
 		},
 
 		notif_guestPoached: function (notif) {
