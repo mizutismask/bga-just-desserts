@@ -317,6 +317,10 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 							this.addActionButton('button_poach', _('Poach a guest'), 'onPoach')
 						}
 						break
+					case 'soloPlayerTurn':
+						this.addActionButton('button_serve', _('Serve a guest'), 'onServeGuest')
+						this.addActionButton('button_exchange', _('Discard desserts'), 'onExchange')
+						break
 					case 'serveSecondGuest':
 						this.addActionButton('button_serve_second_guest', _('Serve another guest'), 'onServeSecondGuest')
 						this.addActionButton('button_pass', _('Pass'), 'onPass')

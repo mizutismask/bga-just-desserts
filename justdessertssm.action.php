@@ -28,12 +28,12 @@ class action_justdessertssm extends APP_GameAction
   // Constructor: please do not modify
   public function __default()
   {
-    if (self::isArg('notifwindow')) {
+    if ($this->isArg('notifwindow')) {
       $this->view = "common_notifwindow";
-      $this->viewArgs['table'] = self::getArg("table", AT_posint, true);
+      $this->viewArgs['table'] = $this->getArg("table", AT_posint, true);
     } else {
       $this->view = "justdessertssm_justdessertssm";
-      self::trace("Complete reinitialization of board game");
+      $this->trace("Complete reinitialization of board game");
     }
   }
 
@@ -46,117 +46,117 @@ class action_justdessertssm extends APP_GameAction
   	
     public function myAction()
     {
-        self::setAjaxMode();     
+        $this->setAjaxMode();     
 
         // Retrieve arguments
         // Note: these arguments correspond to what has been sent through the javascript "ajaxcall" method
-        $arg1 = self::getArg( "myArgument1", AT_posint, true );
-        $arg2 = self::getArg( "myArgument2", AT_posint, true );
+        $arg1 = $this->getArg( "myArgument1", AT_posint, true );
+        $arg2 = $this->getArg( "myArgument2", AT_posint, true );
 
         // Then, call the appropriate method in your game logic, like "playCard" or "myAction"
         $this->game->myAction( $arg1, $arg2 );
 
-        self::ajaxResponse( );
+        $this->ajaxResponse( );
     }
     
     */
   public function drawAction()
   {
-    self::setAjaxMode();
+    $this->setAjaxMode();
 
     $this->game->draw();
 
-    self::ajaxResponse();
+    $this->ajaxResponse();
   }
 
   public function swapAction()
   {
-    self::setAjaxMode();
+    $this->setAjaxMode();
     $cards_id = array();
-    $cards_id = self::getArg("cards_id", AT_numberlist, true);
+    $cards_id = $this->getArg("cards_id", AT_numberlist, true);
     $cards_id = $this->convertStringToArray($cards_id);
     $this->game->swap($cards_id);
 
-    self::ajaxResponse();
+    $this->ajaxResponse();
   }
 
   public function discardGuestAction()
   {
-    self::setAjaxMode();
-    $guest_id = self::getArg("guest_id", AT_posint, true);
+    $this->setAjaxMode();
+    $guest_id = $this->getArg("guest_id", AT_posint, true);
     $this->game->discardGuest($guest_id);
 
-    self::ajaxResponse();
+    $this->ajaxResponse();
   }
 
   public function serveAction()
   {
-    self::setAjaxMode();
-    $cards_id = self::getArg("cards_id", AT_numberlist, true);
-    $guest_id = self::getArg("guest_id", AT_posint, true);
+    $this->setAjaxMode();
+    $cards_id = $this->getArg("cards_id", AT_numberlist, true);
+    $guest_id = $this->getArg("guest_id", AT_posint, true);
     $cards_id = $this->convertStringToArray($cards_id);
     $this->game->serveFirstGuest($guest_id, $cards_id);
 
-    self::ajaxResponse();
+    $this->ajaxResponse();
   }
 
   public function serveSecondGuestAction()
   {
-    self::setAjaxMode();
-    $cards_id = self::getArg("cards_id", AT_numberlist, true);
-    $guest_id = self::getArg("guest_id", AT_posint, true);
+    $this->setAjaxMode();
+    $cards_id = $this->getArg("cards_id", AT_numberlist, true);
+    $guest_id = $this->getArg("guest_id", AT_posint, true);
     $cards_id = $this->convertStringToArray($cards_id);
     $this->game->serveSecondGuest($guest_id, $cards_id);
 
-    self::ajaxResponse();
+    $this->ajaxResponse();
   }
 
   public function openBuffetAction()
   {
-    self::setAjaxMode();
-    $cards_id = self::getArg("cards_id", AT_numberlist, true);
+    $this->setAjaxMode();
+    $cards_id = $this->getArg("cards_id", AT_numberlist, true);
     $cards_id = $this->convertStringToArray($cards_id);
     $this->game->openBuffet($cards_id);
 
-    self::ajaxResponse();
+    $this->ajaxResponse();
   }
 
   public function discardWonGuestAction()
   {
-    self::setAjaxMode();
-    $guest_id = self::getArg("guest_id", AT_posint, true);
+    $this->setAjaxMode();
+    $guest_id = $this->getArg("guest_id", AT_posint, true);
     $this->game->discardWonGuest($guest_id);
 
-    self::ajaxResponse();
+    $this->ajaxResponse();
   }
 
   public function poachAction()
   {
-    self::setAjaxMode();
-    $guest_id = self::getArg("guest_id", AT_posint, true);
-    $poached_player_id = self::getArg("poached_player_id", AT_posint, true);
-    $desserts_ids = self::getArg("desserts_ids", AT_numberlist, true);
+    $this->setAjaxMode();
+    $guest_id = $this->getArg("guest_id", AT_posint, true);
+    $poached_player_id = $this->getArg("poached_player_id", AT_posint, true);
+    $desserts_ids = $this->getArg("desserts_ids", AT_numberlist, true);
     $desserts_ids = $this->convertStringToArray($desserts_ids);
     $this->game->poachGuestFrom($guest_id, $poached_player_id, $desserts_ids);
 
-    self::ajaxResponse();
+    $this->ajaxResponse();
   }
 
   public function blockPoachingAction()
   {
-    self::setAjaxMode();
-    $desserts_ids = self::getArg("desserts_ids", AT_numberlist, true);
+    $this->setAjaxMode();
+    $desserts_ids = $this->getArg("desserts_ids", AT_numberlist, true);
     $desserts_ids = $this->convertStringToArray($desserts_ids);
     $this->game->blockPoaching($desserts_ids);
 
-    self::ajaxResponse();
+    $this->ajaxResponse();
   }
 
   public function letPoachingAction()
   {
-    self::setAjaxMode();
+    $this->setAjaxMode();
     $this->game->letPoaching();
-    self::ajaxResponse();
+    $this->ajaxResponse();
   }
 
 
@@ -174,10 +174,10 @@ class action_justdessertssm extends APP_GameAction
 
   public function passAction()
   {
-    self::setAjaxMode();
+    $this->setAjaxMode();
 
     $this->game->pass();
 
-    self::ajaxResponse();
+    $this->ajaxResponse();
   }
 }
