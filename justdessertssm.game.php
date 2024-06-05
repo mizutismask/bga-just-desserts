@@ -52,6 +52,7 @@ if (!defined('DECK_LOC_DECK')) {
     define('GS_ALREADY_POACHED_THIS_TURN', "already_poached_this_turn");
     define('GS_GUESTS_SERVED_THIS_TURN', "guests_served_this_turn");
     define('GS_POACHED_GUEST_ID', "guest_poached_id");
+    define('GS_SOLO', "solo");
 
     //others
     define("ANYTHING_WITH", "ANYTHING_WITH_");
@@ -76,6 +77,7 @@ class JustDessertsSM extends Table {
             GS_POACHED_PLAYER => 15,
             GS_POACHED_GUEST_ID => 16,
             GS_POACH_ONLY_FAVOURITE_ID_ACCEPTED => 17,
+            GS_SOLO => 18,
 
             "type_of_rules" => TYPE_OF_RULES,
             "opening_a_buffet" => OPENING_BUFFET,
@@ -87,13 +89,7 @@ class JustDessertsSM extends Table {
         $this->dessertcards = $this->getNew("module.common.deck");
         $this->dessertcards->init("dessertcard");
         $this->dessertcards->autoreshuffle_trigger = array('obj' => $this, 'method' => 'dessertDeckAutoReshuffle');
-
-        try {
-            $this->dessertcards->autoreshuffle = count($this->loadPlayersBasicInfos()) != 1;
-        } catch (Throwable $e) {
-            //error : Call to a member function get() on null when calling $this->loadPlayersBasicInfos() 
-            $this->dessertcards->autoreshuffle = true;
-        }
+        $this->dessertcards->autoreshuffle = $this->getGameStateValue(GS_SOLO) != 1;
 
         $this->guestcards = $this->getNew("module.common.deck");
         $this->guestcards->init("guestcard");
@@ -144,6 +140,7 @@ class JustDessertsSM extends Table {
         $this->setGameStateInitialValue(GS_POACHED_PLAYER, 0);
         $this->setGameStateInitialValue(GS_POACHED_GUEST_ID, 0);
         $this->setGameStateInitialValue(GS_POACH_ONLY_FAVOURITE_ID_ACCEPTED, 0);
+        $this->setGameStateInitialValue(GS_SOLO, count($players) == 1);
 
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
