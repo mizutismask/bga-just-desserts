@@ -208,7 +208,7 @@ class JustDessertsSM extends Table {
         $cardsAvailable = array();
         $cardsAvailable["desserts"] = array(
             $this->isStudio() ?
-                ["from" => 1, "to" => 10] : ["from" => 1, "to" => 76,],
+                ["from" => 1, "to" => 12] : ["from" => 1, "to" => 76,],
         );
         $cardsAvailable["guests"] = array(
             array(
@@ -904,8 +904,8 @@ class JustDessertsSM extends Table {
                 throw new BgaUserException($this->_("You can discard 3 cards at most"));
             }
             $cardsCount = intval($this->dessertcards->countCardInLocation(DECK_LOC_HAND, $player_id));
-            if ($cardsCount >= 3 && $cards_nb < 3) {
-                throw new BgaUserException($this->_("You have to discard 3 cards if you can"));
+            if (($cardsCount >= 3 && $cards_nb < 3) || ($cardsCount < 3 && $cardsCount != $cards_nb)){
+                throw new BgaUserException($this->_("You have to discard 3 cards if you can or all of them"));
             }
             if ($this->dessertcards->countCardInLocation(DECK_LOC_DECK) == 0) {
                 throw new BgaUserException($this->_("No more cards in the desserts pile, you can’t discard"));
