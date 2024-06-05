@@ -899,17 +899,17 @@ class JustDessertsSM extends Table {
 
         $swapMsg = clienttranslate('${player_name} swaps ${cards_nb} cards');
         if ($this->isSoloMode()) {
-            $swapMsg = clienttranslate('${player_name} discards ${cards_nb} cards');
+            if ($this->dessertcards->countCardInLocation(DECK_LOC_DECK) == 0) {
+                throw new BgaUserException($this->_("No more cards in the desserts pile, you can’t discard"));
+            }
             if ($cards_nb > 3) {
                 throw new BgaUserException($this->_("You can discard 3 cards at most"));
             }
             $cardsCount = intval($this->dessertcards->countCardInLocation(DECK_LOC_HAND, $player_id));
-            if (($cardsCount >= 3 && $cards_nb < 3) || ($cardsCount < 3 && $cardsCount != $cards_nb)){
+            if (($cardsCount >= 3 && $cards_nb < 3) || ($cardsCount < 3 && $cardsCount != $cards_nb)) {
                 throw new BgaUserException($this->_("You have to discard 3 cards if you can or all of them"));
             }
-            if ($this->dessertcards->countCardInLocation(DECK_LOC_DECK) == 0) {
-                throw new BgaUserException($this->_("No more cards in the desserts pile, you can’t discard"));
-            }
+            $swapMsg = clienttranslate('${player_name} discards ${cards_nb} cards');
         }
 
         $this->playDessertCards($cards_id);
@@ -1019,6 +1019,13 @@ class JustDessertsSM extends Table {
 
         $this->checkGuestAcceptsTheseDesserts($dessertsFromMaterial, $guestFromMaterial);
         $this->doSatisfiedGuestActions($cards_id, $guest, $guestFromMaterial, $dessertsFromMaterial);
+
+        if ($this->isSoloMode() && $this->dessertcards->countCardInLocation(DECK_LOC_HAND, $player_id) == 0) {
+            //if no more cards, give a new hand
+            $new_cards = $this->completeDessertsAndCheckRemainder(DECK_LOC_HAND, $player_id, 5, $player_id);
+            $this->notifyPlayer($player_id, NOTIF_NEW_HAND, clienttranslate('No more cards in hand : ${player_name} draws 5 desserts'), array('cards' => $new_cards, 'discardedDesserts' => [], 'player_name' => $this->getActivePlayerName()));
+            $this->incStat(1, "player_swaps_number", $player_id);
+        }
 
         if ($this->guestsNeedsToBeDiscarded() && $action == "serveSecondGuest") {
             $this->gamestate->nextState(TRANSITION_DISCARD_GUEST_NEEDED);
