@@ -86,6 +86,14 @@ class JustDessertsSM extends Table {
 
         $this->dessertcards = $this->getNew("module.common.deck");
         $this->dessertcards->init("dessertcard");
+        $this->dessertcards->autoreshuffle_trigger = array('obj' => $this, 'method' => 'dessertDeckAutoReshuffle');
+
+        try {
+            $this->dessertcards->autoreshuffle = count($this->loadPlayersBasicInfos()) != 1;
+        } catch (Throwable $e) {
+            //error : Call to a member function get() on null when calling $this->loadPlayersBasicInfos() 
+            $this->dessertcards->autoreshuffle = true;
+        }
 
         $this->guestcards = $this->getNew("module.common.deck");
         $this->guestcards->init("guestcard");
@@ -95,7 +103,7 @@ class JustDessertsSM extends Table {
 
     protected function getGameName() {
         // Used for translations and stuff. Please do not modify.
-        return "justdesserts";
+        return "justdessertssm";
     }
 
     /*
@@ -147,11 +155,6 @@ class JustDessertsSM extends Table {
         $this->initStat('player', 'opened_buffets_number', 0);
         $this->initStat('player', 'poaching_number', 0);
         $this->initStat('player', 'blocking_number', 0);
-
-        if (!$this->isSoloMode()) {
-            $this->dessertcards->autoreshuffle = true;
-            $this->dessertcards->autoreshuffle_trigger = array('obj' => $this, 'method' => 'dessertDeckAutoReshuffle');
-        }
 
         $this->setupGuestsDeck($players);
         $this->setupDessertsDeck($players);
@@ -320,6 +323,9 @@ class JustDessertsSM extends Table {
 
     function dessertDeckAutoReshuffle() {
         $this->notifyAllPlayers(NOTIF_CLEAR_LOCATION, '', array('location' => 'dessertDiscard'));
+        $this->notifyAllPlayers(NOTIF_UPDATE_CARDS_NB, "", array(
+            'counters' => $this->argCardsCounters(),
+        ));
     }
 
     function pickGuestCardsAndNotifyPlayers($nb) {
@@ -521,7 +527,7 @@ class JustDessertsSM extends Table {
         //if the guest got his favorite, there’s a tip
         if ($this->isGuestGivenHisFavourite($dessertsFromMaterial, $guestFromMaterial)) {
             $new_cards = $this->dessertcards->pickCards(1, DECK_LOC_DECK, $player_id);
-            if ($new_cards) {//possibly no card in solo mode since the deck is not reshuffled
+            if ($new_cards) { //possibly no card in solo mode since the deck is not reshuffled
                 // Notify player about his tip
                 $this->notifyPlayer($player_id, NOTIF_NEW_HAND, '', array('cards' => $new_cards));
                 $this->incStat(1, "player_tips_number", $player_id);
