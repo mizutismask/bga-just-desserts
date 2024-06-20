@@ -89,7 +89,7 @@ class JustDessertsSM extends Table {
         $this->dessertcards = $this->getNew("module.common.deck");
         $this->dessertcards->init("dessertcard");
         $this->dessertcards->autoreshuffle_trigger = array('obj' => $this, 'method' => 'dessertDeckAutoReshuffle');
-        $this->dessertcards->autoreshuffle = $this->getGameStateValue(GS_SOLO) != 1;
+        $this->dessertcards->autoreshuffle = $this->refreshGameStateValue(18) != 1;
 
         $this->guestcards = $this->getNew("module.common.deck");
         $this->guestcards->init("guestcard");
@@ -100,6 +100,10 @@ class JustDessertsSM extends Table {
     protected function getGameName() {
         // Used for translations and stuff. Please do not modify.
         return "justdessertssm";
+    }
+
+    private function refreshGameStateValue($global_id){
+        return $this->getUniqueValueFromDB("select global_value from global where global_id='$global_id'");
     }
 
     /*
@@ -207,9 +211,11 @@ class JustDessertsSM extends Table {
     function getCardsAvailable() {
         $cardsAvailable = array();
         $cardsAvailable["desserts"] = array(
-            $this->isStudio() ?
-                ["from" => 1, "to" => 12] : ["from" => 1, "to" => 76,],
+            ["from" => 1, "to" => 76,],
         );
+        /*$cardsAvailable["desserts"] = array(
+                ["from" => 1, "to" => 12],
+        );*/
         $cardsAvailable["guests"] = array(
             array(
                 "from" => 1,
@@ -483,7 +489,12 @@ class JustDessertsSM extends Table {
                 $this->notifyPlayer($player_id, "importantMsg", $this->getSoloRank($remainingGuests), ["remainingGuests" => $remainingGuests]);
                 $this->updateScore($player_id, $remainingGuests * -1);
                 $this->reloadScoresAndNotify();
-                $this->gamestate->nextState(TRANSITION_END_GAME);
+
+                if ($this->isStudio()) {
+                    $this->gamestate->nextState('debugEndGame');
+                } else {
+                    $this->gamestate->nextState(TRANSITION_END_GAME);
+                }
             }
         } else {
             //getting data to check if the active player hit a winning requirement
@@ -1547,5 +1558,37 @@ class JustDessertsSM extends Table {
         //
 
 
+    }
+
+    public function loadBugReportSQL(int $reportId, array $studioPlayers): void {
+        $prodPlayers = $this->getObjectListFromDb("SELECT `player_id` FROM `player`", true);
+        $prodCount = count($prodPlayers);
+        $studioCount = count($studioPlayers);
+        if ($prodCount != $studioCount) {
+            throw new BgaVisibleSystemException("Incorrect player count (bug report has $prodCount players, studio table has $studioCount players)");
+        }
+
+        // SQL specific to your game
+        // For example, reset the current state if it's already game over
+        $sql = [
+            "UPDATE `global` SET `global_value` = 10 WHERE `global_id` = 1 AND `global_value` = 99"
+        ];
+        foreach ($prodPlayers as $index => $prodId) {
+            $studioId = $studioPlayers[$index];
+            // SQL common to all games
+            $sql[] = "UPDATE `player` SET `player_id` = $studioId WHERE `player_id` = $prodId";
+            $sql[] = "UPDATE `global` SET `global_value` = $studioId WHERE `global_value` = $prodId";
+            $sql[] = "UPDATE `stats` SET `stats_player_id` = $studioId WHERE `stats_player_id` = $prodId";
+            $sql[] = "UPDATE gamelog SET gamelog_player=$studioId WHERE gamelog_player=$prodId";
+            $sql[] = "UPDATE gamelog SET gamelog_current_player=$studioId WHERE gamelog_current_player=$prodId";
+            $sql[] = "UPDATE gamelog SET gamelog_notification=REPLACE(gamelog_notification, $prodId, $studioId)";
+
+            // SQL specific to your game TODO
+            $sql[] = "UPDATE `guestcard` SET `card_location_arg` = $studioId WHERE `card_location_arg` = $prodId";
+            $sql[] = "UPDATE `dessertcard` SET `card_location_arg` = $studioId WHERE `card_location_arg` = $prodId";
+        }
+        foreach ($sql as $q) {
+            $this->DbQuery($q);
+        }
     }
 }

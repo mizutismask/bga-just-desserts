@@ -60,6 +60,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_BUFFET_DISCARD", 26);
     define("STATE_POACHING_REACTION", 27);
     define("STATE_POACHING_RESOLVED", 28);
+    define("STATE_DEBUG_END_GAME", 29);
 
     define("STATE_END_GAME", 99);
 
@@ -126,6 +127,7 @@ $machinestates = array(
             TRANSITION_SERVED => STATE_SOLO_PLAYER_TURN,
             TRANSITION_SWAPPED => STATE_NEXT_PLAYER,
             TRANSITION_END_GAME => STATE_END_GAME,
+            "debugEndGame" => STATE_DEBUG_END_GAME,
         )
     ),
 
@@ -197,6 +199,13 @@ $machinestates = array(
         )
     ),
 
+    STATE_DEBUG_END_GAME => [
+        "name" => "debugGameEnd",
+        "description" => "Debug end of game",
+        "type" => "manager",
+        "args" => "argGameEnd",
+        "transitions" => ["endGame" => STATE_END_GAME],
+    ],
 
     /*
     Examples:
