@@ -102,7 +102,7 @@ class JustDessertsSM extends Table {
         return "justdessertssm";
     }
 
-    private function refreshGameStateValue($global_id){
+    private function refreshGameStateValue($global_id) {
         return $this->getUniqueValueFromDB("select global_value from global where global_id='$global_id'");
     }
 
@@ -485,6 +485,9 @@ class JustDessertsSM extends Table {
     function checkIfEndOfGame($player_id) {
         if ($this->isSoloMode()) {
             $remainingGuests = $this->guestcards->countCardInLocation(DECK_LOC_RIVER) + $this->guestcards->countCardInLocation(DECK_LOC_DECK);
+            //$this->dump('*******************remainingGuests', $remainingGuests);
+            //$this->dump('*******************areGuestsPossibleToSatisfy', $this->areGuestsPossibleToSatisfy($player_id));
+            //$this->dump('*******************dessertcards countCardInLocation(DECK_LOC_DECK)', $this->dessertcards->countCardInLocation(DECK_LOC_DECK));
             if ($remainingGuests == 0 || !$this->areGuestsPossibleToSatisfy($player_id) && $this->dessertcards->countCardInLocation(DECK_LOC_DECK) == 0) {
                 $this->notifyPlayer($player_id, "importantMsg", $this->getSoloRank($remainingGuests), ["remainingGuests" => $remainingGuests]);
                 $this->updateScore($player_id, $remainingGuests * -1);
@@ -947,7 +950,11 @@ class JustDessertsSM extends Table {
             'discardedDesserts' => $this->keepDessertsStillInDiscardPile($discardedDesserts),
         ));
 
-        $this->goToDiscardIfNeededOrGoTo(TRANSITION_SWAPPED);
+        if ($this->isSoloMode()) {
+            $this->checkIfEndOfGame($player_id);
+        } else {
+            $this->goToDiscardIfNeededOrGoTo(TRANSITION_SWAPPED);
+        }
     }
 
     public function completeDessertsInLocationUpTo($location, $locationArg, $count, $playerId): array {
@@ -1351,7 +1358,7 @@ class JustDessertsSM extends Table {
         The action method of state X is called everytime the current game state is set to X.
     */
 
-    /** Draws a dessert and a guest at the beginning of each turn for non zombie players. */
+    /** Draws a dessert and a guest at the beginning of each turn for non zombie players. (not in solo)*/
     function stNextPlayer() {
         $player_id = $this->activeNextPlayer();
         $this->giveExtraTime($player_id);
