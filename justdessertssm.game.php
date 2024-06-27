@@ -1471,15 +1471,15 @@ class JustDessertsSM extends Table {
                     $this->zombieDiscard();
                     $this->gamestate->nextState(TRANSITION_GUESTS_DISCARDED);
                     break;
-                case "allPlayersDiscardGuest":
-                    $this->gamestate->nextState(TRANSITION_BUFFET_GUEST_DISCARDED);
-                    break;
             }
             return;
         } else {
             switch ($statename) {
                 case "poachingReaction":
                     $this->letPoaching();
+                    break;
+                case "allPlayersDiscardGuest":
+                    $this->gamestate->nextState(TRANSITION_BUFFET_GUEST_DISCARDED);
                     break;
             }
             return;
