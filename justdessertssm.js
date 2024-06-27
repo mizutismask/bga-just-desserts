@@ -781,6 +781,9 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 					this.wonStocksByPlayerId[notif.args.from_player_id].removeFromStockById(card.id)
 				}
 				this.addCardToolTip(this.guestsOnTable, card.id, card.type_arg)
+				if (notif.args.counters) {
+					this.updateAndShowOnlyNonZeroCounters(notif.args.counters)
+				}
 			}
 		},
 

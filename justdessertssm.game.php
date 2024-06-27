@@ -1129,6 +1129,7 @@ class JustDessertsSM extends Table {
             'player_name' => $this->getCurrentPlayerName(),
             'card_name' => $guestName,
             'i18n' => array('card_name'),
+            'counters' => $this->argCardsCounters(),
         ));
 
         $this->gamestate->setPlayerNonMultiactive($this->getCurrentPlayerId(), TRANSITION_BUFFET_GUEST_DISCARDED);
