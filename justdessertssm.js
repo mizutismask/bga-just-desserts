@@ -89,10 +89,11 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 			this.guestsOnTable.apparenceBorderWidth = '2px'
 
 			// Create cards types:
+			const soloMode = Object.keys(gamedatas['players'])
 			this.cardsAvailable.guests.forEach((range) => {
 				for (var card_id = range.from; card_id <= range.to; card_id++) {
 					var cardDesc = this.guestDescriptions[card_id]
-					var weight = this.getGuestWeight(cardDesc.color)
+					var weight = soloMode ? 0 : this.getGuestWeight(cardDesc.color)
 					this.guestsOnTable.addItemType(card_id, weight, g_gamethemeurl + this.guest_img, card_id)
 				}
 			})
@@ -854,10 +855,10 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 				var player_to_update_id = player['player_id']
 				this.scoreCtrl[player_to_update_id].setValue(player['player_score'])
 			}
-        },
-        
+		},
+
 		notif_importantMsg: function (notif) {
-			this.showMessage(this.format_string_recursive(notif.log, notif.args), "info")
+			this.showMessage(this.format_string_recursive(notif.log, notif.args), 'info')
 		},
 
 		notif_guestPoached: function (notif) {
