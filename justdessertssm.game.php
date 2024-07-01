@@ -279,7 +279,10 @@ class JustDessertsSM extends Table {
     //////////////////////////////////////////////////////////////////////////////
     //////////// Utility functions
     ////////////    
-
+    function endGame() {
+        $this->gamestate->nextState("endGame");
+    }
+    
     /*
         In this space, you can put any utility methods useful for your game logic
     */
