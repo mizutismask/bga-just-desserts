@@ -320,7 +320,7 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 						break
 					case 'soloPlayerTurn':
 						this.addActionButton('button_serve', _('Serve a guest'), 'onServeGuest')
-						this.addActionButton('button_exchange', _('Get a new hand (keeping selected desserts)'), 'onExchange')
+						this.addActionButton('button_exchange', _('Get a new hand (keep selected desserts)'), 'onExchange')
 						break
 					case 'serveSecondGuest':
 						this.addActionButton('button_serve_second_guest', _('Serve another guest'), 'onServeSecondGuest')

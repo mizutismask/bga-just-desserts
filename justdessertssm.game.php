@@ -452,7 +452,7 @@ class JustDessertsSM extends Table {
      When the guest is satisfied, it goes to the won pile of the player and used desserts are discarded.
      The player can have a tip.
      */
-    function doSatisfiedGuestActions($dessert_cards_id, $guest, $guestFromMaterial, $dessertsFromMaterial) {
+    function doSatisfiedGuestActions($dessert_cards_id, $guest, $guestFromMaterial, $dessertsFromMaterial): bool {
         $player_id = $this->getActivePlayerId();
         $this->playDessertCards($dessert_cards_id);
         $fromDiscard = $guest["location"] == DECK_LOC_DISCARD;
@@ -479,10 +479,11 @@ class JustDessertsSM extends Table {
         $this->notifyAllPlayers(NOTIF_UPDATE_CARDS_NB, "", array(
             'counters' => $this->argCardsCounters(),
         ));
-        $this->checkIfEndOfGame($player_id);
+        return $this->checkIfEndOfGame($player_id);
     }
 
-    function checkIfEndOfGame($player_id) {
+    function checkIfEndOfGame($player_id): bool {
+        $eog = false;
         if ($this->isSoloMode()) {
             $remainingGuests = $this->guestcards->countCardInLocation(DECK_LOC_RIVER) + $this->guestcards->countCardInLocation(DECK_LOC_DECK);
             //$this->dump('*******************remainingGuests', $remainingGuests);
@@ -492,6 +493,7 @@ class JustDessertsSM extends Table {
                 $this->notifyPlayer($player_id, "importantMsg", $this->getSoloRank($remainingGuests), ["remainingGuests" => $remainingGuests]);
                 $this->updateScore($player_id, $remainingGuests * -1);
                 $this->reloadScoresAndNotify();
+                $eog = true;
 
                 if ($this->isStudio()) {
                     $this->gamestate->nextState('debugEndGame');
@@ -507,13 +509,16 @@ class JustDessertsSM extends Table {
             $is5 = $this->countCardsForObjective5Differents($woncards) == 5;
             if ($is5 || $this->countCardsForObjective3OfAKind($woncards) == 3) {
                 //victory
+                $eog = true;
                 $this->updateScores($player_id);
                 $this->gamestate->nextState(TRANSITION_END_GAME);
             } else if ($this->gameCanNotBeFinished()) {
+                $eog = true;
                 $this->updateScoresWithAlternativeEnd();
                 $this->gamestate->nextState(TRANSITION_END_GAME);
             }
         }
+        return $eog;
     }
 
     function getSoloRank($remainingGuestCount) {
@@ -1050,7 +1055,7 @@ class JustDessertsSM extends Table {
         $dessertsFromMaterial = $this->getDessertsFromMaterialByIds($cards_id);
 
         $this->checkGuestAcceptsTheseDesserts($dessertsFromMaterial, $guestFromMaterial);
-        $this->doSatisfiedGuestActions($cards_id, $guest, $guestFromMaterial, $dessertsFromMaterial);
+        $eog = $this->doSatisfiedGuestActions($cards_id, $guest, $guestFromMaterial, $dessertsFromMaterial);
 
         if ($this->isSoloMode() && $this->dessertcards->countCardInLocation(DECK_LOC_HAND, $player_id) == 0) {
             //if no more cards, give a new hand
@@ -1061,7 +1066,7 @@ class JustDessertsSM extends Table {
 
         if ($this->guestsNeedsToBeDiscarded() && $action == "serveSecondGuest") {
             $this->gamestate->nextState(TRANSITION_DISCARD_GUEST_NEEDED);
-        } else {
+        } else if (!$this->isSoloMode() || !$eog) {
             $this->gamestate->nextState($nextState);
         }
     }
