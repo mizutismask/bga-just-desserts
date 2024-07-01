@@ -153,9 +153,14 @@ class JustDessertsSM extends Table {
         $this->initStat('player', 'turns_number', 0);
         $this->initStat('player', 'player_tips_number', 0);
         $this->initStat('player', 'player_swaps_number', 0);
-        $this->initStat('player', 'opened_buffets_number', 0);
-        $this->initStat('player', 'poaching_number', 0);
-        $this->initStat('player', 'blocking_number', 0);
+       
+        if (count($players) == 1) {
+            $this->initStat('player', 'remaining_guests_number', 0);
+        }else{
+            $this->initStat('player', 'opened_buffets_number', 0);
+            $this->initStat('player', 'poaching_number', 0);
+            $this->initStat('player', 'blocking_number', 0);
+        }
 
         $this->setupGuestsDeck($players);
         $this->setupDessertsDeck($players);
@@ -210,12 +215,12 @@ class JustDessertsSM extends Table {
 
     function getCardsAvailable() {
         $cardsAvailable = array();
-        $cardsAvailable["desserts"] = array(
+       /* $cardsAvailable["desserts"] = array(
             ["from" => 1, "to" => 76,],
-        );
-        /*$cardsAvailable["desserts"] = array(
-                ["from" => 1, "to" => 12],
         );*/
+        $cardsAvailable["desserts"] = array(
+                ["from" => 1, "to" => 12],
+        );
         $cardsAvailable["guests"] = array(
             array(
                 "from" => 1,
@@ -282,7 +287,7 @@ class JustDessertsSM extends Table {
     function endGame() {
         $this->gamestate->nextState("endGame");
     }
-    
+
     /*
         In this space, you can put any utility methods useful for your game logic
     */
@@ -495,6 +500,7 @@ class JustDessertsSM extends Table {
             if ($remainingGuests == 0 || !$this->areGuestsPossibleToSatisfy($player_id) && $this->dessertcards->countCardInLocation(DECK_LOC_DECK) == 0) {
                 $this->notifyPlayer($player_id, "importantMsg", $this->getSoloRank($remainingGuests), ["remainingGuests" => $remainingGuests]);
                 $this->updateScore($player_id, $remainingGuests * -1);
+                $this->setStat($remainingGuests, "remaining_guests_number", $player_id);
                 $this->reloadScoresAndNotify();
                 $eog = true;
 

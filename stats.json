@@ -6,6 +6,11 @@
             "name": "Satisfied guests",
             "type": "int"
         },
+        "remaining_guests_number": {
+            "id": 17,
+            "name": "Remaining guests (solo)",
+            "type": "int"
+        },
         "turns_number": {
             "id": 11,
             "name": "Turns",
@@ -18,7 +23,7 @@
         },
         "player_swaps_number": {
             "id": 13,
-            "name": "Swaps",
+            "name": "Desserts swaps",
             "type": "int"
         },
         "opened_buffets_number": {
