@@ -320,7 +320,7 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 						break
 					case 'soloPlayerTurn':
 						this.addActionButton('button_serve', _('Serve a guest'), 'onServeGuest')
-						this.addActionButton('button_exchange', _('Discard desserts'), 'onExchange')
+						this.addActionButton('button_exchange', _('Get a new hand (keeping selected desserts)'), 'onExchange')
 						break
 					case 'serveSecondGuest':
 						this.addActionButton('button_serve_second_guest', _('Serve another guest'), 'onServeSecondGuest')
@@ -459,7 +459,7 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 			dojo.stopEvent(evt)
 
 			var items = this.playerHand.getSelectedItems()
-			if (items.length > 0) {
+			if (items.length > 0 || Object.keys(this.gamedatas['players']).length == 1) {
 				if (this.checkAction('swap')) {
 					this.ajaxcall(
 						'/justdessertssm/justdessertssm/swapAction.html',
@@ -750,6 +750,9 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 					this.playerHand.removeFromStockById(removed.id)
 					//they are added to the discard in the discarded notif because the deck may have been reshuffled, we don’t know for sure at this momment if they go to the discard pile
 				})
+				if (Object.keys(this.gamedatas["players"]).length == 1) {
+					this.playerHand.unselectAll()
+				}
 			}
 
 			for (var i in notif.args.cards) {

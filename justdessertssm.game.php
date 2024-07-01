@@ -909,24 +909,38 @@ class JustDessertsSM extends Table {
     function swap($cards_id) {
         $this->checkAction('swap');
         $player_id = $this->getActivePlayerId();
-        $cards_nb = sizeof($cards_id);
+
 
         $swapMsg = clienttranslate('${player_name} swaps ${cards_nb} cards');
         if ($this->isSoloMode()) {
+            $swapMsg = clienttranslate('${player_name} discards ${cards_nb} cards');
             if ($this->dessertcards->countCardInLocation(DECK_LOC_DECK) == 0) {
                 throw new BgaUserException($this->_("No more cards in the desserts pile, you can’t discard"));
             }
-            if ($cards_nb > 3) {
-                throw new BgaUserException($this->_("You can discard 3 cards at most"));
+            //solo is working the opposite way of multiplayer, $cards_id are what you keep, not what you discard
+            $toKeep = $cards_id;
+            $hand = $this->dessertcards->getCardsInLocation(DECK_LOC_HAND, $player_id);
+            $handCount = count($hand);
+
+            if ($handCount <= 3) {
+                $cards_id = array_map(fn ($c) => $c["id"], $hand);
+            } else if ($handCount - count($toKeep) == 3) {
+                $cards_id = array_filter(array_map(fn ($c) => $c["id"], $hand), fn ($id) => in_array($id, $toKeep) === false);
+            } else {
+                $shouldBeSelected = $handCount - 3;
+                $difference = $shouldBeSelected - count($toKeep);
+                switch ($difference) {
+                    case 1:
+                    case 2:
+                        throw new BgaUserException(sprintf($this->_('Select %d more dessert(s) that you want to keep'), $difference));
+                    default:
+                        throw new BgaUserException(sprintf($this->_('Select exactly %d dessert(s) that you want to keep'), $shouldBeSelected));
+                }
             }
-            $cardsCount = intval($this->dessertcards->countCardInLocation(DECK_LOC_HAND, $player_id));
-            if (($cardsCount >= 3 && $cards_nb < 3) || ($cardsCount < 3 && $cardsCount != $cards_nb)) {
-                throw new BgaUserException($this->_("You have to discard 3 cards if you can or all of them"));
-            }
-            $swapMsg = clienttranslate('${player_name} discards ${cards_nb} cards');
         }
 
         $this->playDessertCards($cards_id);
+        $cards_nb = count($cards_id);
         $this->notifyAllPlayers("msg", $swapMsg, array(
             'player_name' => $this->getActivePlayerName(),
             'cards_nb' => $cards_nb,
