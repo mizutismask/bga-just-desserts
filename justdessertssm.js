@@ -89,11 +89,10 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 			this.guestsOnTable.apparenceBorderWidth = '2px'
 
 			// Create cards types:
-			const soloMode = Object.keys(gamedatas['players'])
 			this.cardsAvailable.guests.forEach((range) => {
 				for (var card_id = range.from; card_id <= range.to; card_id++) {
 					var cardDesc = this.guestDescriptions[card_id]
-					var weight = soloMode ? 0 : this.getGuestWeight(cardDesc.color)
+					var weight = this.isSoloMode() ? 0 : this.getGuestWeight(cardDesc.color)
 					this.guestsOnTable.addItemType(card_id, weight, g_gamethemeurl + this.guest_img, card_id)
 				}
 			})
