@@ -224,10 +224,55 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 
 			this.addTooltipToClass('jd_circle', _('Satisfied guests of this suit'), '')
 
+			this.setupRanks()
+
 			// Setup game notifications to handle (see "setupNotifications" method below)
 			this.setupNotifications()
 
 			//console.log("Ending game setup");
+		},
+
+		setupRanks: function () {
+			if (this.isSoloMode()) {
+				dojo.place(
+					`
+				<div id="solo-ranks">
+					<table class="whiteblock jd_panel">
+						<thead>
+							<tr id="scoretr">
+								<th id="th-destination-reached-score" class="">${_("Remaining guests")}</th>
+								<th id="th-destination-reached-score" class="">${_("Rank")}</th>
+							</tr>
+						</thead>
+						<tbody id="score-table-body">
+							<tr>
+								<td>0</td>
+								<td>${_("You take the CAKE!")}</td>
+							</tr>
+							<tr>
+								<td>1-3</td>
+								<td>${_("You did BERRY well!")}</td>
+							</tr>
+							<tr>
+								<td>4-6</td>
+								<td>${_("That should be PUDDING a smile on your face")}</td>
+							</tr>
+							<tr>
+								<td>7-9</td>
+								<td>${_("DONUT worry, you can try again!")}</td>
+							</tr>
+							<tr>
+								<td>10+</td>
+								<td>${_("It’s a SHERBET you’ll do better next time!")}</td>
+							</tr>
+						</tbody>
+					</table>
+    			</div>
+				`,
+					'container',
+					'first'
+				)
+			}
 		},
 
 		///////////////////////////////////////////////////
@@ -345,6 +390,10 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 
 		///////////////////////////////////////////////////
 		//// Utility methods
+		isValueInRange:function($value, $minValue, $maxValue) {
+			return $value >= $minValue && $value <= $maxValue;
+		},
+		
 		addCardToolTip: function (cards, card_id, card_type_arg, delay = 200) {
 			// Get the div of current card
 			curDiv = cards.getItemDivId(card_id)
@@ -424,6 +473,10 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 				default:
 					return 0
 			}
+		},
+
+		isSoloMode() {
+			return Object.keys(this.gamedatas['players']).length == 1
 		},
 		///////////////////////////////////////////////////
 		//// Player's action
@@ -750,7 +803,7 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 					this.playerHand.removeFromStockById(removed.id)
 					//they are added to the discard in the discarded notif because the deck may have been reshuffled, we don’t know for sure at this momment if they go to the discard pile
 				})
-				if (Object.keys(this.gamedatas["players"]).length == 1) {
+				if (Object.keys(this.gamedatas['players']).length == 1) {
 					this.playerHand.unselectAll()
 				}
 			}
@@ -856,8 +909,21 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 			for (var player_id in notif.args.players) {
 				var player = notif.args.players[player_id]
 				var player_to_update_id = player['player_id']
-				this.scoreCtrl[player_to_update_id].setValue(player['player_score'])
+				const score = player['player_score']
+				this.scoreCtrl[player_to_update_id].setValue(score)
+				if (this.isSoloMode()) {
+					const rank = this.getRank(Math.abs(parseInt(score)))
+					dojo.query(`#solo-ranks tr:nth-of-type(${rank})`).addClass("active-rank")
+				}
 			}
+		},
+
+		getRank: function (score) {
+			if (score == 0) return 1;
+			if (this.isValueInRange(score, 1, 3)) return 2;
+			if (this.isValueInRange(score, 4, 6)) return 3;
+			if (this.isValueInRange(score, 7, 9)) return 4;
+			if (score > 9) return 5;
 		},
 
 		notif_importantMsg: function (notif) {
