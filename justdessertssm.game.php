@@ -215,12 +215,12 @@ class JustDessertsSM extends Table {
 
     function getCardsAvailable() {
         $cardsAvailable = array();
-       /* $cardsAvailable["desserts"] = array(
-            ["from" => 1, "to" => 76,],
-        );*/
         $cardsAvailable["desserts"] = array(
-                ["from" => 1, "to" => 12],
+            ["from" => 1, "to" => 76,],
         );
+       /* $cardsAvailable["desserts"] = array(
+                ["from" => 1, "to" => 12],
+        );*/
         $cardsAvailable["guests"] = array(
             array(
                 "from" => 1,
