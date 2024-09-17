@@ -9,7 +9,7 @@
 		"displaycondition": [
 			{
 				"type": "minplayers",
-				"value": 2
+				"value": [2, 3, 4, 5]
 			}
 		]
 	},
@@ -21,7 +21,7 @@
 			{ "type": "otheroption", "id": 100, "value": 2 },
 			{
 				"type": "minplayers",
-				"value": 2
+				"value": [2, 3, 4, 5]
 			}
 		]
 	},
@@ -33,7 +33,7 @@
 			{ "type": "otheroption", "id": 100, "value": 2 },
 			{
 				"type": "minplayers",
-				"value": 2
+				"value": [2, 3, 4, 5]
 			}
 		]
 	},
@@ -43,13 +43,7 @@
 			"1": { "name": "Yes", "tmdisplay": "Better with bacon", "description": "New cards and a new flavor : bacon", "premium": true },
 			"0": { "name": "No" }
 		},
-		"default": 0,
-		"displaycondition": [
-			{
-				"type": "minplayers",
-				"value": 2
-			}
-		]
+		"default": 0
 	},
 	"104": {
 		"name": "Just coffee expansion",
@@ -57,12 +51,6 @@
 			"1": { "name": "Yes", "tmdisplay": "Just coffee", "description": "New cards and a new flavor : coffee", "premium": true },
 			"0": { "name": "No" }
 		},
-		"default": 0,
-		"displaycondition": [
-			{
-				"type": "minplayers",
-				"value": 2
-			}
-		]
+		"default": 0
 	}
 }
