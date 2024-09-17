@@ -239,30 +239,30 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 					<table class="whiteblock jd_panel">
 						<thead>
 							<tr id="scoretr">
-								<th id="th-destination-reached-score" class="">${_("Remaining guests")}</th>
-								<th id="th-destination-reached-score" class="">${_("Rank")}</th>
+								<th id="th-destination-reached-score" class="">${_('Remaining guests')}</th>
+								<th id="th-destination-reached-score" class="">${_('Rank')}</th>
 							</tr>
 						</thead>
 						<tbody id="score-table-body">
 							<tr>
 								<td>0</td>
-								<td>${_("You take the CAKE!")}</td>
+								<td>${_('You take the CAKE!')}</td>
 							</tr>
 							<tr>
 								<td>1-3</td>
-								<td>${_("You did BERRY well!")}</td>
+								<td>${_('You did BERRY well!')}</td>
 							</tr>
 							<tr>
 								<td>4-6</td>
-								<td>${_("That should be PUDDING a smile on your face")}</td>
+								<td>${_('That should be PUDDING a smile on your face')}</td>
 							</tr>
 							<tr>
 								<td>7-9</td>
-								<td>${_("DONUT worry, you can try again!")}</td>
+								<td>${_('DONUT worry, you can try again!')}</td>
 							</tr>
 							<tr>
 								<td>10+</td>
-								<td>${_("It’s a SHERBET you’ll do better next time!")}</td>
+								<td>${_('It’s a SHERBET you’ll do better next time!')}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -389,10 +389,10 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 
 		///////////////////////////////////////////////////
 		//// Utility methods
-		isValueInRange:function($value, $minValue, $maxValue) {
-			return $value >= $minValue && $value <= $maxValue;
+		isValueInRange: function ($value, $minValue, $maxValue) {
+			return $value >= $minValue && $value <= $maxValue
 		},
-		
+
 		addCardToolTip: function (cards, card_id, card_type_arg, delay = 200) {
 			// Get the div of current card
 			curDiv = cards.getItemDivId(card_id)
@@ -509,9 +509,13 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 
 			// Preventing default browser reaction
 			dojo.stopEvent(evt)
+			if (this.isSoloMode() && this.guestsOnTable.getSelectedItems().length > 0) {
+				this.showMessage(_('Unselect guests before discarding'), 'error')
+				return
+			}
 
 			var items = this.playerHand.getSelectedItems()
-			if (items.length > 0 || Object.keys(this.gamedatas['players']).length == 1) {
+			if (items.length > 0 || this.isSoloMode()) {
 				if (this.checkAction('swap')) {
 					this.ajaxcall(
 						'/justdessertssm/justdessertssm/swapAction.html',
@@ -912,17 +916,17 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 				this.scoreCtrl[player_to_update_id].setValue(score)
 				if (this.isSoloMode()) {
 					const rank = this.getRank(Math.abs(parseInt(score)))
-					dojo.query(`#solo-ranks tr:nth-of-type(${rank})`).addClass("active-rank")
+					dojo.query(`#solo-ranks tr:nth-of-type(${rank})`).addClass('active-rank')
 				}
 			}
 		},
 
 		getRank: function (score) {
-			if (score == 0) return 1;
-			if (this.isValueInRange(score, 1, 3)) return 2;
-			if (this.isValueInRange(score, 4, 6)) return 3;
-			if (this.isValueInRange(score, 7, 9)) return 4;
-			if (score > 9) return 5;
+			if (score == 0) return 1
+			if (this.isValueInRange(score, 1, 3)) return 2
+			if (this.isValueInRange(score, 4, 6)) return 3
+			if (this.isValueInRange(score, 7, 9)) return 4
+			if (score > 9) return 5
 		},
 
 		notif_importantMsg: function (notif) {
