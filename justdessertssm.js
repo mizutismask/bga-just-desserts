@@ -281,7 +281,7 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 		//                  You can use this method to perform some user interface changes at this moment.
 		//
 		onEnteringState: function (stateName, args) {
-			//console.log('Entering state: ' + stateName, args);
+			//console.log('Entering state: ' + stateName, args)
 			switch (stateName) {
 				case 'playerTurn':
 					this.guestsOnTable.setSelectionMode(1)
@@ -364,7 +364,9 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 						break
 					case 'soloPlayerTurn':
 						this.addActionButton('button_serve', _('Serve a guest'), 'onServeGuest')
-						this.addActionButton('button_exchange', _('Discard 3 desserts (Keep selected)'), 'onExchange')
+						if (args.canDiscard) {
+							this.addActionButton('button_exchange', this.getSoloExchangeButtonTitle(args.handCount), 'onExchange')
+						}
 						break
 					case 'serveSecondGuest':
 						this.addActionButton('button_serve_second_guest', _('Serve another guest'), 'onServeSecondGuest')
@@ -476,6 +478,22 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 
 		isSoloMode() {
 			return Object.keys(this.gamedatas['players']).length == 1
+		},
+
+		getSoloExchangeButtonTitle(handCount) {
+			switch (handCount) {
+				case 4:
+				case 5:
+					var keep = handCount - 3
+					return dojo.string.substitute(_('Discard 3 desserts (Keep ${count} selected)'), {
+						count: keep
+					})
+
+				default:
+					return dojo.string.substitute(_('Discard ${count} dessert(s)'), {
+						count: handCount
+					})
+			}
 		},
 		///////////////////////////////////////////////////
 		//// Player's action

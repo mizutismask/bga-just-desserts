@@ -153,10 +153,10 @@ class JustDessertsSM extends Table {
         $this->initStat('player', 'turns_number', 0);
         $this->initStat('player', 'player_tips_number', 0);
         $this->initStat('player', 'player_swaps_number', 0);
-       
+
         if (count($players) == 1) {
             $this->initStat('player', 'remaining_guests_number', 0);
-        }else{
+        } else {
             $this->initStat('player', 'opened_buffets_number', 0);
             $this->initStat('player', 'poaching_number', 0);
             $this->initStat('player', 'blocking_number', 0);
@@ -218,7 +218,7 @@ class JustDessertsSM extends Table {
         $cardsAvailable["desserts"] = array(
             ["from" => 1, "to" => 76,],
         );
-       /* $cardsAvailable["desserts"] = array(
+        /* $cardsAvailable["desserts"] = array(
                 ["from" => 1, "to" => 12],
         );*/
         $cardsAvailable["guests"] = array(
@@ -937,9 +937,9 @@ class JustDessertsSM extends Table {
             $handCount = count($hand);
 
             if ($handCount <= 3) {
-                $cards_id = array_map(fn ($c) => $c["id"], $hand);
+                $cards_id = array_map(fn($c) => $c["id"], $hand);
             } else if ($handCount - count($toKeep) == 3) {
-                $cards_id = array_filter(array_map(fn ($c) => $c["id"], $hand), fn ($id) => in_array($id, $toKeep) === false);
+                $cards_id = array_filter(array_map(fn($c) => $c["id"], $hand), fn($id) => in_array($id, $toKeep) === false);
             } else {
                 $shouldBeSelected = $handCount - 3;
                 $difference = $shouldBeSelected - count($toKeep);
@@ -979,7 +979,10 @@ class JustDessertsSM extends Table {
         ));
 
         if ($this->isSoloMode()) {
-            $this->checkIfEndOfGame($player_id);
+            $eog = $this->checkIfEndOfGame($player_id);
+            if (!$eog) {
+                $this->gamestate->nextState(TRANSITION_SWAPPED);
+            }
         } else {
             $this->goToDiscardIfNeededOrGoTo(TRANSITION_SWAPPED);
         }
@@ -1343,12 +1346,18 @@ class JustDessertsSM extends Table {
     }
 
     function argGetPossibleMoves() {
-        return array(
+        $res = array(
             "possibleActions" => array(
                 "poachAction" =>  $this->isPoachingAvailable(),
                 "openBuffetAction" =>  $this->isOpenBuffetAvailable(),
             )
         );
+
+        if ($this->isSoloMode()) {
+            $res["handCount"] = count($this->dessertcards->getPlayerHand($this->getActivePlayerId()));
+            $res["canDiscard"] =  $this->dessertcards->countCardInLocation(DECK_LOC_DECK) > 0;
+        }
+        return $res;
     }
 
     function argGetPoachedGuest() {
