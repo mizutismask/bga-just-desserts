@@ -54,6 +54,7 @@
 if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
     define("STATE_PLAYER_TURN", 2);
     define("STATE_SOLO_PLAYER_TURN", 3);
+    define("STATE_END_SOLO_PLAYER_TURN", 4);
     define("STATE_NEXT_PLAYER", 23);
     define("STATE_DISCARD", 24);
     define("STATE_SERVE_SECOND_GUEST", 25);
@@ -74,6 +75,7 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("TRANSITION_GUESTS_DISCARDED", "guestsDiscarded");
     define("TRANSITION_PASSED", "passed");
     define("TRANSITION_END_GAME", "endGame");
+    define("TRANSITION_END_SOLO_GAME", "endSoloGame");
     define("TRANSITION_BUFFET_OPENED", "buffetOpened");
     define("TRANSITION_BUFFET_GUEST_DISCARDED", "buffetGuestDiscarded");
     define("TRANSITION_BUFFET_SERVE", "buffetServe");
@@ -127,9 +129,17 @@ $machinestates = array(
             TRANSITION_SERVED => STATE_SOLO_PLAYER_TURN,
             TRANSITION_SWAPPED => STATE_NEXT_PLAYER,
             TRANSITION_END_GAME => STATE_END_GAME,
-            "debugEndGame" => STATE_DEBUG_END_GAME,
+            TRANSITION_END_SOLO_GAME => STATE_END_SOLO_PLAYER_TURN,
         )
     ),
+
+    STATE_END_SOLO_PLAYER_TURN => [
+        "name" => "endSoloGame",
+        "descriptionmyturn" =>  clienttranslate('You can’t serve any more guests'),
+        "type" => "activeplayer",
+        "possibleactions" => array("endSoloGame"), 
+        "transitions" => [TRANSITION_END_GAME => STATE_END_GAME],
+    ],
 
     STATE_NEXT_PLAYER => array(
         "name" => "nextPlayer",

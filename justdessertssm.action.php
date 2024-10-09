@@ -180,4 +180,11 @@ class action_justdessertssm extends APP_GameAction
 
     $this->ajaxResponse();
   }
+
+  public function endSoloGameAction()
+  {
+    $this->setAjaxMode();
+    $this->game->endSoloGame();
+    $this->ajaxResponse();
+  }
 }

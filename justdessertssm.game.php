@@ -284,6 +284,14 @@ class JustDessertsSM extends Table {
     //////////////////////////////////////////////////////////////////////////////
     //////////// Utility functions
     ////////////    
+    function getPlayerScore(int $playerId) {
+        return $this->getUniqueIntValueFromDB("SELECT player_score FROM player where `player_id` = $playerId");
+    }
+
+    function getUniqueIntValueFromDB(string $sql) {
+        return intval($this->getUniqueValueFromDB($sql));
+    }
+
     function endGame() {
         $this->gamestate->nextState("endGame");
     }
@@ -498,17 +506,11 @@ class JustDessertsSM extends Table {
             //$this->dump('*******************areGuestsPossibleToSatisfy', $this->areGuestsPossibleToSatisfy($player_id));
             //$this->dump('*******************dessertcards countCardInLocation(DECK_LOC_DECK)', $this->dessertcards->countCardInLocation(DECK_LOC_DECK));
             if ($remainingGuests == 0 || !$this->areGuestsPossibleToSatisfy($player_id) && $this->dessertcards->countCardInLocation(DECK_LOC_DECK) == 0) {
-                $this->notifyPlayer($player_id, "importantMsg", $this->getSoloRank($remainingGuests), ["remainingGuests" => $remainingGuests]);
                 $this->updateScore($player_id, $remainingGuests * -1);
                 $this->setStat($remainingGuests, "remaining_guests_number", $player_id);
                 $this->reloadScoresAndNotify();
                 $eog = true;
-
-                if ($this->isStudio()) {
-                    $this->gamestate->nextState('debugEndGame');
-                } else {
-                    $this->gamestate->nextState(TRANSITION_END_GAME);
-                }
+                $this->gamestate->nextState(TRANSITION_END_SOLO_GAME);
             }
         } else {
             //getting data to check if the active player hit a winning requirement
@@ -1104,6 +1106,13 @@ class JustDessertsSM extends Table {
         $this->goToDiscardIfNeededOrGoTo(TRANSITION_PASSED);
     }
 
+    function endSoloGame() {
+        $this->checkAction("endSoloGame");
+        $player_id = $this->getActivePlayerId();
+        $score = abs($this->getPlayerScore($player_id));
+        $this->notifyPlayer($player_id, "importantMsg", $this->getSoloRank($score), ["remainingGuests" => $score]);
+        $this->gamestate->nextState(TRANSITION_END_GAME);
+    }
 
     /***************************** Opening a buffet ****************************/
     function openBuffet($cards_id) {
@@ -1635,5 +1644,11 @@ class JustDessertsSM extends Table {
         foreach ($sql as $q) {
             $this->DbQuery($q);
         }
+    }
+
+    /************************ Debug functions *************************/
+    function debug_almostEmptyDeck() {
+        $count = intval($this->dessertcards->countCardInLocation('deck')) - 1;
+        $this->dessertcards->pickCardsForLocation($count, 'deck', 'discard');
     }
 }

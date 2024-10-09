@@ -368,6 +368,9 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 							this.addActionButton('button_exchange', this.getSoloExchangeButtonTitle(args.handCount), 'onExchange')
 						}
 						break
+					case 'endSoloGame':
+						this.addActionButton('button_endGame', _('End the game'), 'onEndSoloGame')
+						break
 					case 'serveSecondGuest':
 						this.addActionButton('button_serve_second_guest', _('Serve another guest'), 'onServeSecondGuest')
 						this.addActionButton('button_pass', _('Pass'), 'onPass')
@@ -646,6 +649,21 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 			if (this.checkAction('pass')) {
 				this.ajaxcall(
 					'/justdessertssm/justdessertssm/passAction.html',
+					{
+						lock: true
+					},
+					this,
+					function (result) {}
+				)
+			}
+		},
+
+		onEndSoloGame: function (evt) {
+			dojo.stopEvent(evt)
+
+			if (this.checkAction('endSoloGame')) {
+				this.ajaxcall(
+					'/justdessertssm/justdessertssm/endSoloGameAction.html',
 					{
 						lock: true
 					},
