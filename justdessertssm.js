@@ -369,7 +369,7 @@ define(['dojo', 'dojo/_base/declare', 'ebg/core/gamegui', 'ebg/counter', 'ebg/st
 						}
 						break
 					case 'endSoloGame':
-						this.addActionButton('button_endGame', _('End the game'), 'onEndSoloGame')
+						this.addActionButton('button_endGame', _('End game'), 'onEndSoloGame')
 						break
 					case 'serveSecondGuest':
 						this.addActionButton('button_serve_second_guest', _('Serve another guest'), 'onServeSecondGuest')

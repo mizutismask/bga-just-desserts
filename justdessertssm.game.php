@@ -1647,8 +1647,12 @@ class JustDessertsSM extends Table {
     }
 
     /************************ Debug functions *************************/
-    function debug_almostEmptyDeck() {
+    function debug_almostEmptyDesserts() {
         $count = intval($this->dessertcards->countCardInLocation('deck')) - 1;
+        $this->dessertcards->pickCardsForLocation($count, 'deck', 'discard');
+    }
+    function debug_emptyGuests() {
+        $count = intval($this->dessertcards->countCardInLocation('deck'));
         $this->dessertcards->pickCardsForLocation($count, 'deck', 'discard');
     }
 }
