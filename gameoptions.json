@@ -1,0 +1,56 @@
+{
+	"100": {
+		"name": "Rules",
+		"values": {
+			"1": { "name": "Basic rules", "tmdisplay": "Basic rules", "description": "A simple version to learn the game" },
+			"2": { "name": "Advanced rules", "tmdisplay": "Advanced rules", "description": "More strategic rules" }
+		},
+		"default": 2,
+		"displaycondition": [
+			{
+				"type": "minplayers",
+				"value": [2, 3, 4, 5]
+			}
+		]
+	},
+	"101": {
+		"name": "Opening a buffet",
+		"values": { "1": { "name": "Yes", "tmdisplay": "Opening a buffet", "description": "Make opponents give back their guests" }, "0": { "name": "No" } },
+		"default": 0,
+		"displaycondition": [
+			{ "type": "otheroption", "id": 100, "value": 2 },
+			{
+				"type": "minplayers",
+				"value": [2, 3, 4, 5]
+			}
+		]
+	},
+	"102": {
+		"name": "Poaching and blocking",
+		"values": { "1": { "name": "Yes", "tmdisplay": "Poaching and blocking", "description": "Steal your opponents guests" }, "0": { "name": "No" } },
+		"default": 0,
+		"displaycondition": [
+			{ "type": "otheroption", "id": 100, "value": 2 },
+			{
+				"type": "minplayers",
+				"value": [2, 3, 4, 5]
+			}
+		]
+	},
+	"103": {
+		"name": "Better with bacon expansion",
+		"values": {
+			"1": { "name": "Yes", "tmdisplay": "Better with bacon", "description": "New cards and a new flavor : bacon", "premium": true },
+			"0": { "name": "No" }
+		},
+		"default": 0
+	},
+	"104": {
+		"name": "Just coffee expansion",
+		"values": {
+			"1": { "name": "Yes", "tmdisplay": "Just coffee", "description": "New cards and a new flavor : coffee", "premium": true },
+			"0": { "name": "No" }
+		},
+		"default": 0
+	}
+}

@@ -79,6 +79,7 @@
 #guest_draw {
     margin-bottom: 8px;
     margin-right: 0px;
+    position: relative;
 }
 
 #guests_wrapper {
@@ -227,8 +228,8 @@
     font-size: 28px;
     color: saddlebrown;
     z-index: 1;
-    top: 206px;
-    left: 28px;
+    top: 189px;
+    left: 17px;
 }
 
 #jd_dessert_draw_count{
@@ -260,6 +261,38 @@
 
 .jd_card-tooltip-favourite-label{
     margin:  5px  0px  5px  0px;
+}
+
+.solo_game .gamestate_debugGameEnd #solo-ranks, .solo_game .gamestate_gameEnd #solo-ranks{
+    display: block;
+}
+
+#solo-ranks{
+    display: none;
+    margin: 0 auto;
+    max-width: 470px;
+}
+
+#solo-ranks table{
+    text-align: center;
+}
+
+#solo-ranks td{
+    padding: 2px;
+}
+
+#solo-ranks th{
+    padding: 5px;
+    text-align: center;
+    font-weight: bolder;
+}
+
+/*#solo-ranks td:first-of-type{
+    text-align: right;
+}*/
+
+.active-rank{
+    color: #298d0a;
 }
 
 @media only screen and (min-width: 1100px) {

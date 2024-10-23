@@ -27,11 +27,11 @@
 
 require_once(APP_BASE_PATH . "view/common/game.view.php");
 
-class view_justdesserts_justdesserts extends game_view
+class view_justdessertssm_justdessertssm extends game_view
 {
   function getGameName()
   {
-    return "justdesserts";
+    return "justdessertssm";
   }
   function build_page($viewArgs)
   {
@@ -51,10 +51,10 @@ class view_justdesserts_justdesserts extends game_view
         $this->tpl['MY_VARIABLE_ELEMENT'] = $number_to_display;
 
         // Display a string to be translated in all languages: 
-        $this->tpl['MY_VARIABLE_ELEMENT'] = self::_("A string to be translated");
+        $this->tpl['MY_VARIABLE_ELEMENT'] = $this->_("A string to be translated");
 
         // Display some HTML content of your own:
-        $this->tpl['MY_VARIABLE_ELEMENT'] = self::raw( $some_html_code );
+        $this->tpl['MY_VARIABLE_ELEMENT'] = $this->raw( $some_html_code );
         
         */
 
@@ -79,11 +79,11 @@ class view_justdesserts_justdesserts extends game_view
         
         */
 
-    $template = self::getGameName() . "_" . self::getGameName();
+    $template = $this->getGameName() . "_" . $this->getGameName();
 
     // this will make our My Hand text translatable
-    $this->tpl['MY_HAND'] = self::_("My hand");
-    $this->tpl['REMAINING_DESSERTS'] = self::_("Dessert draw remaining cards");
+    $this->tpl['MY_HAND'] = $this->_("My hand");
+    $this->tpl['REMAINING_DESSERTS'] = $this->_("Dessert draw remaining cards");
 
     // this will inflate our player block with actual players data
     $this->page->begin_block($template, "player");
@@ -111,7 +111,7 @@ class view_justdesserts_justdesserts extends game_view
     }
 
     /*********** discards ********/
-    $this->tpl['DISCARDED_DESSERTS'] = self::_("Discarded desserts");
+    $this->tpl['DISCARDED_DESSERTS'] = $this->_("Discarded desserts");
 
     /*********** Do not change anything below this line  ************/
   }

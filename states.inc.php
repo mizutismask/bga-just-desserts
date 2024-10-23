@@ -38,7 +38,7 @@
    _ action: name of the method to call when this game state become the current game state. Usually, the
              action method is prefixed by "st" (ex: "stMyGameStateName").
    _ possibleactions: array that specify possible player actions on this step. It allows you to use "checkAction"
-                      method on both client side (Javacript: this.checkAction) and server side (PHP: self::checkAction).
+                      method on both client side (Javacript: this.checkAction) and server side (PHP: $this->checkAction).
    _ transitions: the transitions are the possible paths to go from a game state to another. You must name
                   transitions in order to use transition names in "nextState" PHP method, and use IDs to
                   specify the next game state for each transition.
@@ -53,12 +53,15 @@
 // define contants for state ids
 if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
     define("STATE_PLAYER_TURN", 2);
+    define("STATE_SOLO_PLAYER_TURN", 3);
+    define("STATE_END_SOLO_PLAYER_TURN", 4);
     define("STATE_NEXT_PLAYER", 23);
     define("STATE_DISCARD", 24);
     define("STATE_SERVE_SECOND_GUEST", 25);
     define("STATE_BUFFET_DISCARD", 26);
     define("STATE_POACHING_REACTION", 27);
     define("STATE_POACHING_RESOLVED", 28);
+    define("STATE_DEBUG_END_GAME", 29);
 
     define("STATE_END_GAME", 99);
 
@@ -68,9 +71,11 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("TRANSITION_DISCARD_GUEST_NEEDED", "discardGuestNeeded");
     define("TRANSITION_SECOND_GUEST_SERVED", "secondGuestServed");
     define("TRANSITION_PLAYER_TURN", "playerTurn");
+    define("TRANSITION_SOLO_PLAYER_TURN", "soloPlayerTurn");
     define("TRANSITION_GUESTS_DISCARDED", "guestsDiscarded");
     define("TRANSITION_PASSED", "passed");
     define("TRANSITION_END_GAME", "endGame");
+    define("TRANSITION_END_SOLO_GAME", "endSoloGame");
     define("TRANSITION_BUFFET_OPENED", "buffetOpened");
     define("TRANSITION_BUFFET_GUEST_DISCARDED", "buffetGuestDiscarded");
     define("TRANSITION_BUFFET_SERVE", "buffetServe");
@@ -113,6 +118,29 @@ $machinestates = array(
         )
     ),
 
+    STATE_SOLO_PLAYER_TURN => array(
+        "name" => "soloPlayerTurn",
+        "description" => "",
+        "descriptionmyturn" => clienttranslate('${you} can '),
+        "type" => "activeplayer",
+        "possibleactions" => array("serve", "swap"), 
+        "args" => "argGetPossibleMoves",
+        "transitions" => array(
+            TRANSITION_SERVED => STATE_SOLO_PLAYER_TURN,
+            TRANSITION_SWAPPED => STATE_NEXT_PLAYER,
+            TRANSITION_END_GAME => STATE_END_GAME,
+            TRANSITION_END_SOLO_GAME => STATE_END_SOLO_PLAYER_TURN,
+        )
+    ),
+
+    STATE_END_SOLO_PLAYER_TURN => [
+        "name" => "endSoloGame",
+        "descriptionmyturn" =>  clienttranslate('You can’t serve any more guests'),
+        "type" => "activeplayer",
+        "possibleactions" => array("endSoloGame"), 
+        "transitions" => [TRANSITION_END_GAME => STATE_END_GAME],
+    ],
+
     STATE_NEXT_PLAYER => array(
         "name" => "nextPlayer",
         "description" => '',
@@ -120,8 +148,9 @@ $machinestates = array(
         "action" => "stNextPlayer",
         "args" => "argCardsCounters",
         "updateGameProgression" => true,
-        "transitions" => array(TRANSITION_PLAYER_TURN => STATE_PLAYER_TURN)
+        "transitions" => array(TRANSITION_PLAYER_TURN => STATE_PLAYER_TURN, TRANSITION_SOLO_PLAYER_TURN => STATE_SOLO_PLAYER_TURN)
     ),
+
     STATE_DISCARD => array(
         "name" => "playerDiscardGuest",
         "description" => clienttranslate('${actplayer} must discard guests until there is only one left from each suit'),
@@ -180,29 +209,13 @@ $machinestates = array(
         )
     ),
 
-
-    /*
-    Examples:
-    
-    2 => array(
-        "name" => "nextPlayer",
-        "description" => '',
-        "type" => "game",
-        "action" => "stNextPlayer",
-        "updateGameProgression" => true,   
-        "transitions" => array( "endGame" => 99, "nextPlayer" => 10 )
-    ),
-    
-    10 => array(
-        "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must play a card or pass'),
-        "descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-        "type" => "activeplayer",
-        "possibleactions" => array( "playCard", "pass" ),
-        "transitions" => array( "playCard" => 2, "pass" => 2 )
-    ), 
-
-*/
+    STATE_DEBUG_END_GAME => [
+        "name" => "debugGameEnd",
+        "description" => "Debug end of game",
+        "type" => "manager",
+        "args" => "argGameEnd",
+        "transitions" => ["endGame" => STATE_END_GAME],
+    ],
 
     // Final state.
     // Please do not modify (and do not overload action/args methods).
