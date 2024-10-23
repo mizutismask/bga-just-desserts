@@ -505,7 +505,7 @@ class JustDessertsSM extends Table {
             //$this->dump('*******************remainingGuests', $remainingGuests);
             //$this->dump('*******************areGuestsPossibleToSatisfy', $this->areGuestsPossibleToSatisfy($player_id));
             //$this->dump('*******************dessertcards countCardInLocation(DECK_LOC_DECK)', $this->dessertcards->countCardInLocation(DECK_LOC_DECK));
-            if ($remainingGuests == 0 || !$this->areGuestsPossibleToSatisfy($player_id) && $this->dessertcards->countCardInLocation(DECK_LOC_DECK) == 0) {
+            if ($remainingGuests == 0 || (!$this->areGuestsPossibleToSatisfy($player_id) && $this->dessertcards->countCardInLocation(DECK_LOC_DECK) == 0)) {
                 $this->updateScore($player_id, $remainingGuests * -1);
                 $this->setStat($remainingGuests, "remaining_guests_number", $player_id);
                 $this->reloadScoresAndNotify();
@@ -1376,6 +1376,9 @@ class JustDessertsSM extends Table {
         );
     }
 
+    /**
+     * In solo mode
+     */
     function areGuestsPossibleToSatisfy($playerId) {
         $guests = $this->guestcards->getCardsInLocation(DECK_LOC_RIVER);
         $cards_id = array_keys($this->dessertcards->getPlayerHand($playerId));
@@ -1383,8 +1386,15 @@ class JustDessertsSM extends Table {
             $guest = $this->guestcards->getCard($guest_id);
             $guestFromMaterial = $this->getGuestFromMaterialFromCard($guest);
             $dessertsFromMaterial = $this->getDessertsFromMaterialByIds($cards_id);
-            return $this->doesGuestAcceptsTheseDesserts($dessertsFromMaterial, $guestFromMaterial);
+            $possible = $this->doesGuestAcceptsTheseDesserts($this->removeDessertsWithSomethingDisliked($guestFromMaterial, $dessertsFromMaterial), $guestFromMaterial);
+            return $possible;
         });
+    }
+
+    function removeDessertsWithSomethingDisliked($guestFromMaterial, $dessertsFromMaterial) {
+        return array_filter($dessertsFromMaterial, fn($d) => !(
+            in_array($guestFromMaterial["dislike1"], $d["tastes"])
+            || (array_key_exists("dislike2", $guestFromMaterial) && in_array($guestFromMaterial["dislike2"], $d["tastes"]))));
     }
 
     function array_some(array $array, callable $fn) {
@@ -1624,8 +1634,14 @@ class JustDessertsSM extends Table {
 
         // SQL specific to your game
         // For example, reset the current state if it's already game over
+        if ($this->isSoloMode()) {
+            $state = STATE_SOLO_PLAYER_TURN;
+        } else {
+            $state = STATE_PLAYER_TURN;
+        }
         $sql = [
-            "UPDATE `global` SET `global_value` = 10 WHERE `global_id` = 1 AND `global_value` = 99"
+            "UPDATE `global` SET `global_value` = $state WHERE `global_id` = 1 AND `global_value` = 99",
+            "UPDATE `global` SET `global_value` = $state WHERE `global_id` = 1 AND `global_value` = 4"
         ];
         foreach ($prodPlayers as $index => $prodId) {
             $studioId = $studioPlayers[$index];
