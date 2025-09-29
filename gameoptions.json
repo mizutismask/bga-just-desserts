@@ -40,7 +40,7 @@
 	"103": {
 		"name": "Better with bacon expansion",
 		"values": {
-			"1": { "name": "Yes", "tmdisplay": "Better with bacon", "description": "New cards and a new flavor : bacon", "premium": true },
+			"1": { "name": "Yes", "tmdisplay": "Better with bacon", "description": "New cards and a new flavor : bacon" },
 			"0": { "name": "No" }
 		},
 		"default": 0
@@ -48,7 +48,7 @@
 	"104": {
 		"name": "Just coffee expansion",
 		"values": {
-			"1": { "name": "Yes", "tmdisplay": "Just coffee", "description": "New cards and a new flavor : coffee", "premium": true },
+			"1": { "name": "Yes", "tmdisplay": "Just coffee", "description": "New cards and a new flavor : coffee"},
 			"0": { "name": "No" }
 		},
 		"default": 0
